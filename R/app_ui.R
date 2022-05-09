@@ -9,8 +9,46 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    fluidPage(
-      h1("learnitdashboard")
+    dashboardPage(
+      
+      # Head of Dashboard
+      dashboardHeader(
+        title = "LearnItDashboard"
+      ),
+      
+      # Sidebar of Dashboard
+      dashboardSidebar(
+        
+        # Creation of the sidebar
+        sidebarMenu(
+          # First tab
+          menuItem("SDD Dashboard", tabName = "mongodbsdd"),
+          # Second tab
+          menuItem("Building", tabName = "building")
+        )
+        
+      ),
+      
+      # Body of Dashboard
+      dashboardBody(
+        tabItems(
+          
+          # First tab
+          tabItem(tabName = "mongodbsdd",
+            # Page title
+            h1("SDD Dashboard"),
+            # Page Module
+            mod_test_1_ui("test_1_1"),
+          ),
+          
+          # Second tab (test)
+          tabItem(tabName = "building",
+            h1("Nothing yet...")
+          )
+          
+        ),
+      ),
+      
     )
   )
 }
