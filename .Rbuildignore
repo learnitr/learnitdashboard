@@ -4,3 +4,10 @@
 dev_history.R
 ^dev$
 $run_dev.*
+
+^LM_Docs$
+^LICENSE
+^LICENCE\.md$
+^LICENSE\.md$
+^CODE_OF_CONDUCT\.md$
+^README\.Rmd$
