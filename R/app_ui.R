@@ -38,7 +38,7 @@ app_ui <- function(request) {
             # Page title
             h1("SDD Dashboard"),
             # Page Module
-            mod_test_1_ui("test_1_1"),
+            mod_sdd_tables_ui("sdd_tables_1")
           ),
           
           # Second tab (test)

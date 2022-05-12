@@ -1,4 +1,4 @@
-#' test_1 UI Function
+#' sdd_tables UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -7,7 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_test_1_ui <- function(id){
+mod_sdd_tables_ui <- function(id){
   ns <- NS(id)
   tagList(
     
@@ -36,13 +36,12 @@ mod_test_1_ui <- function(id){
   )
 }
     
-#' test_1 Server Functions
+#' sdd_tables Server Functions
 #'
 #' @noRd 
-mod_test_1_server <- function(id){
+mod_sdd_tables_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
-    
     
 # Global Vars -------------------------------------------------------------
     
@@ -55,23 +54,23 @@ mod_test_1_server <- function(id){
     
     # Variable : H5P
     h5p <- reactiveVal()
-    h5p(sdd_h5p$find('{}', limit = 10))
+    try(h5p({message("requete h5p");sdd_h5p$find('{}', limit = 10)}))
     # Variable : Learnr
     learnr <- reactiveVal()
-    learnr(sdd_learnr$find('{}', limit = 10))
+    try(learnr(sdd_learnr$find('{}', limit = 10)))
     # Variable : Shiny
     shiny <- reactiveVal()
-    shiny(sdd_shiny$find('{}', limit = 10))
+    try(shiny(sdd_shiny$find('{}', limit = 10)))
     
-
+    
 # DT Displays -------------------------------------------------------------
     
     # Display // DT cols selector
     output$dt_cols_selector <- renderUI({
       dt <- switch (input$activetab,
-        "H5P" = h5p(),
-        "Learnr" = learnr(),
-        "Shiny" = shiny()
+                    "H5P" = h5p(),
+                    "Learnr" = learnr(),
+                    "Shiny" = shiny()
       )
       selectInput(ns("dt_selected_cols"), NULL, choices = names(dt), multiple = TRUE)
     })
@@ -83,11 +82,11 @@ mod_test_1_server <- function(id){
         pageLength = 5
       )
     )
-    # Display //
+    # Display // Learnr datatable
     output$sdd_learnr_dt <- renderDT(
       learnr()[req(input$dt_selected_cols)], options = list(lengthChange = FALSE)
     )
-    # Display //
+    # Display // Shiny datatable
     output$sdd_shiny_dt <- renderDT(
       shiny()[req(input$dt_selected_cols)], options = list(lengthChange = FALSE)
     )
@@ -96,7 +95,7 @@ mod_test_1_server <- function(id){
 }
     
 ## To be copied in the UI
-# mod_test_1_ui("test_1_1")
+# mod_sdd_tables_ui("sdd_tables_1")
     
 ## To be copied in the server
-# mod_test_1_server("test_1_1")
+# mod_sdd_tables_server("sdd_tables_1")
