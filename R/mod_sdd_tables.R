@@ -11,25 +11,34 @@ mod_sdd_tables_ui <- function(id){
   ns <- NS(id)
   tagList(
     
-    tags$br(),
-    uiOutput(ns("dt_cols_selector")),
-    tags$br(),
+    fluidRow(
+      
+      column( width = 3,
+        uiOutput(ns("dt_cols_selector")),
+      ),
     
-    tabsetPanel(id = ns("activetab"),
-      # First tab
-      tabPanel("H5P",
-        tags$br(),
-        DTOutput(ns("sdd_h5p_dt")),
+      column( width = 3,
+        uiOutput(ns("sdd_login_selector")),
       ),
-      # Second tab
-      tabPanel("Learnr",
-        tags$br(),
-        DTOutput(ns("sdd_learnr_dt")),
-      ),
-      # Third tab
-      tabPanel("Shiny",
-        tags$br(),
-        DTOutput(ns("sdd_shiny_dt")),
+    ),
+    
+    fluidRow(
+      tabsetPanel(id = ns("activetab"),
+        # First tab
+        tabPanel("H5P",
+          tags$br(),
+          DTOutput(ns("sdd_h5p_dt")),
+        ),
+        # Second tab
+        tabPanel("Learnr",
+          tags$br(),
+          DTOutput(ns("sdd_learnr_dt")),
+        ),
+        # Third tab
+        tabPanel("Shiny",
+          tags$br(),
+          DTOutput(ns("sdd_shiny_dt")),
+        ),
       ),
     ),
     
@@ -52,44 +61,106 @@ mod_sdd_tables_server <- function(id){
     sdd_learnr <- try(mongolite::mongo("learnr", url = sdd_url))
     sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url))
     
+    # === H5P Variables ===
     # Variable : H5P
     h5p <- reactiveVal()
-    try(h5p({message("requete h5p");sdd_h5p$find('{}', limit = 10)}))
+    try(h5p({message("requete h5p");sdd_h5p$find('{}', limit = 1000)}))
+    
+    # === Learnr Variables ===
     # Variable : Learnr
     learnr <- reactiveVal()
-    try(learnr(sdd_learnr$find('{}', limit = 10)))
+    try(learnr({message("requete learnr");sdd_learnr$find('{}', limit = 1000)}))
+    
+    # === Shiny Variables ===
     # Variable : Shiny
     shiny <- reactiveVal()
-    try(shiny(sdd_shiny$find('{}', limit = 10)))
+    try(shiny({message("requete shiny");sdd_shiny$find('{}', limit = 1000)}))
     
+    # === SDD Variables ===
+    # Variable : Logins
+    sdd_logins <- reactive({
+      try((unique(h5p()["login"])))
+    })
+
+# Reactive Values ---------------------------------------------------------
+
+    # Variable : Definition of the request, "All" or only one selected login
+    request <- reactive({
+      # Definition of the request : All or only one selected login
+      if (req(input$sdd_selected_login) != "All" ) {
+        return(paste0( r"( {"login" : ")", input$sdd_selected_login, r"("} )"))
+      } else {
+        return("{}")
+      }
+    })
     
 # DT Displays -------------------------------------------------------------
     
     # Display // DT cols selector
     output$dt_cols_selector <- renderUI({
-      dt <- switch (input$activetab,
-                    "H5P" = h5p(),
-                    "Learnr" = learnr(),
-                    "Shiny" = shiny()
-      )
-      selectInput(ns("dt_selected_cols"), NULL, choices = names(dt), multiple = TRUE)
+      # If there was no error while loading the table
+      if (!inherits(h5p(), "try-error")) {
+        tagList(
+          tags$h3("Columns :"),
+          # Creation of the selector of cols to show, because the page is too small for everything
+          selectInput(ns("dt_selected_cols"), NULL, choices = c("All",names(h5p())), multiple = TRUE, selected = "All")
+        )
+      } else { NULL }
+    })
+    
+    # Display // Login selector
+    output$sdd_login_selector <- renderUI({
+      # If there was no error while getting the logins
+      if (!inherits(sdd_logins(), "try-error")) {
+        tagList(
+          tags$h3("Login :"),
+          # Creation of selector with choices "All" and the logins
+          selectInput(ns("sdd_selected_login"), NULL, choices = c("All", sdd_logins()))
+        )
+      } else { NULL }
     })
     
     # Display // H5P datatable
-    output$sdd_h5p_dt <- renderDT(
-      h5p()[req(input$dt_selected_cols)], options = list(
-        lengthChange = FALSE,
-        pageLength = 5
-      )
-    )
+    output$sdd_h5p_dt <- renderDT({
+      
+      # Getting the dataframe of defined request
+      h5p <- sdd_h5p$find(request(), limit = 1000)
+      
+      # Displaying everything or only selected cols
+      if (req(input$dt_selected_cols) == "All") {
+        h5p
+      } else {
+        h5p[req(input$dt_selected_cols)]
+      }
+    })
+    
     # Display // Learnr datatable
-    output$sdd_learnr_dt <- renderDT(
-      learnr()[req(input$dt_selected_cols)], options = list(lengthChange = FALSE)
-    )
+    output$sdd_learnr_dt <- renderDT({
+      
+      # Getting the dataframe of defined request
+      learnr <- sdd_learnr$find(request(), limit = 1000)
+      
+      # Displaying everything or only selected cols
+      if (req(input$dt_selected_cols) == "All") {
+        learnr
+      } else {
+        learnr[req(input$dt_selected_cols)]
+      }
+    })
+    
     # Display // Shiny datatable
-    output$sdd_shiny_dt <- renderDT(
-      shiny()[req(input$dt_selected_cols)], options = list(lengthChange = FALSE)
-    )
+    output$sdd_shiny_dt <- renderDT({
+      
+      # Getting the dataframe of defined request
+      shiny <- sdd_shiny$find(request(), limit = 1000)
+      
+      # Displaying everything or only selected cols
+      if (req(input$dt_selected_cols) == "All") {
+        shiny
+      } else {
+        shiny[req(input$dt_selected_cols)]
+      }
+    })
     
   })
 }
