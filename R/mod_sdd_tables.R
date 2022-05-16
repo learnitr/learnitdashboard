@@ -18,26 +18,33 @@ mod_sdd_tables_ui <- function(id){
       ),
     
       column( width = 3,
+        # Selector of login
         uiOutput(ns("sdd_login_selector")),
       ),
     ),
     
     fluidRow(
-      tabsetPanel(id = ns("activetab"),
-        # First tab
-        tabPanel("H5P",
-          tags$br(),
-          DTOutput(ns("sdd_h5p_dt")),
-        ),
-        # Second tab
-        tabPanel("Learnr",
-          tags$br(),
-          DTOutput(ns("sdd_learnr_dt")),
-        ),
-        # Third tab
-        tabPanel("Shiny",
-          tags$br(),
-          DTOutput(ns("sdd_shiny_dt")),
+      
+      column( width = 12,
+        # Selector of app
+        uiOutput(ns("sdd_app_selector")),
+        
+        tabsetPanel(id = ns("activetab"),
+          # First tab
+          tabPanel("H5P",
+            tags$br(),
+            DTOutput(ns("sdd_h5p_dt")),
+          ),
+          # Second tab
+          tabPanel("Learnr",
+            tags$br(),
+            DTOutput(ns("sdd_learnr_dt")),
+          ),
+          # Third tab
+          tabPanel("Shiny",
+            tags$br(),
+            DTOutput(ns("sdd_shiny_dt")),
+          ),
         ),
       ),
     ),
@@ -93,24 +100,35 @@ mod_sdd_tables_server <- function(id){
     
     # === SDD Variables ===
     # Variables : Logins
-    sdd_h5p_logins <- try(unique(h5p_init$login), silent = TRUE)
-    sdd_learnr_logins <- try(unique(learnr_init$login), silent = TRUE)
-    sdd_shiny_logins <- try(unique(shiny_init$login), silent = TRUE)
-    if (!inherits(sdd_h5p_logins, "try-error") && !inherits(sdd_learnr_logins, "try-error") && !inherits(sdd_shiny_logins, "try-error")) {
-      logins <- sort(unique(c(sdd_h5p_logins, sdd_learnr_logins, sdd_shiny_logins)))
-    } else {
+    sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
+    logins <- try(sort(sdd_users$distinct("user_login")))
+    sdd_users$disconnect()
+    if (inherits(logins, "try-error")) {
       logins <- NULL
     }
 
 # Reactive Values ---------------------------------------------------------
 
     # Variable : Definition of the request, "All" or only one selected login
-    request <- eventReactive(input$sdd_selected_login, {
+    request <- eventReactive({
+      input$sdd_selected_login
+      input$sdd_selected_app
+      }, {
+      
+      # Is there a login request ?
+      login_request <- !is.null(input$sdd_selected_login) && input$sdd_selected_login != "All"
+      # Is there an app request ?
+      app_request <- !is.null(input$sdd_selected_app) && input$sdd_selected_app != "All"
+      
       # Definition of the request : All or only one selected login
-      if (is.null(input$sdd_selected_login) || input$sdd_selected_login == "All") {
-        return ("{}")
-      } else if (req(input$sdd_selected_login) != "All" ) {
+      if (login_request && app_request) {
+        return (paste0( r"( {"login" : ")", input$sdd_selected_login, r"(" , "app" : ")", input$sdd_selected_app, r"(" } )"))
+      } else if (login_request) {
         return(paste0( r"( {"login" : ")", input$sdd_selected_login, r"("} )"))
+      } else if (app_request) {
+        return(paste0( r"( {"app" : ")", input$sdd_selected_app, r"("} )"))
+      } else {
+        return("{}")
       }
     })
     
@@ -145,6 +163,27 @@ mod_sdd_tables_server <- function(id){
           selectInput(ns("sdd_selected_login"), NULL, choices = c("All", logins), selected = "All")
         )
       } else { NULL }
+    })
+    
+    # Display // App selector
+    output$sdd_app_selector <- renderUI({
+      req(input$activetab)
+      
+      # Getting the right table
+      table <- switch (input$activetab,
+        "H5P" = sdd_h5p,
+        "Learnr" = sdd_learnr,
+        "Shiny" = sdd_shiny
+      )
+      
+      # Getting table's apps
+      table_apps <- sort(table$distinct("app"))
+      
+      # Displaying the selector
+      tagList(
+        tags$h3("Application :"),
+        selectInput(ns("sdd_selected_app"), NULL, choices = c("All", table_apps), selected = "All")
+      )
     })
     
     # Display // H5P datatable

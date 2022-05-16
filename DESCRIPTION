@@ -12,6 +12,7 @@ Imports:
     mongolite,
     rlang,
     shiny (>= 1.7.1),
+    shinydashboard,
     shinyjs,
     shinythemes,
     utils
