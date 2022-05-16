@@ -57,41 +57,68 @@ mod_sdd_tables_server <- function(id){
     # URL pour accéder à la base de données
     sdd_url <- "mongodb://127.0.0.1:27017/sdd"
     # Pour se connecter
-    sdd_h5p <- try(mongolite::mongo("h5p", url = sdd_url))
-    sdd_learnr <- try(mongolite::mongo("learnr", url = sdd_url))
-    sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url))
+    sdd_h5p <- try(mongolite::mongo("h5p", url = sdd_url), silent = TRUE)
+    sdd_learnr <- try(mongolite::mongo("learnr", url = sdd_url), silent = TRUE)
+    sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url), silent = TRUE)
     
     # === H5P Variables ===
     # Variable : H5P
+    # Initially getting all of 1000 last entries
+    h5p_init <- try({message("requete h5p");sdd_h5p$find('{}', limit = 1000)}, silent = TRUE)
     h5p <- reactiveVal()
-    try(h5p({message("requete h5p");sdd_h5p$find('{}', limit = 1000)}))
+    # If it succeeded : it's defined in the main variable
+    if (!inherits(h5p_init, "try-error")) {
+      h5p(h5p_init)
+    }
     
     # === Learnr Variables ===
     # Variable : Learnr
+    # Initially getting all of 1000 last entries
+    learnr_init <- try({message("requete learnr");sdd_learnr$find('{}', limit = 1000)}, silent = TRUE)
     learnr <- reactiveVal()
-    try(learnr({message("requete learnr");sdd_learnr$find('{}', limit = 1000)}))
+    # If it succeeded : it's defined in the main variable
+    if (!inherits(learnr_init, "try-error")) {
+      learnr(learnr_init)
+    }
     
     # === Shiny Variables ===
     # Variable : Shiny
+    # Initially getting all of 1000 last entries
+    shiny_init <- try({message("requete shiny");sdd_shiny$find('{}', limit = 1000)}, silent = TRUE)
     shiny <- reactiveVal()
-    try(shiny({message("requete shiny");sdd_shiny$find('{}', limit = 1000)}))
+    # If it succeeded : it's defined in the main variable
+    if (!inherits(shiny_init, "try-error")) {
+      shiny(shiny_init)
+    }
     
     # === SDD Variables ===
-    # Variable : Logins
-    sdd_logins <- reactive({
-      try((unique(h5p()["login"])))
-    })
+    # Variables : Logins
+    sdd_h5p_logins <- try(unique(h5p_init$login), silent = TRUE)
+    sdd_learnr_logins <- try(unique(learnr_init$login), silent = TRUE)
+    sdd_shiny_logins <- try(unique(shiny_init$login), silent = TRUE)
+    if (!inherits(sdd_h5p_logins, "try-error") && !inherits(sdd_learnr_logins, "try-error") && !inherits(sdd_shiny_logins, "try-error")) {
+      logins <- sort(unique(c(sdd_h5p_logins, sdd_learnr_logins, sdd_shiny_logins)))
+    } else {
+      logins <- NULL
+    }
 
 # Reactive Values ---------------------------------------------------------
 
     # Variable : Definition of the request, "All" or only one selected login
-    request <- reactive({
+    request <- eventReactive(input$sdd_selected_login, {
       # Definition of the request : All or only one selected login
-      if (req(input$sdd_selected_login) != "All" ) {
+      if (is.null(input$sdd_selected_login) || input$sdd_selected_login == "All") {
+        return ("{}")
+      } else if (req(input$sdd_selected_login) != "All" ) {
         return(paste0( r"( {"login" : ")", input$sdd_selected_login, r"("} )"))
-      } else {
-        return("{}")
       }
+    })
+    
+    # Defining tables depending on the request
+    observeEvent(request(), {
+      {message("requete h5p");h5p(try(sdd_h5p$find(request(), limit = 1000), silent = TRUE))}
+      {message("requete learnr");learnr(try(sdd_learnr$find(request(), limit = 1000), silent = TRUE))}
+      {message("requete shiny");shiny(try(sdd_shiny$find(request(), limit = 1000), silent = TRUE))}
     })
     
 # DT Displays -------------------------------------------------------------
@@ -99,11 +126,11 @@ mod_sdd_tables_server <- function(id){
     # Display // DT cols selector
     output$dt_cols_selector <- renderUI({
       # If there was no error while loading the table
-      if (!inherits(h5p(), "try-error")) {
+      if (!inherits(h5p_init, "try-error")) {
         tagList(
           tags$h3("Columns :"),
           # Creation of the selector of cols to show, because the page is too small for everything
-          selectInput(ns("dt_selected_cols"), NULL, choices = c("All",names(h5p())), multiple = TRUE, selected = "All")
+          selectInput(ns("dt_selected_cols"), NULL, choices = c("All",names(h5p_init)), multiple = TRUE, selected = "All")
         )
       } else { NULL }
     })
@@ -111,11 +138,11 @@ mod_sdd_tables_server <- function(id){
     # Display // Login selector
     output$sdd_login_selector <- renderUI({
       # If there was no error while getting the logins
-      if (!inherits(sdd_logins(), "try-error")) {
+      if (!is.null(logins)) {
         tagList(
           tags$h3("Login :"),
           # Creation of selector with choices "All" and the logins
-          selectInput(ns("sdd_selected_login"), NULL, choices = c("All", sdd_logins()))
+          selectInput(ns("sdd_selected_login"), NULL, choices = c("All", logins), selected = "All")
         )
       } else { NULL }
     })
@@ -123,42 +150,48 @@ mod_sdd_tables_server <- function(id){
     # Display // H5P datatable
     output$sdd_h5p_dt <- renderDT({
       
-      # Getting the dataframe of defined request
-      h5p <- sdd_h5p$find(request(), limit = 1000)
-      
-      # Displaying everything or only selected cols
-      if (req(input$dt_selected_cols) == "All") {
-        h5p
+      # If no errors to get the dataframe from mongoDB
+      if (!inherits(h5p(), "try-error") && length(h5p()) > 0) {
+        # Displaying everything or only selected cols
+        if ("All" %in% req(input$dt_selected_cols)) {
+          h5p()
+        } else {
+          h5p()[req(input$dt_selected_cols)]
+        }
       } else {
-        h5p[req(input$dt_selected_cols)]
+        NULL
       }
     })
     
     # Display // Learnr datatable
     output$sdd_learnr_dt <- renderDT({
       
-      # Getting the dataframe of defined request
-      learnr <- sdd_learnr$find(request(), limit = 1000)
-      
-      # Displaying everything or only selected cols
-      if (req(input$dt_selected_cols) == "All") {
-        learnr
+      # If no errors to get the dataframe from mongoDB
+      if (!inherits(learnr(), "try-error") && length(learnr()) > 0) {
+        # Displaying everything or only selected cols
+        if ("All" %in% req(input$dt_selected_cols)) {
+          learnr()
+        } else {
+          learnr()[req(input$dt_selected_cols)]
+        }
       } else {
-        learnr[req(input$dt_selected_cols)]
+        NULL
       }
     })
     
     # Display // Shiny datatable
     output$sdd_shiny_dt <- renderDT({
       
-      # Getting the dataframe of defined request
-      shiny <- sdd_shiny$find(request(), limit = 1000)
-      
-      # Displaying everything or only selected cols
-      if (req(input$dt_selected_cols) == "All") {
-        shiny
+      # If no errors to get the dataframe from mongoDB
+      if (!inherits(shiny(), "try-error") && length(shiny()) > 0) {
+        # Displaying everything or only selected cols
+        if ("All" %in% req(input$dt_selected_cols)) {
+          shiny()
+        } else {
+          shiny()[req(input$dt_selected_cols)]
+        }
       } else {
-        shiny[req(input$dt_selected_cols)]
+        NULL
       }
     })
     

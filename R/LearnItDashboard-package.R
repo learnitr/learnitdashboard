@@ -10,9 +10,10 @@
 #' @name learnitdashboard-package
 #' 
 #' 
-#' @import DT
+#' @importFrom DT DTOutput renderDT
 #' @import mongolite
 #' @import rlang
+#' @import shiny
 #' @import shinydashboard
 #' @importFrom shinyjs disabled disable enable
 #' @import shinythemes
