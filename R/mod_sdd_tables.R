@@ -13,10 +13,12 @@ mod_sdd_tables_ui <- function(id){
     
     fluidRow(
       
+      # Column to select the columns to show
       column( width = 3,
         uiOutput(ns("dt_cols_selector")),
       ),
-    
+      
+      # Column to select the login of the request
       column( width = 3,
         # Selector of login
         uiOutput(ns("sdd_login_selector")),
@@ -25,6 +27,7 @@ mod_sdd_tables_ui <- function(id){
     
     fluidRow(
       
+      # Column to select the app of the request
       column( width = 12,
         # Selector of app
         uiOutput(ns("sdd_app_selector")),
@@ -99,10 +102,13 @@ mod_sdd_tables_server <- function(id){
     }
     
     # === SDD Variables ===
-    # Variables : Logins
+    # Variable : Users
     sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
-    logins <- try(sort(sdd_users$distinct("user_login")))
-    sdd_users$disconnect()
+    # Variable : Logins
+    logins <- try(sort(sdd_users$distinct("user_login")), silent = TRUE)
+    # Disconnecting from users table
+    try(sdd_users$disconnect(), silent = TRUE)
+    # If logins occurred an error, it becomes NULL
     if (inherits(logins, "try-error")) {
       logins <- NULL
     }
@@ -120,13 +126,17 @@ mod_sdd_tables_server <- function(id){
       # Is there an app request ?
       app_request <- !is.null(input$sdd_selected_app) && input$sdd_selected_app != "All"
       
-      # Definition of the request : All or only one selected login
+      # Definition of the request
+      # Request of login and app
       if (login_request && app_request) {
         return (paste0( r"( {"login" : ")", input$sdd_selected_login, r"(" , "app" : ")", input$sdd_selected_app, r"(" } )"))
+      # Request of login
       } else if (login_request) {
         return(paste0( r"( {"login" : ")", input$sdd_selected_login, r"("} )"))
+      # Request of app
       } else if (app_request) {
         return(paste0( r"( {"app" : ")", input$sdd_selected_app, r"("} )"))
+      # No special request
       } else {
         return("{}")
       }
@@ -177,13 +187,15 @@ mod_sdd_tables_server <- function(id){
       )
       
       # Getting table's apps
-      table_apps <- sort(table$distinct("app"))
+      table_apps <- try(sort(table$distinct("app")), silent = TRUE)
       
-      # Displaying the selector
-      tagList(
-        tags$h3("Application :"),
-        selectInput(ns("sdd_selected_app"), NULL, choices = c("All", table_apps), selected = "All")
-      )
+      # Displaying the selector if table_apps didn't occur error
+      if (!inherits(table_apps, "try-error")) {
+        tagList(
+          tags$h3("Application :"),
+          selectInput(ns("sdd_selected_app"), NULL, choices = c("All", table_apps), selected = "All")
+        )
+      }
     })
     
     # Display // H5P datatable
@@ -200,7 +212,14 @@ mod_sdd_tables_server <- function(id){
       } else {
         NULL
       }
-    })
+    },
+    # Options for the data table
+    options = list(
+      scrollX = TRUE,
+      pageLength = 5,
+      lengthMenu = c(5,10,25,50)
+    )
+    )
     
     # Display // Learnr datatable
     output$sdd_learnr_dt <- renderDT({
@@ -216,7 +235,14 @@ mod_sdd_tables_server <- function(id){
       } else {
         NULL
       }
-    })
+    },
+    # Options for the data table
+    options = list(
+      scrollX = TRUE,
+      pageLength = 5,
+      lengthMenu = c(5,10,25,50)
+    )
+    )
     
     # Display // Shiny datatable
     output$sdd_shiny_dt <- renderDT({
@@ -232,7 +258,14 @@ mod_sdd_tables_server <- function(id){
       } else {
         NULL
       }
-    })
+    },
+    # Options for the data table
+    options = list(
+      scrollX = TRUE,
+      pageLength = 5,
+      lengthMenu = c(5,10,25,50)
+    )
+    )
     
   })
 }
