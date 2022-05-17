@@ -15,7 +15,7 @@
 #' @import rlang
 #' @import shiny
 #' @import shinydashboard
-#' @importFrom shinyjs disabled disable enable
+#' @importFrom shinyjs useShinyjs disabled disable enable
 #' @import shinythemes
 #' @importFrom utils head
 #' 

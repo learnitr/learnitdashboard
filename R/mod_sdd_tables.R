@@ -26,6 +26,25 @@ mod_sdd_tables_ui <- function(id){
     ),
     
     fluidRow(
+      column( width = 3,
+        # Activator of selecting dates
+        checkboxInput(ns("is_dates"), h4("Select dates", style = "margin : 0px;")),
+      )
+    ),
+    
+    fluidRow(
+      column( width = 3,
+        # Selectors of dates
+        uiOutput(ns("sdd_date1_selector")),
+      ),
+      
+      column( width = 3,
+        # Selectors of dates
+        uiOutput(ns("sdd_date2_selector")),
+      ),
+    ),
+    
+    fluidRow(
       
       # Column to select the app of the request
       column( width = 12,
@@ -74,38 +93,42 @@ mod_sdd_tables_server <- function(id){
     # === H5P Variables ===
     # Variable : H5P
     # Initially getting all of 1000 last entries
-    h5p_init <- try({message("requete h5p");sdd_h5p$find('{}', limit = 1000)}, silent = TRUE)
+    # h5p_init <- try({message("requete h5p");sdd_h5p$find('{}', limit = 1000)}, silent = TRUE)
     h5p <- reactiveVal()
     # If it succeeded : it's defined in the main variable
-    if (!inherits(h5p_init, "try-error")) {
-      h5p(h5p_init)
-    }
+    # if (!inherits(h5p_init, "try-error")) {
+    #   h5p(h5p_init)
+    # }
+    # h5p({message("requete h5p");try(sdd_h5p$find('{}', limit = 1000), silent = TRUE)})
     
     # === Learnr Variables ===
     # Variable : Learnr
     # Initially getting all of 1000 last entries
-    learnr_init <- try({message("requete learnr");sdd_learnr$find('{}', limit = 1000)}, silent = TRUE)
+    # learnr_init <- try({message("requete learnr");sdd_learnr$find('{}', limit = 1000)}, silent = TRUE)
     learnr <- reactiveVal()
     # If it succeeded : it's defined in the main variable
-    if (!inherits(learnr_init, "try-error")) {
-      learnr(learnr_init)
-    }
+    # if (!inherits(learnr_init, "try-error")) {
+    #   learnr(learnr_init)
+    # }
+    # learnr({message("requete learnr");try(sdd_learnr$find('{}', limit = 1000), silent = TRUE)})
     
     # === Shiny Variables ===
     # Variable : Shiny
     # Initially getting all of 1000 last entries
-    shiny_init <- try({message("requete shiny");sdd_shiny$find('{}', limit = 1000)}, silent = TRUE)
+    # shiny_init <- try({message("requete shiny");sdd_shiny$find('{}', limit = 1000)}, silent = TRUE)
     shiny <- reactiveVal()
     # If it succeeded : it's defined in the main variable
-    if (!inherits(shiny_init, "try-error")) {
-      shiny(shiny_init)
-    }
+    # if (!inherits(shiny_init, "try-error")) {
+    #   shiny(shiny_init)
+    # }
+    # shiny({message("requete shiny");try(sdd_shiny$find('{}', limit = 1000), silent = TRUE)})
     
     # === SDD Variables ===
     # Variable : Users
     sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
     # Variable : Logins
-    logins <- try(sort(sdd_users$distinct("user_login")), silent = TRUE)
+    # logins <- try(sort(sdd_users$distinct("user_login")), silent = TRUE)
+    logins <- try(sort(unique(c(sdd_users$distinct("user_login"), sdd_h5p$distinct("login")))), silent = TRUE)
     # Disconnecting from users table
     try(sdd_users$disconnect(), silent = TRUE)
     # If logins occurred an error, it becomes NULL
@@ -119,24 +142,43 @@ mod_sdd_tables_server <- function(id){
     request <- eventReactive({
       input$sdd_selected_login
       input$sdd_selected_app
+      input$is_dates
+      input$sdd_selected_date1
+      input$sdd_selected_date2
       }, {
       
       # Is there a login request ?
       login_request <- !is.null(input$sdd_selected_login) && input$sdd_selected_login != "All"
       # Is there an app request ?
       app_request <- !is.null(input$sdd_selected_app) && input$sdd_selected_app != "All"
+      # Is there a date request ?
+      date_request <- !is.null(input$sdd_selected_login) && !is.null(input$sdd_selected_app) && input$is_dates == TRUE
       
       # Definition of the request
       # Request of login and app
       if (login_request && app_request) {
-        return (paste0( r"( {"login" : ")", input$sdd_selected_login, r"(" , "app" : ")", input$sdd_selected_app, r"(" } )"))
+        if (date_request) {
+          return(paste0( r"( {"login" : ")", input$sdd_selected_login, r"(" , "app" : ")", input$sdd_selected_app, r"(" , "date" : { "$gte" : ")", input$sdd_selected_date1 , r"(" , "$lte" : ")", input$sdd_selected_date2, r"(" }})"))
+        } else {
+          return(paste0( r"( {"login" : ")", input$sdd_selected_login, r"(" , "app" : ")", input$sdd_selected_app, r"(" } )"))
+        }
       # Request of login
       } else if (login_request) {
-        return(paste0( r"( {"login" : ")", input$sdd_selected_login, r"("} )"))
+        if (date_request) {
+          return(paste0( r"( {"login" : ")", input$sdd_selected_login, r"(" , "date" : { "$gte" : ")", input$sdd_selected_date1 , r"(" , "$lte" : ")", input$sdd_selected_date2, r"(" }})"))
+        } else {
+          return(paste0( r"( {"login" : ")", input$sdd_selected_login, r"("} )"))
+        }
       # Request of app
       } else if (app_request) {
-        return(paste0( r"( {"app" : ")", input$sdd_selected_app, r"("} )"))
+        if (date_request) {
+          return(paste0( r"( {"app" : ")", input$sdd_selected_app,r"(" , "date" : { "$gte" : ")", input$sdd_selected_date1 , r"(" , "$lte" : ")", input$sdd_selected_date2, r"(" }})"))
+        } else {
+          return(paste0( r"( {"app" : ")", input$sdd_selected_app, r"("} )"))
+        }
       # No special request
+      } else if (date_request) {
+        return(paste0(r"({ "date" : { "$gte" : ")", input$sdd_selected_date1 , r"(" , "$lte" : ")", input$sdd_selected_date2, r"(" }})"))
       } else {
         return("{}")
       }
@@ -153,12 +195,21 @@ mod_sdd_tables_server <- function(id){
     
     # Display // DT cols selector
     output$dt_cols_selector <- renderUI({
+      req(input$activetab)
+      
+      # Getting the right table
+      table <- switch (input$activetab,
+                       "H5P" = h5p(),
+                       "Learnr" = learnr(),
+                       "Shiny" = shiny()
+      )
+      
       # If there was no error while loading the table
-      if (!inherits(h5p_init, "try-error")) {
+      if (!inherits(table, "try-error")) {
         tagList(
           tags$h3("Columns :"),
           # Creation of the selector of cols to show, because the page is too small for everything
-          selectInput(ns("dt_selected_cols"), NULL, choices = c("All",names(h5p_init)), multiple = TRUE, selected = "All")
+          selectInput(ns("dt_selected_cols"), NULL, choices = c("All",names(table)), multiple = TRUE, selected = "All")
         )
       } else { NULL }
     })
@@ -175,15 +226,42 @@ mod_sdd_tables_server <- function(id){
       } else { NULL }
     })
     
+    # Activating the dates selectors
+    observe({
+      if (!input$is_dates) {
+        shinyjs::disable("sdd_selected_date1")
+        shinyjs::disable("sdd_selected_date2")
+      } else if (input$is_dates) {
+        shinyjs::enable("sdd_selected_date1")
+        shinyjs::enable("sdd_selected_date2")
+      }
+    })
+    
+    # Display // First date selector
+    output$sdd_date1_selector <- renderUI({
+      tagList(
+        tags$h3("From :"),
+        shinyjs::disabled(dateInput(ns("sdd_selected_date1"), NULL)),
+      )
+    })
+    
+    # Display // Second date selector
+    output$sdd_date2_selector <- renderUI({
+      tagList(
+        tags$h3("To :"),
+        shinyjs::disabled(dateInput(ns("sdd_selected_date2"), NULL)),
+      )
+    })
+    
     # Display // App selector
     output$sdd_app_selector <- renderUI({
       req(input$activetab)
       
       # Getting the right table
       table <- switch (input$activetab,
-        "H5P" = sdd_h5p,
-        "Learnr" = sdd_learnr,
-        "Shiny" = sdd_shiny
+                       "H5P" = sdd_h5p,
+                       "Learnr" = sdd_learnr,
+                       "Shiny" = sdd_shiny
       )
       
       # Getting table's apps

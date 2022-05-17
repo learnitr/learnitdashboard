@@ -31,6 +31,7 @@ app_ui <- function(request) {
       
       # Body of Dashboard
       dashboardBody(
+        useShinyjs(),
         tabItems(
           
           # First tab
