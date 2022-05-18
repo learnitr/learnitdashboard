@@ -11,6 +11,7 @@ mod_sdd_tables_ui <- function(id){
   ns <- NS(id)
   tagList(
     
+    # 1st Row
     fluidRow(
       
       # Column to select the columns to show
@@ -25,6 +26,7 @@ mod_sdd_tables_ui <- function(id){
       ),
     ),
     
+    # 2nd Row
     fluidRow(
       column( width = 3,
         # Activator of selecting dates
@@ -32,18 +34,20 @@ mod_sdd_tables_ui <- function(id){
       )
     ),
     
+    # 3rd Row
     fluidRow(
       column( width = 3,
-        # Selectors of dates
+        # First selector of date
         uiOutput(ns("sdd_date1_selector")),
       ),
       
       column( width = 3,
-        # Selectors of dates
+        # Second selector of date
         uiOutput(ns("sdd_date2_selector")),
       ),
     ),
     
+    # 4th Row
     fluidRow(
       
       # Column to select the app of the request
@@ -52,17 +56,17 @@ mod_sdd_tables_ui <- function(id){
         uiOutput(ns("sdd_app_selector")),
         
         tabsetPanel(id = ns("activetab"),
-          # First tab
+          # First tab : H5P
           tabPanel("H5P",
             tags$br(),
             DTOutput(ns("sdd_h5p_dt")),
           ),
-          # Second tab
+          # Second tab : Learnr
           tabPanel("Learnr",
             tags$br(),
             DTOutput(ns("sdd_learnr_dt")),
           ),
-          # Third tab
+          # Third tab : Shiny
           tabPanel("Shiny",
             tags$br(),
             DTOutput(ns("sdd_shiny_dt")),
@@ -92,36 +96,15 @@ mod_sdd_tables_server <- function(id){
     
     # === H5P Variables ===
     # Variable : H5P
-    # Initially getting all of 1000 last entries
-    # h5p_init <- try({message("requete h5p");sdd_h5p$find('{}', limit = 1000)}, silent = TRUE)
     h5p <- reactiveVal()
-    # If it succeeded : it's defined in the main variable
-    # if (!inherits(h5p_init, "try-error")) {
-    #   h5p(h5p_init)
-    # }
-    # h5p({message("requete h5p");try(sdd_h5p$find('{}', limit = 1000), silent = TRUE)})
     
     # === Learnr Variables ===
     # Variable : Learnr
-    # Initially getting all of 1000 last entries
-    # learnr_init <- try({message("requete learnr");sdd_learnr$find('{}', limit = 1000)}, silent = TRUE)
     learnr <- reactiveVal()
-    # If it succeeded : it's defined in the main variable
-    # if (!inherits(learnr_init, "try-error")) {
-    #   learnr(learnr_init)
-    # }
-    # learnr({message("requete learnr");try(sdd_learnr$find('{}', limit = 1000), silent = TRUE)})
     
     # === Shiny Variables ===
     # Variable : Shiny
-    # Initially getting all of 1000 last entries
-    # shiny_init <- try({message("requete shiny");sdd_shiny$find('{}', limit = 1000)}, silent = TRUE)
     shiny <- reactiveVal()
-    # If it succeeded : it's defined in the main variable
-    # if (!inherits(shiny_init, "try-error")) {
-    #   shiny(shiny_init)
-    # }
-    # shiny({message("requete shiny");try(sdd_shiny$find('{}', limit = 1000), silent = TRUE)})
     
     # === SDD Variables ===
     # Variable : Users
@@ -132,7 +115,7 @@ mod_sdd_tables_server <- function(id){
     # Disconnecting from users table
     try(sdd_users$disconnect(), silent = TRUE)
     # If logins occurred an error, it becomes NULL
-    if (inherits(logins, "try-error")) {
+    if (inherits(logins, "try-error") || length(logins) == 0) {
       logins <- NULL
     }
 
@@ -197,7 +180,7 @@ mod_sdd_tables_server <- function(id){
     output$dt_cols_selector <- renderUI({
       req(input$activetab)
       
-      # Getting the right table
+      # Getting the right table depending on the tab
       table <- switch (input$activetab,
                        "H5P" = h5p(),
                        "Learnr" = learnr(),

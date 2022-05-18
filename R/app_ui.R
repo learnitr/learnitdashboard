@@ -43,7 +43,7 @@ app_ui <- function(request) {
           ),
           
           # Second tab (test)
-          tabItem(tabName = "building",
+          tabItem(tabName = "Progression",
             h1("Nothing yet...")
           )
           
