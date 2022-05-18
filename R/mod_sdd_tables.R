@@ -35,17 +35,7 @@ mod_sdd_tables_ui <- function(id){
     ),
     
     # 3rd Row
-    fluidRow(
-      column( width = 3,
-        # First selector of date
-        uiOutput(ns("sdd_date1_selector")),
-      ),
-      
-      column( width = 3,
-        # Second selector of date
-        uiOutput(ns("sdd_date2_selector")),
-      ),
-    ),
+    uiOutput(ns("sdd_dates_selectors")),
     
     # 4th Row
     fluidRow(
@@ -120,22 +110,28 @@ mod_sdd_tables_server <- function(id){
     }
 
 # Reactive Values ---------------------------------------------------------
-
+    
+    dates_changed <- reactiveVal(0)
+    observeEvent({
+      input$sdd_selected_date1
+      input$sdd_selected_date2
+    }, {
+      dates_changed(dates_changed()+1)
+    })
+    
     # Variable : Definition of the request, "All" or only one selected login
     request <- eventReactive({
       input$sdd_selected_login
       input$sdd_selected_app
       input$is_dates
-      input$sdd_selected_date1
-      input$sdd_selected_date2
+      dates_changed()
       }, {
-      
       # Is there a login request ?
       login_request <- !is.null(input$sdd_selected_login) && input$sdd_selected_login != "All"
       # Is there an app request ?
       app_request <- !is.null(input$sdd_selected_app) && input$sdd_selected_app != "All"
       # Is there a date request ?
-      date_request <- !is.null(input$sdd_selected_login) && !is.null(input$sdd_selected_app) && input$is_dates == TRUE
+      date_request <- input$is_dates == TRUE
       
       # Definition of the request
       # Request of login and app
@@ -209,31 +205,26 @@ mod_sdd_tables_server <- function(id){
       } else { NULL }
     })
     
-    # Activating the dates selectors
-    observe({
-      if (!input$is_dates) {
-        shinyjs::disable("sdd_selected_date1")
-        shinyjs::disable("sdd_selected_date2")
-      } else if (input$is_dates) {
-        shinyjs::enable("sdd_selected_date1")
-        shinyjs::enable("sdd_selected_date2")
+    # Display // Dates selectors
+    output$sdd_dates_selectors <- renderUI({
+      if (input$is_dates == TRUE) {
+      tagList(
+        fluidRow(
+          # First selector of date
+          column(width = 3,
+            tags$h3("From :"),
+            dateInput(ns("sdd_selected_date1"), NULL)
+          ),
+          # Second selector of date
+          column(width = 3,
+            tags$h3("To :"),
+            dateInput(ns("sdd_selected_date2"), NULL)
+          ),
+        )
+      )
+      } else {
+        NULL
       }
-    })
-    
-    # Display // First date selector
-    output$sdd_date1_selector <- renderUI({
-      tagList(
-        tags$h3("From :"),
-        shinyjs::disabled(dateInput(ns("sdd_selected_date1"), NULL)),
-      )
-    })
-    
-    # Display // Second date selector
-    output$sdd_date2_selector <- renderUI({
-      tagList(
-        tags$h3("To :"),
-        shinyjs::disabled(dateInput(ns("sdd_selected_date2"), NULL)),
-      )
     })
     
     # Display // App selector
