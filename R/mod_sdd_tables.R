@@ -269,8 +269,8 @@ mod_sdd_tables_server <- function(id){
     # Options for the data table
     options = list(
       scrollX = TRUE,
-      pageLength = 5,
-      lengthMenu = c(5,10,25,50)
+      pageLength = 100,
+      lengthMenu = c(50,100,200,500)
     )
     )
     
@@ -292,8 +292,8 @@ mod_sdd_tables_server <- function(id){
     # Options for the data table
     options = list(
       scrollX = TRUE,
-      pageLength = 5,
-      lengthMenu = c(5,10,25,50)
+      pageLength = 100,
+      lengthMenu = c(50,100,200,500)
     )
     )
     
@@ -315,8 +315,8 @@ mod_sdd_tables_server <- function(id){
     # Options for the data table
     options = list(
       scrollX = TRUE,
-      pageLength = 5,
-      lengthMenu = c(5,10,25,50)
+      pageLength = 100,
+      lengthMenu = c(50,100,200,500)
     )
     )
     

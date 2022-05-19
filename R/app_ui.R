@@ -24,7 +24,7 @@ app_ui <- function(request) {
           # First tab
           menuItem("SDD Dashboard", tabName = "mongodbsdd"),
           # Second tab
-          menuItem("Building", tabName = "building")
+          menuItem("Progression", tabName = "progression")
         )
         
       ),
@@ -43,7 +43,7 @@ app_ui <- function(request) {
           ),
           
           # Second tab (test)
-          tabItem(tabName = "Progression",
+          tabItem(tabName = "progression",
             h1("Nothing yet...")
           )
           
