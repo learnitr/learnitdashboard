@@ -26,7 +26,7 @@ app_ui <- function(request) {
           # Second tab
           menuItem("Students Progression", tabName = "std_progression"),
           # Third tab
-          menuItem("Classroom Progression", tabName = "clr_progression")
+          menuItem("Courses Progression", tabName = "cls_progression")
         )
         
       ),
@@ -52,8 +52,10 @@ app_ui <- function(request) {
           ),
           
           # Third tab (test)
-          tabItem(tabName = "clr_progression",
-            h1("Nothing yet...")
+          tabItem(tabName = "cls_progression",
+            h1("Courses Progression"),
+            # Page Module
+            mod_cls_progression_ui("cls_progression_1")
           )
           
         ),

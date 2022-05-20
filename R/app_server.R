@@ -24,5 +24,7 @@ app_server <- function(input, output, session) {
   sdd_tables_vars <- mod_sdd_tables_server("sdd_tables_1", all_vars = all_vars)
   # Server module of 2nd page
   std_progression_vars <- mod_std_progression_server("std_progression_1", all_vars = all_vars)
+  # Server module of 3rd page
+  mod_cls_progression_server("cls_progression_1")
   
 }

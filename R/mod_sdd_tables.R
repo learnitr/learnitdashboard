@@ -77,9 +77,9 @@ mod_sdd_tables_server <- function(id, all_vars){
     
 # Global Vars -------------------------------------------------------------
     
-    # URL pour accéder à la base de données
+    # URL to access databases
     sdd_url <- "mongodb://127.0.0.1:27017/sdd"
-    # Pour se connecter
+    # To connect to them
     sdd_h5p <- try(mongolite::mongo("h5p", url = sdd_url), silent = TRUE)
     sdd_learnr <- try(mongolite::mongo("learnr", url = sdd_url), silent = TRUE)
     sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url), silent = TRUE)
