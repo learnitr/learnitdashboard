@@ -16,6 +16,7 @@ Imports:
     shinydashboard,
     shinyjs,
     shinythemes,
+    shinyTime,
     utils
 Suggests: 
     spelling,

@@ -160,17 +160,34 @@ mod_sdd_tables_server <- function(id, all_vars){
                    tags$h3("From :"),
                    dateInput(ns("sdd_selected_date1"), NULL, value = input$sdd_selected_date1)
             ),
+            # First selector of time
+            column(width = 3,
+                   tags$h3(""),
+                   tags$br(),
+                   tags$br(),
+                   timeInput(ns("sdd_selected_time1"), NULL, value = input$sdd_selected_time1)
+            ),
             # Second selector of date
             column(width = 3,
                    tags$h3("To :"),
                    dateInput(ns("sdd_selected_date2"), NULL, value = input$sdd_selected_date2)
             ),
+            # Second selector of time
+            column(width = 3,
+                   tags$h3(""),
+                   tags$br(),
+                   tags$br(),
+                   timeInput(ns("sdd_selected_time2"), NULL, value = input$sdd_selected_time2)
+            ),
           )
         )
       } else {
+        # To create the inputs but without making them available to user (for reactivity)
         tagList(
           shinyjs::hidden(dateInput(ns("sdd_selected_date1"), NULL, value = input$sdd_selected_date1)),
+          shinyjs::hidden(timeInput(ns("sdd_selected_time1"), NULL, value = input$sdd_selected_time1)),
           shinyjs::hidden(dateInput(ns("sdd_selected_date2"), NULL, value = input$sdd_selected_date2)),
+          shinyjs::hidden(timeInput(ns("sdd_selected_time2"), NULL, value = input$sdd_selected_time2)),
         )
       }
     })
@@ -207,6 +224,8 @@ mod_sdd_tables_server <- function(id, all_vars){
       print(input$is_dates)
       print(input$sdd_selected_date1)
       print(input$sdd_selected_date2)
+      input$sdd_selected_time1
+      input$sdd_selected_time2
       }, {
       # Is there a login request ?
       login_request <- !is.null(input$sdd_selected_login) && input$sdd_selected_login != "All"
@@ -224,7 +243,8 @@ mod_sdd_tables_server <- function(id, all_vars){
       date_request <- input$is_dates == TRUE
       # Creation of the request part for dates
       if (date_request) {
-        date_querry <- glue::glue(r"("date" : { "$gte" : "<<input$sdd_selected_date1>>" , "$lte" : "<<input$sdd_selected_date2>>" })", .open = "<<", .close = ">>")
+        date_querry <- glue::glue(r"("date" : { "$gte" : "<<paste0(input$sdd_selected_date1, " ", strftime(input$sdd_selected_time1, "%T"))>>" , "$lte" : "<<paste0(input$sdd_selected_date2, " ", strftime(input$sdd_selected_time2, "%T"))>>" })", .open = "<<", .close = ">>")
+        print(date_querry)
       }
       
       # Definition of the request

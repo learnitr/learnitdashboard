@@ -18,6 +18,7 @@
 #' @import shinydashboard
 #' @importFrom shinyjs useShinyjs disabled disable enable
 #' @import shinythemes
+#' @import shinyTime
 #' @importFrom utils head
 #' 
 NULL
