@@ -39,14 +39,16 @@ app_ui <- function(request) {
           # First tab
           tabItem(tabName = "rawdatatable",
             # Page title
-            h1("SDD Dashboard"),
+            h1("Raw Data Exploration"),
             # Page Module
             mod_sdd_tables_ui("sdd_tables_1")
           ),
           
           # Second tab (test)
           tabItem(tabName = "std_progression",
-            h1("Nothing yet...")
+            h1("Students Progression"),
+            # Page Module
+            mod_std_progression_ui("std_progression_1")
           ),
           
           # Third tab (test)

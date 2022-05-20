@@ -71,7 +71,7 @@ mod_sdd_tables_ui <- function(id){
 #' sdd_tables Server Functions
 #'
 #' @noRd 
-mod_sdd_tables_server <- function(id){
+mod_sdd_tables_server <- function(id, all_vars){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -109,6 +109,10 @@ mod_sdd_tables_server <- function(id){
       logins <- NULL
     }
 
+# Getting Modules Vars ----------------------------------------------------
+    
+    # Vars from std_progression
+    stdp_selected_login <- reactive({all_vars$std_progression_vars$stdp_selected_login})
 
 # Selectors ---------------------------------------------------------------
 
@@ -141,7 +145,7 @@ mod_sdd_tables_server <- function(id){
         tagList(
           tags$h3("Login :"),
           # Creation of selector with choices "All" and the logins
-          selectInput(ns("sdd_selected_login"), NULL, choices = c("All", logins), selected = "All")
+          selectInput(ns("sdd_selected_login"), NULL, choices = c("All", logins), selected = stdp_selected_login())
         )
       } else { NULL }
     })
@@ -206,16 +210,19 @@ mod_sdd_tables_server <- function(id){
       }, {
       # Is there a login request ?
       login_request <- !is.null(input$sdd_selected_login) && input$sdd_selected_login != "All"
+      # Creation of the request part for login
       if (login_request) {
         login_querry <- glue::glue(r"("login" : "<<input$sdd_selected_login>>")", .open = "<<", .close = ">>")
       }
       # Is there an app request ?
       app_request <- !is.null(input$sdd_selected_app) && input$sdd_selected_app != "All"
+      # Creation of the request part for app
       if (app_request) {
         app_querry <- glue::glue(r"("app" : "<<input$sdd_selected_app>>")", .open = "<<", .close = ">>")
       }
       # Is there a date request ?
       date_request <- input$is_dates == TRUE
+      # Creation of the request part for dates
       if (date_request) {
         date_querry <- glue::glue(r"("date" : { "$gte" : "<<input$sdd_selected_date1>>" , "$lte" : "<<input$sdd_selected_date2>>" })", .open = "<<", .close = ">>")
       }
@@ -248,6 +255,7 @@ mod_sdd_tables_server <- function(id){
       } else {
         request <- "{}"
       }
+      # Send the request after evaluating it
       return(glue::glue(request, .open = "<<", .close = ">>"))
     })
     
@@ -333,15 +341,22 @@ mod_sdd_tables_server <- function(id){
 
 # Communication -----------------------------------------------------------
 
+    # Variable : all of module's vars
     sdd_tables_vars <- reactiveValues(
       logins = NULL,
+      sdd_selected_login = NULL,
     )
     
+    # Updating the vars
     observe({
       sdd_tables_vars$logins <- logins
     })
+    observe({
+      sdd_tables_vars$sdd_selected_login <- input$sdd_selected_login
+    })
     
-    return(logins)
+    # Sending the vars
+    return(sdd_tables_vars)
     
   })
 }
