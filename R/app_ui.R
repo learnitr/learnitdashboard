@@ -22,9 +22,11 @@ app_ui <- function(request) {
         # Creation of the sidebar
         sidebarMenu(
           # First tab
-          menuItem("SDD Dashboard", tabName = "mongodbsdd"),
+          menuItem("Raw Data Exploration", tabName = "rawdatatable"),
           # Second tab
-          menuItem("Progression", tabName = "progression")
+          menuItem("Students Progression", tabName = "std_progression"),
+          # Third tab
+          menuItem("Classroom Progression", tabName = "clr_progression")
         )
         
       ),
@@ -35,7 +37,7 @@ app_ui <- function(request) {
         tabItems(
           
           # First tab
-          tabItem(tabName = "mongodbsdd",
+          tabItem(tabName = "rawdatatable",
             # Page title
             h1("SDD Dashboard"),
             # Page Module
@@ -43,7 +45,12 @@ app_ui <- function(request) {
           ),
           
           # Second tab (test)
-          tabItem(tabName = "progression",
+          tabItem(tabName = "std_progression",
+            h1("Nothing yet...")
+          ),
+          
+          # Third tab (test)
+          tabItem(tabName = "clr_progression",
             h1("Nothing yet...")
           )
           

@@ -206,39 +206,49 @@ mod_sdd_tables_server <- function(id){
       }, {
       # Is there a login request ?
       login_request <- !is.null(input$sdd_selected_login) && input$sdd_selected_login != "All"
+      if (login_request) {
+        login_querry <- glue::glue(r"("login" : "<<input$sdd_selected_login>>")", .open = "<<", .close = ">>")
+      }
       # Is there an app request ?
       app_request <- !is.null(input$sdd_selected_app) && input$sdd_selected_app != "All"
+      if (app_request) {
+        app_querry <- glue::glue(r"("app" : "<<input$sdd_selected_app>>")", .open = "<<", .close = ">>")
+      }
       # Is there a date request ?
       date_request <- input$is_dates == TRUE
+      if (date_request) {
+        date_querry <- glue::glue(r"("date" : { "$gte" : "<<input$sdd_selected_date1>>" , "$lte" : "<<input$sdd_selected_date2>>" })", .open = "<<", .close = ">>")
+      }
       
       # Definition of the request
       # Request of login and app
       if (login_request && app_request) {
         if (date_request) {
-          return(paste0( r"( {"login" : ")", input$sdd_selected_login, r"(" , "app" : ")", input$sdd_selected_app, r"(" , "date" : { "$gte" : ")", input$sdd_selected_date1 , r"(" , "$lte" : ")", input$sdd_selected_date2, r"(" }})"))
+          request <- r"({<<login_querry>> , <<app_querry>> , <<date_querry>>})"
         } else {
-          return(paste0( r"( {"login" : ")", input$sdd_selected_login, r"(" , "app" : ")", input$sdd_selected_app, r"(" } )"))
+          request <- r"({<<login_querry>> , <<app_querry>>})"
         }
       # Request of login
       } else if (login_request) {
         if (date_request) {
-          return(paste0( r"( {"login" : ")", input$sdd_selected_login, r"(" , "date" : { "$gte" : ")", input$sdd_selected_date1 , r"(" , "$lte" : ")", input$sdd_selected_date2, r"(" }})"))
+          request <- r"({<<login_querry>> , <<date_querry>>})"
         } else {
-          return(paste0( r"( {"login" : ")", input$sdd_selected_login, r"("} )"))
+          request <- r"({<<login_querry>>})"
         }
       # Request of app
       } else if (app_request) {
         if (date_request) {
-          return(paste0( r"( {"app" : ")", input$sdd_selected_app,r"(" , "date" : { "$gte" : ")", input$sdd_selected_date1 , r"(" , "$lte" : ")", input$sdd_selected_date2, r"(" }})"))
+          request <- r"({<<app_querry>> , <<date_querry>>})"
         } else {
-          return(paste0( r"( {"app" : ")", input$sdd_selected_app, r"("} )"))
+          request <- r"({<<app_querry>>})"
         }
       # No special request
       } else if (date_request) {
-        return(paste0(r"({ "date" : { "$gte" : ")", input$sdd_selected_date1 , r"(" , "$lte" : ")", input$sdd_selected_date2, r"(" }})"))
+        request <- r"({<<date_querry>>})"
       } else {
-        return("{}")
+        request <- "{}"
       }
+      return(glue::glue(request, .open = "<<", .close = ">>"))
     })
     
     # Defining tables depending on the request
@@ -319,6 +329,19 @@ mod_sdd_tables_server <- function(id){
       lengthMenu = c(50,100,200,500)
     )
     )
+    
+
+# Communication -----------------------------------------------------------
+
+    sdd_tables_vars <- reactiveValues(
+      logins = NULL,
+    )
+    
+    observe({
+      sdd_tables_vars$logins <- logins
+    })
+    
+    return(logins)
     
   })
 }
