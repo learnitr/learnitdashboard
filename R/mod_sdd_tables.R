@@ -165,7 +165,7 @@ mod_sdd_tables_server <- function(id, all_vars){
                    tags$h3(""),
                    tags$br(),
                    tags$br(),
-                   timeInput(ns("sdd_selected_time1"), NULL, value = input$sdd_selected_time1)
+                   timeInput(ns("sdd_selected_time1"), NULL, value = input$sdd_selected_time1, seconds = FALSE)
             ),
             # Second selector of date
             column(width = 3,
@@ -177,7 +177,7 @@ mod_sdd_tables_server <- function(id, all_vars){
                    tags$h3(""),
                    tags$br(),
                    tags$br(),
-                   timeInput(ns("sdd_selected_time2"), NULL, value = input$sdd_selected_time2)
+                   timeInput(ns("sdd_selected_time2"), NULL, value = input$sdd_selected_time2, seconds = FALSE)
             ),
           )
         )
@@ -246,7 +246,7 @@ mod_sdd_tables_server <- function(id, all_vars){
       date_request <- input$is_dates == TRUE
       # Creation of the request part for dates
       if (date_request) {
-        date_query <- glue::glue(r"("date" : { "$gte" : "<<paste0(input$sdd_selected_date1, " ", strftime(input$sdd_selected_time1, "%T"))>>" , "$lte" : "<<paste0(input$sdd_selected_date2, " ", strftime(input$sdd_selected_time2, "%T"))>>" })", .open = "<<", .close = ">>")
+        date_query <- glue::glue(r"("date" : { "$gte" : "<<paste0(input$sdd_selected_date1, " ", strftime(input$sdd_selected_time1, "%H:%M"))>>" , "$lte" : "<<paste0(input$sdd_selected_date2, " ", strftime(input$sdd_selected_time2, "%H:%M"))>>" })", .open = "<<", .close = ">>")
         print(date_query)
       }
       
@@ -263,7 +263,7 @@ mod_sdd_tables_server <- function(id, all_vars){
         if (date_request) {
           build_request <- r"({<<login_query>> , <<date_query>>})"
         } else {
-          build_request <- r"({<<login_query>>})"
+          build_request <- r"--[{<<login_query>>}]--"
         }
       # Request of app
       } else if (app_request) {
