@@ -217,7 +217,7 @@ mod_sdd_tables_server <- function(id, all_vars){
     
 # Request ---------------------------------------------------------
     
-    # Variable : Definition of the request, "All" or only one selected login
+    # Variable : Definition of the request depending on login, app and dates/times
     request <- eventReactive({
       print(input$sdd_selected_login)
       print(input$sdd_selected_app)
@@ -365,6 +365,9 @@ mod_sdd_tables_server <- function(id, all_vars){
     sdd_tables_vars <- reactiveValues(
       logins = NULL,
       sdd_selected_login = NULL,
+      h5p = NULL,
+      learnr = NULL,
+      shiny = NULL,
     )
     
     # Updating the vars
@@ -373,6 +376,11 @@ mod_sdd_tables_server <- function(id, all_vars){
     })
     observe({
       sdd_tables_vars$sdd_selected_login <- input$sdd_selected_login
+    })
+    observe({
+      sdd_tables_vars$h5p <- h5p()
+      sdd_tables_vars$learnr <- learnr()
+      sdd_tables_vars$shiny <- shiny()
     })
     
     # Sending the vars

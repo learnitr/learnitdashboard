@@ -11,6 +11,7 @@
 #' 
 #' 
 #' @importFrom DT DTOutput renderDT
+#' @importFrom ggplot2 ggplot geom_count aes
 #' @importFrom glue glue
 #' @import mongolite
 #' @import rlang

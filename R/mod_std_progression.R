@@ -36,6 +36,16 @@ mod_std_progression_server <- function(id, all_vars){
     logins <- reactive({all_vars$sdd_tables_vars$logins})
     sdd_selected_login <- reactive({all_vars$sdd_tables_vars$sdd_selected_login})
 
+
+# Tables ------------------------------------------------------------------
+
+    # Variable : H5P table
+    h5p <- reactiveVal()
+    # Variable : Learnr table
+    learnr <- reactiveVal()
+    # Variable : shiny table
+    shiny <- reactiveVal()
+    
 # Selectors ---------------------------------------------------------------
     
     # Display // Login selector
@@ -48,6 +58,39 @@ mod_std_progression_server <- function(id, all_vars){
           selectInput(ns("stdp_selected_login"), NULL, choices = c("All", logins()), selected = sdd_selected_login())
         )
       } else { NULL }
+    })
+    
+# Request ----------------------------------------------------------------
+
+    # Variable : Definition of the request, "All" or only one selected login
+    request <- eventReactive({
+      input$stdp_selected_login
+    }, {
+      # Is there a login request ?
+      login_request <- !is.null(input$stdp_selected_login) && input$stdp_selected_login != "All"
+      # Creation of the request part for login
+      if (login_request) {
+        login_querry <- glue::glue(r"("login" : "<<input$stdp_selected_login>>")", .open = "<<", .close = ">>")
+      }
+      
+      # Definition of the request
+      # Request of login and app
+      if (login_request) {
+        request <- r"({<<login_querry>>})"
+        # No special request
+      } else {
+        request <- "{}"
+      }
+      # Send the request after evaluating it
+      return(glue::glue(request, .open = "<<", .close = ">>"))
+    })
+    
+    # Defining tables depending on the request
+    observeEvent(request(), {
+      print(request())
+      {message("requete h5p");h5p(try(sdd_h5p$find(request(), limit = 1000), silent = TRUE))}
+      {message("requete learnr");learnr(try(sdd_learnr$find(request(), limit = 1000), silent = TRUE))}
+      {message("requete shiny");shiny(try(sdd_shiny$find(request(), limit = 1000), silent = TRUE))}
     })
     
 # Display Progression -----------------------------------------------------
@@ -68,7 +111,9 @@ mod_std_progression_server <- function(id, all_vars){
     # Display test graph
     output$test_graph <- renderPlot({
       if (req(input$stdp_selected_login) != "All") {
-        plot(rnorm(30))
+        login_grades <- na.omit(h5p()[c("login", "app", "grade")])
+        ggplot2::ggplot(login_grades) +
+          geom_count(mapping = aes(x = grade, y = app))
       }
     })
 
