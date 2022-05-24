@@ -63,17 +63,7 @@ app_ui <- function(request) {
       
       controlbar = dashboardControlbar(
         skin = "dark",
-        controlbarMenu(
-          id = "menu",
-          controlbarItem(
-            "Tab 1",
-            "Welcome to tab 1"
-          ),
-          controlbarItem(
-            "Tab 2",
-            "Welcome to tab 2"
-          )
-        )
+        mod_right_sidebar_ui("right_sidebar_1")
       )
       
     )

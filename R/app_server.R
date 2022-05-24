@@ -20,6 +20,8 @@ app_server <- function(input, output, session) {
     all_vars$std_progression_vars <- std_progression_vars
   })
   
+  # Server module of the right sidebar for selectors
+  mod_right_sidebar_server("right_sidebar_1", all_vars = all_vars)
   # Server module of 1st page
   sdd_tables_vars <- mod_sdd_tables_server("sdd_tables_1", all_vars = all_vars)
   # Server module of 2nd page
