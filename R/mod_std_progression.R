@@ -13,11 +13,11 @@ mod_std_progression_ui <- function(id){
     
     # Box to select the login
     box( title = "Login :", status = "warning", solidHeader = TRUE, width = 4,
-    uiOutput(ns("stdp_login_selector")),
+    uiOutput(ns("stdp_login_selector"))
     ),
     # Box to render the progression
     box( title = "Graph :", status = "primary", solidHeader = TRUE, width = 8,
-    uiOutput(ns("stdp_progression")),
+    uiOutput(ns("stdp_progression"))
     )
     
   )

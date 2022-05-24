@@ -17,6 +17,7 @@
 #' @import rlang
 #' @import shiny
 #' @import shinydashboard
+#' @import shinydashboardPlus
 #' @importFrom shinyjs useShinyjs disabled disable enable
 #' @import shinythemes
 #' @import shinyTime

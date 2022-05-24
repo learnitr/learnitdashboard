@@ -12,12 +12,12 @@ app_ui <- function(request) {
     dashboardPage(
       
       # Head of Dashboard
-      dashboardHeader(
+      header = dashboardHeader(
         title = "LearnItDashboard"
       ),
       
       # Sidebar of Dashboard
-      dashboardSidebar(
+      sidebar = dashboardSidebar(
         
         # Creation of the sidebar
         sidebarMenu(
@@ -32,7 +32,7 @@ app_ui <- function(request) {
       ),
       
       # Body of Dashboard
-      dashboardBody(
+      body = dashboardBody(
         useShinyjs(),
         tabItems(
           
@@ -58,8 +58,23 @@ app_ui <- function(request) {
             mod_cls_progression_ui("cls_progression_1")
           )
           
-        ),
+        )
       ),
+      
+      controlbar = dashboardControlbar(
+        skin = "dark",
+        controlbarMenu(
+          id = "menu",
+          controlbarItem(
+            "Tab 1",
+            "Welcome to tab 1"
+          ),
+          controlbarItem(
+            "Tab 2",
+            "Welcome to tab 2"
+          )
+        )
+      )
       
     )
   )

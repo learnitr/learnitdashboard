@@ -13,11 +13,11 @@ mod_cls_progression_ui <- function(id){
     
     # Box to select the course
     box( title = "Course :", status = "warning", solidHeader = TRUE,width = 4,
-         uiOutput(ns("cls_course_selector")),
+         uiOutput(ns("cls_course_selector"))
     ),
     # Box to render the course progression
     box( title = "Graph :", status = "primary", solidHeader = TRUE, width = 8,
-         uiOutput(ns("cls_course_progression")),
+         uiOutput(ns("cls_course_progression"))
     )
     
   )
