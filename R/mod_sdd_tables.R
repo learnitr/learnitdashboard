@@ -217,8 +217,11 @@ mod_sdd_tables_server <- function(id, all_vars){
     
 # Request ---------------------------------------------------------
     
+    # Variable : Request
+    request <- reactiveVal()
+    
     # Variable : Definition of the request depending on login, app and dates/times
-    request <- eventReactive({
+    observeEvent({
       print(input$sdd_selected_login)
       print(input$sdd_selected_app)
       print(input$is_dates)
@@ -231,52 +234,72 @@ mod_sdd_tables_server <- function(id, all_vars){
       login_request <- !is.null(input$sdd_selected_login) && input$sdd_selected_login != "All"
       # Creation of the request part for login
       if (login_request) {
-        login_querry <- glue::glue(r"("login" : "<<input$sdd_selected_login>>")", .open = "<<", .close = ">>")
+        login_query <- glue::glue(r"("login" : "<<input$sdd_selected_login>>")", .open = "<<", .close = ">>")
       }
       # Is there an app request ?
       app_request <- !is.null(input$sdd_selected_app) && input$sdd_selected_app != "All"
       # Creation of the request part for app
       if (app_request) {
-        app_querry <- glue::glue(r"("app" : "<<input$sdd_selected_app>>")", .open = "<<", .close = ">>")
+        app_query <- glue::glue(r"("app" : "<<input$sdd_selected_app>>")", .open = "<<", .close = ">>")
       }
       # Is there a date request ?
       date_request <- input$is_dates == TRUE
       # Creation of the request part for dates
       if (date_request) {
-        date_querry <- glue::glue(r"("date" : { "$gte" : "<<paste0(input$sdd_selected_date1, " ", strftime(input$sdd_selected_time1, "%T"))>>" , "$lte" : "<<paste0(input$sdd_selected_date2, " ", strftime(input$sdd_selected_time2, "%T"))>>" })", .open = "<<", .close = ">>")
-        print(date_querry)
+        date_query <- glue::glue(r"("date" : { "$gte" : "<<paste0(input$sdd_selected_date1, " ", strftime(input$sdd_selected_time1, "%T"))>>" , "$lte" : "<<paste0(input$sdd_selected_date2, " ", strftime(input$sdd_selected_time2, "%T"))>>" })", .open = "<<", .close = ">>")
+        print(date_query)
       }
       
       # Definition of the request
       # Request of login and app
       if (login_request && app_request) {
         if (date_request) {
-          request <- r"({<<login_querry>> , <<app_querry>> , <<date_querry>>})"
+          build_request <- r"({<<login_query>> , <<app_query>> , <<date_query>>})"
         } else {
-          request <- r"({<<login_querry>> , <<app_querry>>})"
+          build_request <- r"({<<login_query>> , <<app_query>>})"
         }
       # Request of login
       } else if (login_request) {
         if (date_request) {
-          request <- r"({<<login_querry>> , <<date_querry>>})"
+          build_request <- r"({<<login_query>> , <<date_query>>})"
         } else {
-          request <- r"({<<login_querry>>})"
+          build_request <- r"({<<login_query>>})"
         }
       # Request of app
       } else if (app_request) {
         if (date_request) {
-          request <- r"({<<app_querry>> , <<date_querry>>})"
+          build_request <- r"({<<app_query>> , <<date_query>>})"
         } else {
-          request <- r"({<<app_querry>>})"
+          build_request <- r"({<<app_query>>})"
         }
       # No special request
       } else if (date_request) {
-        request <- r"({<<date_querry>>})"
+        build_request <- r"({<<date_query>>})"
       } else {
-        request <- "{}"
+        build_request <- "{}"
       }
       # Send the request after evaluating it
-      return(glue::glue(request, .open = "<<", .close = ">>"))
+      request(glue::glue(build_request, .open = "<<", .close = ">>"))
+    })
+    
+    # Variable : Definition of the request depending on the student progression module
+    observeEvent(stdp_selected_login(), {
+      # Is there a login request ?
+      login_request <- !is.null(stdp_selected_login()) && stdp_selected_login() != "All"
+      # Creation of the request part for login
+      if (login_request) {
+        login_query <- glue::glue(r"("login" : "<<stdp_selected_login()>>")", .open = "<<", .close = ">>")
+      }
+      
+      # Request of login from module std_progression
+      if (login_request) {
+        build_request <- r"({<<login_query>>})"
+      } else {
+        build_request <- "{}"
+      }
+      
+      # Send the request after evaluating it
+      request(glue::glue(build_request, .open = "<<", .close = ">>"))
     })
     
     # Defining tables depending on the request
