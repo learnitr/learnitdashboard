@@ -12,15 +12,13 @@ mod_right_sidebar_ui <- function(id){
   tagList(
     column( width = 12,
       # Selector of course :
-      tags$h3("Course :"),
-      tags$br(),
+      uiOutput(ns("ui_course_selector")),
       # Selector of table :
       uiOutput(ns("ui_table_selector")),
+      # Selector of module :
+      uiOutput(ns("ui_module_selector")),
       # Selector of app :
       uiOutput(ns("ui_app_selector")),
-      # Selector of module :
-      tags$h3("Module :"),
-      tags$br(),
       # Selector of login :
       uiOutput(ns("ui_login_selector")),
       # Selectors of time range :
@@ -64,25 +62,56 @@ mod_right_sidebar_server <- function(id, all_vars){
     sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
     
     # Variable : Logins
-    # logins <- try(sort(sdd_users$distinct("user_login")), silent = TRUE)
-    logins <- try(sort(unique(c(sdd_users$distinct("user_login"), sdd_h5p$distinct("login")))), silent = TRUE)
-    
-    # Disconnecting from users table
-    try(sdd_users$disconnect(), silent = TRUE)
-    
-    # If logins occurred an error, it becomes NULL
-    if (inherits(logins, "try-error") || length(logins) == 0) {
-      logins <- NULL
-    }
+    all_logins <- try(sort(unique(c(sdd_users$distinct("user_login"), sdd_h5p$distinct("login")))), silent = TRUE)
+    courses <- try(sort(sdd_users$distinct("icourse")), silent = TRUE)
+
+    # # Disconnecting from users table
+    # try(sdd_users$disconnect(), silent = TRUE)
+
+    # If all_logins occurred an error or is empty, it becomes NULL
+    if (inherits(all_logins, "try-error") || length(all_logins) == 0) {all_logins <- NULL}
+    # If courses occured an error or is empty, it becomes NULL
+    if (inherits(courses, "try-error") || length(courses) == 0) {courses <- NULL}
 
 # Display Selectors ---------------------------------------------------------------
 
+    # Display // Course selector
+    output$ui_course_selector <- renderUI({
+      if (!is.null(courses)) {
+        tagList(
+          tags$h3("Course :"),
+          # Creation of selector with choices "All and the courses
+          selectInput(ns("selected_course"), NULL, choices = c("All", courses))
+        )
+      } else { NULL }
+    })
+    
     # Display // Table selector
     output$ui_table_selector <- renderUI({
       tagList(
         tags$h3("Table :"),
         selectInput(ns("selected_table"), NULL, choices = c("H5P", "Learnr", "Shiny"), selected = "H5P")
       )
+    })
+    
+    # Display // Module selector
+    output$ui_module_selector <- renderUI({
+      # If no course is selected, all modules are selected
+      if (req(input$selected_course) == "All") {
+        tagList(
+          tags$h3("Module :"),
+          # Creation of the module selector
+          selectInput(ns("selected_module"), NULL, choices = "All")
+        )
+      } else {
+        # If a course is selected, then you can chose a module
+        # modules <- a list of modules that depends on the app and maybe the table
+        tagList(
+          tags$h3("Module :"),
+          # Creation of the module selector
+          selectInput(ns("selected_module"), NULL, choices = "All") # To change
+        )
+      }
     })
     
     # Display // App selector
@@ -110,12 +139,21 @@ mod_right_sidebar_server <- function(id, all_vars){
     
     # Display // Login selector
     output$ui_login_selector <- renderUI({
-      # If there was no error while getting the logins
-      if (!is.null(logins)) {
+      # If a course is selected
+      if (req(input$selected_course) != "All") {
+        # Getting the logins of the selected course
+        logins <- sdd_users$distinct("user_login", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>", "enrolled" : "yes" }]--", .open = "<<", .close = ">>"))
+        tagList(
+          tags$h3("Login :"),
+          # Creation of selector with choices "All" and the logins of the course
+          selectInput(ns("selected_login"), NULL, choices = c("All", logins))
+        )
+      } else if (!is.null(all_logins)) {
+      # If there was no error while getting the all of the logins of all courses
         tagList(
           tags$h3("Login :"),
           # Creation of selector with choices "All" and the logins
-          selectInput(ns("selected_login"), NULL, choices = c("All", logins))
+          selectInput(ns("selected_login"), NULL, choices = c("All", all_logins))
         )
       } else { NULL }
     })
