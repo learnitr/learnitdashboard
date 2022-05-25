@@ -31,10 +31,12 @@ app_server <- function(input, output, session) {
   # Server module of the right sidebar for selectors
   right_sidebar_vars <- mod_right_sidebar_server("right_sidebar_1", all_vars = all_vars)
   # Server module of 1st page
-  std_progression_vars <- mod_std_progression_server("std_progression_1", all_vars = all_vars)
+  mod_home_page_server("home_page_1")
   # Server module of 2nd page
-  cls_progression_vars <- mod_cls_progression_server("cls_progression_1", all_vars = all_vars)
+  std_progression_vars <- mod_std_progression_server("std_progression_1", all_vars = all_vars)
   # Server module of 3rd page
+  cls_progression_vars <- mod_cls_progression_server("cls_progression_1", all_vars = all_vars)
+  # Server module of 4th page
   sdd_tables_vars <- mod_sdd_tables_server("sdd_tables_1", all_vars = all_vars)
   
 }

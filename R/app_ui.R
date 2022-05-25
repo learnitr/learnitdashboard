@@ -22,10 +22,12 @@ app_ui <- function(request) {
         # Creation of the sidebar
         sidebarMenu(
           # First tab
-          menuItem(h4("Students Progression"), tabName = "std_progression"),
+          menuItem(h4("Home Page"), tabName = "home_page"),
           # Second tab
-          menuItem(h4("Courses Progression"), tabName = "cls_progression"),
+          menuItem(h4("Students Progression"), tabName = "std_progression"),
           # Third tab
+          menuItem(h4("Courses Progression"), tabName = "cls_progression"),
+          # Forth tab
           menuItem(h4("Raw Data Exploration"), tabName = "rawdatatable")
         )
         
@@ -36,21 +38,27 @@ app_ui <- function(request) {
         useShinyjs(),
         tabItems(
           
-          # First tab : Student progression
+          # First tab : Home Page with general informations
+          tabItem(tabName = "home_page",
+            # Page Module
+            mod_home_page_ui("home_page_1")
+          ),
+          
+          # Second tab : Student progression
           tabItem(tabName = "std_progression",
             h1("Students Progression"),
             # Page Module
             mod_std_progression_ui("std_progression_1")
           ),
           
-          # Second tab : Course progression
+          # Third tab : Course progression
           tabItem(tabName = "cls_progression",
             h1("Courses Progression"),
             # Page Module
             mod_cls_progression_ui("cls_progression_1")
           ),
           
-          # Third tab : Data Table Exploration
+          # Forth tab : Data Table Exploration
           tabItem(tabName = "rawdatatable",
             # Page Module
             mod_sdd_tables_ui("sdd_tables_1")

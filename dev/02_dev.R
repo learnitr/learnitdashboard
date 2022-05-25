@@ -19,7 +19,7 @@ attachment::att_amend_desc()
 
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module(name = "right_sidebar", with_test = TRUE) # Name of the module
+golem::add_module(name = "home_page", with_test = TRUE) # Name of the module
 golem::add_module(name = "std_progression", with_test = TRUE) # Name of the module
 
 ## Add helper functions ----
