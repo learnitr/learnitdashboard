@@ -9,10 +9,11 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    dashboardPage(
+    dashboardPage( skin = "purple",
       
       # Head of Dashboard
       header = dashboardHeader(
+        controlbarIcon = shiny::icon("gears", verify_fa = FALSE),
         title = h3("LearnItDashboard")
       ),
       
@@ -22,13 +23,13 @@ app_ui <- function(request) {
         # Creation of the sidebar
         sidebarMenu(
           # First tab
-          menuItem(h4("Home Page"), tabName = "home_page"),
+          menuItem("Home Page", tabName = "home_page", icon = shiny::icon("home", verify_fa = FALSE)),
           # Second tab
-          menuItem(h4("Students Progression"), tabName = "std_progression"),
+          menuItem("Students Progression", tabName = "std_progression", icon = shiny::icon("graduation-cap", verify_fa = FALSE)),
           # Third tab
-          menuItem(h4("Courses Progression"), tabName = "cls_progression"),
+          menuItem("Courses Progression", tabName = "cls_progression", icon = shiny::icon("school", verify_fa = FALSE)),
           # Forth tab
-          menuItem(h4("Raw Data Exploration"), tabName = "rawdatatable")
+          menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE))
         )
         
       ),

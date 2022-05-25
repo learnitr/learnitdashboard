@@ -143,7 +143,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       # If a course is selected
       if (req(input$selected_course) != "All") {
         # Getting the logins of the selected course
-        logins <- sdd_users$distinct("user_login", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>", "enrolled" : "yes" }]--", .open = "<<", .close = ">>"))
+        logins <- try(sdd_users$distinct("user_login", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>", "enrolled" : "yes" }]--", .open = "<<", .close = ">>")), silent = TRUE)
         tagList(
           tags$h3("Login :"),
           # Creation of selector with choices "All" and the logins of the course
@@ -262,8 +262,6 @@ mod_right_sidebar_server <- function(id, all_vars){
       right_sidebar_vars$selected_table <- input$selected_table
       right_sidebar_vars$selected_login <- input$selected_login
       right_sidebar_vars$selected_course <- input$selected_course
-    })
-    observe({
       right_sidebar_vars$h5p <- h5p()
       right_sidebar_vars$learnr <- learnr()
       right_sidebar_vars$shiny <- shiny()

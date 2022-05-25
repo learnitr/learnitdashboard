@@ -10,16 +10,108 @@
 mod_home_page_ui <- function(id){
   ns <- NS(id)
   tagList(
- 
+    infoBoxOutput(ns("infobox_1")),
+    infoBoxOutput(ns("infobox_2")),
+    infoBoxOutput(ns("infobox_3")),
+    valueBoxOutput(ns("valuebox_1")),
+    valueBoxOutput(ns("valuebox_2")),
+    valueBoxOutput(ns("valuebox_3"))
   )
 }
     
 #' home_page Server Functions
 #'
 #' @noRd 
-mod_home_page_server <- function(id){
+mod_home_page_server <- function(id, all_vars){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+
+# Global Vars -------------------------------------------------------------
+
+    # URL to access databases
+    sdd_url <- "mongodb://127.0.0.1:27017/sdd"
+    # To connect to them
+    sdd_h5p <- try(mongolite::mongo("h5p", url = sdd_url), silent = TRUE)
+    sdd_learnr <- try(mongolite::mongo("learnr", url = sdd_url), silent = TRUE)
+    sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url), silent = TRUE)
+    sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
+    
+# Display Boxes -----------------------------------------------------------
+
+    # Display // Info Box 1
+    output$infobox_1 <- renderInfoBox({
+      en_nb_std <- try(length(sdd_users$distinct("user_login", query = '{ "enrolled" : "yes" }')))
+      
+      infoBox(
+        title = "Enrolled Students",
+        value = en_nb_std,
+        icon = icon("graduation-cap", verify_fa = FALSE),
+        color = "purple"
+      )
+    })
+    
+    # Display // Info Box 2
+    output$infobox_2 <- renderInfoBox({
+      nen_nb_std <- try(length(sdd_users$distinct("user_login")))
+      
+      infoBox(
+        title = "Non Enrolled Students",
+        value = nen_nb_std,
+        icon = icon("graduation-cap", verify_fa = FALSE),
+        color = "purple"
+      )
+    })
+    
+    # Display // Info Box 3
+    output$infobox_3 <- renderInfoBox({
+      nb_courses <- try(length(sdd_users$distinct("icourse")))
+      
+      infoBox(
+        title = "Courses",
+        value = nb_courses,
+        icon = icon("school", verify_fa = FALSE),
+        color = "purple"
+      )
+    })
+    
+    # Display // Value Box 1
+    output$valuebox_1 <- renderValueBox({
+      h5p_apps <- try(sdd_h5p$distinct("app"), silent = TRUE)
+      h5p_apps <- try(length(h5p_apps[h5p_apps != ""]), silent = TRUE)
+      
+      valueBox(
+        value = h5p_apps,
+        subtitle = "H5P Apps",
+        icon = icon("gears", verify_fa = FALSE),
+        color = "purple"
+      )
+    })
+    
+    # Display // Value Box 2
+    output$valuebox_2 <- renderValueBox({
+      learnr_apps <- try(sdd_learnr$distinct("app"), silent = TRUE)
+      learnr_apps <- try(length(learnr_apps[learnr_apps != ""]), silent = TRUE)
+      
+      valueBox(
+        value = learnr_apps,
+        subtitle = "Learnr Apps",
+        icon = icon("gears", verify_fa = FALSE),
+        color = "purple"
+      )
+    })
+    
+    # Display // Value Box 3
+    output$valuebox_3 <- renderValueBox({
+      shiny_apps <- try(sdd_shiny$distinct("app"), silent = TRUE)
+      shiny_apps <- try(length(shiny_apps[shiny_apps != ""]), silent = TRUE)
+      
+      valueBox(
+        value = shiny_apps,
+        subtitle = "Shiny Apps",
+        icon = icon("gears", verify_fa = FALSE),
+        color = "purple"
+      )
+    })
  
   })
 }
