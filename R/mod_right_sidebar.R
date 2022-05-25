@@ -65,9 +65,6 @@ mod_right_sidebar_server <- function(id, all_vars){
     all_logins <- try(sort(unique(c(sdd_users$distinct("user_login"), sdd_h5p$distinct("login")))), silent = TRUE)
     courses <- try(sort(sdd_users$distinct("icourse")), silent = TRUE)
 
-    # # Disconnecting from users table
-    # try(sdd_users$disconnect(), silent = TRUE)
-
     # If all_logins occurred an error or is empty, it becomes NULL
     if (inherits(all_logins, "try-error") || length(all_logins) == 0) {all_logins <- NULL}
     # If courses occured an error or is empty, it becomes NULL
@@ -131,7 +128,6 @@ mod_right_sidebar_server <- function(id, all_vars){
       } else {
         table_apps <- try(sort(table$distinct("app")), silent = TRUE)
       }
-      print(length(table_apps))
       
       # Displaying the selector if table_apps didn't occur error
       if (!inherits(table_apps, "try-error")) {
@@ -255,6 +251,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     right_sidebar_vars <- reactiveValues(
       selected_table = NULL,
       selected_login = NULL,
+      selected_course = NULL,
       h5p = NULL,
       learnr = NULL,
       shiny = NULL,
@@ -264,6 +261,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     observe({
       right_sidebar_vars$selected_table <- input$selected_table
       right_sidebar_vars$selected_login <- input$selected_login
+      right_sidebar_vars$selected_course <- input$selected_course
     })
     observe({
       right_sidebar_vars$h5p <- h5p()

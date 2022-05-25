@@ -11,10 +11,7 @@ mod_std_progression_ui <- function(id){
   ns <- NS(id)
   tagList(
     
-    # Box to render the progression
-    box( title = "Graph :", status = "primary", solidHeader = TRUE, width = 8,
-      uiOutput(ns("stdp_progression"))
-    )
+    uiOutput(ns("stdp_progression"))
     
   )
 }
@@ -40,10 +37,20 @@ mod_std_progression_server <- function(id, all_vars){
       
       # Message if nothing selected
       if (selected_login() == "All") {
-        return(tags$h4("Nothing to display, please select a login."))
+        tagList(
+          # Dashboard box
+          box( title = "Graph :", status = "primary", solidHeader = TRUE, width = 8,
+            tags$h4("Nothing to display, please select a login.")
+          )
+        )
       # Progression if login selected
       } else if (selected_login() != "All") {
-        return(plotOutput(ns("test_graph")))
+        tagList(
+          # Dashboard box
+          box( title = paste0("Graph : ",selected_login()), status = "primary", solidHeader = TRUE, width = 8,
+            plotOutput(ns("test_graph"))
+          )
+        )
       }
     })
     

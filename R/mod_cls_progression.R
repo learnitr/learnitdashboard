@@ -11,14 +11,7 @@ mod_cls_progression_ui <- function(id){
   ns <- NS(id)
   tagList(
     
-    # Box to select the course
-    box( title = "Course :", status = "warning", solidHeader = TRUE,width = 4,
-         uiOutput(ns("cls_course_selector"))
-    ),
-    # Box to render the course progression
-    box( title = "Graph :", status = "primary", solidHeader = TRUE, width = 8,
-         uiOutput(ns("cls_course_progression"))
-    )
+    uiOutput(ns("cls_course_progression"))
     
   )
 }
@@ -26,59 +19,57 @@ mod_cls_progression_ui <- function(id){
 #' cls_progression Server Functions
 #'
 #' @noRd 
-mod_cls_progression_server <- function(id){
+mod_cls_progression_server <- function(id, all_vars){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-# Global Vars -------------------------------------------------------------
-    
-    # URL to access databases
-    sdd_url <- "mongodb://127.0.0.1:27017/sdd"
-    # Connection to Users
-    sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
-    # Variable : All the existing classes
-    courses <- try(sort(unique(sdd_users$distinct("ictitle"))), silent = TRUE)
-    if (inherits(courses, "try-error") || length(courses) == 0) {
-      courses <- NULL
-    }
-    # Disconnecting from the database
-    try(sdd_users$disconnect(), silent = TRUE)
-    
+# Getting Modules Vars ----------------------------------------------------
 
-# Selectors ---------------------------------------------------------------
-    
-    # Display // Course selector
-    output$cls_course_selector <- renderUI({
-      # If there was no error while getting the courses
-      if (!is.null(courses)) {
-        # Creation of selector with choices "All" and the courses
-        tagList(
-          selectInput(ns("cls_selected_course"), NULL, choices = c("All", courses), selected = "All")
-        )
-      } else { NULL }
-    })
+    # Vars from right sidebar
+    selected_course <- reactive({all_vars$right_sidebar_vars$selected_course})    
 
 # Display Course Progression -------------------------------------------------------------
 
     # Display the progression of selected student or message if all selected
     output$cls_course_progression <- renderUI({
-      req(input$cls_selected_course)
+      req(selected_course())
       
       # Message if nothing selected
-      if (input$cls_selected_course == "All") {
-        return(tags$h4("Nothing to display, please select a course"))
+      if (selected_course() == "All") {
+        tagList(
+          # Dashboard Box
+          box( title = "Graph :", status = "primary", solidHeader = TRUE, width = 8,
+            tags$h4("Nothing to display, please select a course")
+          )
+        )
         # Progression if login selected
-      } else if (input$cls_selected_course != "All") {
-        return(plotOutput(ns("test_graph")))
+      } else if (selected_course() != "All") {
+        tagList(
+          # Dashboard Box
+          box( title = paste0("Graph : ", selected_course()), status = "primary", solidHeader = TRUE, width = 8,
+            plotOutput(ns("test_graph"))
+          )
+        )
       }
     })
     
     # Display test graph
     output$test_graph <- renderPlot({
-      if (req(input$cls_selected_course) != "All") {
+      if (req(selected_course()) != "All") {
         plot(rnorm(30))
       }
     })
+
+# Communication -----------------------------------------------------------
+
+    # Variable : all of module's vars
+    cls_progression_vars <- reactiveValues()
+    
+    # Updating the vars
+    # Nothing yet
+    
+    # Sending the vars
+    return(cls_progression_vars)
     
   })
 }
