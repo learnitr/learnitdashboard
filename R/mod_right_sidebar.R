@@ -126,7 +126,12 @@ mod_right_sidebar_server <- function(id, all_vars){
       )
       
       # Getting table's apps
-      table_apps <- try(sort(table$distinct("app")), silent = TRUE)
+      if (req(input$selected_course) != "All") {
+        table_apps <- try(sort(table$distinct("app", query = glue::glue(r"--[{ "course" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+      } else {
+        table_apps <- try(sort(table$distinct("app")), silent = TRUE)
+      }
+      print(length(table_apps))
       
       # Displaying the selector if table_apps didn't occur error
       if (!inherits(table_apps, "try-error")) {
@@ -191,6 +196,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     
     # Variable : Definition of the request depending on login, app and dates/times
     observeEvent({
+      input$selected_course
       input$selected_login
       input$selected_app
       input$is_dates
@@ -202,6 +208,12 @@ mod_right_sidebar_server <- function(id, all_vars){
       # Creation of empty vector for the request
       request_vector <- c()
       
+      # --- Is there a course request ?
+      course_request <- !is.null(input$selected_course) && input$selected_course != "All"
+      # Creation of the request part for course
+      if (course_request) {
+        request_vector <- append(request_vector, glue::glue(r"--["course" : "<<input$selected_course>>"]--", .open = "<<", .close = ">>"))
+      }
       # --- Is there an app request ?
       app_request <- !is.null(input$selected_app) && input$selected_app != "All"
       # Creation of the request part for app
