@@ -18,6 +18,9 @@ mod_right_sidebar_ui <- function(id){
       uiOutput(ns("ui_table_selector")),
       # Selector of app :
       uiOutput(ns("ui_app_selector")),
+      # Selector of module :
+      tags$h3("Module :"),
+      tags$br(),
       # Selector of login :
       uiOutput(ns("ui_login_selector")),
       # Selectors of time range :
@@ -150,65 +153,41 @@ mod_right_sidebar_server <- function(id, all_vars){
     
     # Variable : Definition of the request depending on login, app and dates/times
     observeEvent({
-      print(input$sdd_selected_login)
-      print(input$sdd_selected_app)
-      print(input$is_dates)
-      print(input$sdd_selected_date1)
-      print(input$sdd_selected_date2)
+      input$sdd_selected_login
+      input$sdd_selected_app
+      input$is_dates
+      input$sdd_selected_date1
+      input$sdd_selected_date2
       input$sdd_selected_time1
       input$sdd_selected_time2
     }, {
-      # Is there a login request ?
-      login_request <- !is.null(input$sdd_selected_login) && input$sdd_selected_login != "All"
-      # Creation of the request part for login
-      if (login_request) {
-        login_query <- glue::glue(r"("login" : "<<input$sdd_selected_login>>")", .open = "<<", .close = ">>")
-      }
-      # Is there an app request ?
+      # Creation of empty vector for the request
+      request_vector <- c()
+      
+      # --- Is there an app request ?
       app_request <- !is.null(input$sdd_selected_app) && input$sdd_selected_app != "All"
       # Creation of the request part for app
       if (app_request) {
-        app_query <- glue::glue(r"("app" : "<<input$sdd_selected_app>>")", .open = "<<", .close = ">>")
+        request_vector <- append(request_vector, glue::glue(r"--["app" : "<<input$sdd_selected_app>>"]--", .open = "<<", .close = ">>"))
       }
-      # Is there a date request ?
+      # --- Is there a login request ?
+      login_request <- !is.null(input$sdd_selected_login) && input$sdd_selected_login != "All"
+      # Creation of the request part for login
+      if (login_request) {
+        request_vector <- append(request_vector, glue::glue(r"--[login" : "<<input$sdd_selected_login>>"]--", .open = "<<", .close = ">>"))
+      }
+      # --- Is there a date request ?
       date_request <- input$is_dates == TRUE
       # Creation of the request part for dates
       if (date_request) {
-        date_query <- glue::glue(r"("date" : { "$gte" : "<<paste0(input$sdd_selected_date1, " ", strftime(input$sdd_selected_time1, "%H:%M"))>>" , "$lte" : "<<paste0(input$sdd_selected_date2, " ", strftime(input$sdd_selected_time2, "%H:%M"))>>" })", .open = "<<", .close = ">>")
-        print(date_query)
+        request_vector <- append(request_vector, glue::glue(r"--["date" : { "$gte" : "<<paste0(input$sdd_selected_date1, " ", strftime(input$sdd_selected_time1, "%H:%M"))>>" , "$lte" : "<<paste0(input$sdd_selected_date2, " ", strftime(input$sdd_selected_time2, "%H:%M"))>>" }]--", .open = "<<", .close = ">>"))
       }
       
       # Definition of the request
-      # Request of login and app
-      if (login_request && app_request) {
-        if (date_request) {
-          build_request <- r"({<<login_query>> , <<app_query>> , <<date_query>>})"
-        } else {
-          build_request <- r"({<<login_query>> , <<app_query>>})"
-        }
-        # Request of login
-      } else if (login_request) {
-        if (date_request) {
-          build_request <- r"({<<login_query>> , <<date_query>>})"
-        } else {
-          build_request <- r"--[{<<login_query>>}]--"
-        }
-        # Request of app
-      } else if (app_request) {
-        if (date_request) {
-          build_request <- r"({<<app_query>> , <<date_query>>})"
-        } else {
-          build_request <- r"({<<app_query>>})"
-        }
-        # No special request
-      } else if (date_request) {
-        build_request <- r"({<<date_query>>})"
-      } else {
-        build_request <- "{}"
-      }
+      build_request <- r"--[{<<paste(request_vector, collapse = " , ")>>}]--"
+      
       # Send the request after evaluating it
       request(glue::glue(build_request, .open = "<<", .close = ">>"))
-      print(paste0(request(), "creation"))
     })
     
     # Defining tables depending on the request
