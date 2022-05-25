@@ -10,12 +10,21 @@
 mod_right_sidebar_ui <- function(id){
   ns <- NS(id)
   tagList(
-    h3("Course"),
-    uiOutput(ns("sdd_app_selector")),
-    uiOutput(ns("sdd_login_selector")),
-    h3("Time"),
-    checkboxInput(ns("is_dates"), h4("Select dates", style = "margin : 0px;")),
-    uiOutput(ns("sdd_dates_selectors"))
+    column( width = 12,
+      # Selector of course :
+      tags$h3("Course :"),
+      tags$br(),
+      # Selector of table :
+      uiOutput(ns("ui_table_selector")),
+      # Selector of app :
+      uiOutput(ns("ui_app_selector")),
+      # Selector of login :
+      uiOutput(ns("ui_login_selector")),
+      # Selectors of time range :
+      tags$h3("Time :"),
+      checkboxInput(ns("is_dates"), h4("Select dates", style = "margin : 0px;")),
+      uiOutput(ns("ui_dates_selectors"))
+    )
   )
 }
     
@@ -65,12 +74,20 @@ mod_right_sidebar_server <- function(id, all_vars){
 
 # Display Selectors ---------------------------------------------------------------
 
+    # Display // Table selector
+    output$ui_table_selector <- renderUI({
+      tagList(
+        tags$h3("Table :"),
+        selectInput(ns("selected_table"), NULL, choices = c("H5P", "Learnr", "Shiny"), selected = "H5P")
+      )
+    })
+    
     # Display // App selector
-    output$sdd_app_selector <- renderUI({
-      req(input$activetab)
+    output$ui_app_selector <- renderUI({
+      req(input$selected_table)
       
       # Getting the right table
-      table <- switch (input$activetab,
+      table <- switch (input$selected_table,
                        "H5P" = sdd_h5p,
                        "Learnr" = sdd_learnr,
                        "Shiny" = sdd_shiny
@@ -89,7 +106,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     })
     
     # Display // Login selector
-    output$sdd_login_selector <- renderUI({
+    output$ui_login_selector <- renderUI({
       # If there was no error while getting the logins
       if (!is.null(logins)) {
         tagList(
@@ -101,35 +118,19 @@ mod_right_sidebar_server <- function(id, all_vars){
     })
     
     # Display // Dates selectors
-    output$sdd_dates_selectors <- renderUI({
+    output$ui_dates_selectors <- renderUI({
       if (input$is_dates == TRUE) {
         tagList(
-          fluidRow(
-            # First selector of date
-            column(width = 3,
-                   tags$h3("From :"),
-                   dateInput(ns("sdd_selected_date1"), NULL, value = input$sdd_selected_date1)
-            ),
-            # First selector of time
-            column(width = 3,
-                   tags$h3(""),
-                   tags$br(),
-                   tags$br(),
-                   timeInput(ns("sdd_selected_time1"), NULL, value = input$sdd_selected_time1, seconds = FALSE)
-            ),
-            # Second selector of date
-            column(width = 3,
-                   tags$h3("To :"),
-                   dateInput(ns("sdd_selected_date2"), NULL, value = input$sdd_selected_date2)
-            ),
-            # Second selector of time
-            column(width = 3,
-                   tags$h3(""),
-                   tags$br(),
-                   tags$br(),
-                   timeInput(ns("sdd_selected_time2"), NULL, value = input$sdd_selected_time2, seconds = FALSE)
-            ),
-          )
+          # First selector of date
+          tags$h4("From :"),
+          dateInput(ns("sdd_selected_date1"), NULL, value = input$sdd_selected_date1),
+          # First selector of time
+          timeInput(ns("sdd_selected_time1"), NULL, value = input$sdd_selected_time1, seconds = FALSE),
+          # Second selector of date
+          tags$h4("To :"),
+          dateInput(ns("sdd_selected_date2"), NULL, value = input$sdd_selected_date2),
+          # Second selector of time
+          timeInput(ns("sdd_selected_time2"), NULL, value = input$sdd_selected_time2, seconds = FALSE),
         )
       } else {
         # To create the inputs but without making them available to user (for reactivity)
@@ -141,6 +142,105 @@ mod_right_sidebar_server <- function(id, all_vars){
         )
       }
     })
+    
+# Request ---------------------------------------------------------
+    
+    # Variable : Request
+    request <- reactiveVal()
+    
+    # Variable : Definition of the request depending on login, app and dates/times
+    observeEvent({
+      print(input$sdd_selected_login)
+      print(input$sdd_selected_app)
+      print(input$is_dates)
+      print(input$sdd_selected_date1)
+      print(input$sdd_selected_date2)
+      input$sdd_selected_time1
+      input$sdd_selected_time2
+    }, {
+      # Is there a login request ?
+      login_request <- !is.null(input$sdd_selected_login) && input$sdd_selected_login != "All"
+      # Creation of the request part for login
+      if (login_request) {
+        login_query <- glue::glue(r"("login" : "<<input$sdd_selected_login>>")", .open = "<<", .close = ">>")
+      }
+      # Is there an app request ?
+      app_request <- !is.null(input$sdd_selected_app) && input$sdd_selected_app != "All"
+      # Creation of the request part for app
+      if (app_request) {
+        app_query <- glue::glue(r"("app" : "<<input$sdd_selected_app>>")", .open = "<<", .close = ">>")
+      }
+      # Is there a date request ?
+      date_request <- input$is_dates == TRUE
+      # Creation of the request part for dates
+      if (date_request) {
+        date_query <- glue::glue(r"("date" : { "$gte" : "<<paste0(input$sdd_selected_date1, " ", strftime(input$sdd_selected_time1, "%H:%M"))>>" , "$lte" : "<<paste0(input$sdd_selected_date2, " ", strftime(input$sdd_selected_time2, "%H:%M"))>>" })", .open = "<<", .close = ">>")
+        print(date_query)
+      }
+      
+      # Definition of the request
+      # Request of login and app
+      if (login_request && app_request) {
+        if (date_request) {
+          build_request <- r"({<<login_query>> , <<app_query>> , <<date_query>>})"
+        } else {
+          build_request <- r"({<<login_query>> , <<app_query>>})"
+        }
+        # Request of login
+      } else if (login_request) {
+        if (date_request) {
+          build_request <- r"({<<login_query>> , <<date_query>>})"
+        } else {
+          build_request <- r"--[{<<login_query>>}]--"
+        }
+        # Request of app
+      } else if (app_request) {
+        if (date_request) {
+          build_request <- r"({<<app_query>> , <<date_query>>})"
+        } else {
+          build_request <- r"({<<app_query>>})"
+        }
+        # No special request
+      } else if (date_request) {
+        build_request <- r"({<<date_query>>})"
+      } else {
+        build_request <- "{}"
+      }
+      # Send the request after evaluating it
+      request(glue::glue(build_request, .open = "<<", .close = ">>"))
+      print(paste0(request(), "creation"))
+    })
+    
+    # Defining tables depending on the request
+    observeEvent(request(), {
+      print(request())
+      {message("requete h5p");h5p(try(sdd_h5p$find(request(), limit = 1000), silent = TRUE))}
+      {message("requete learnr");learnr(try(sdd_learnr$find(request(), limit = 1000), silent = TRUE))}
+      {message("requete shiny");shiny(try(sdd_shiny$find(request(), limit = 1000), silent = TRUE))}
+    })
+    
+
+# Communication -----------------------------------------------------------
+
+    # Variable : all of module's vars
+    right_sidebar_vars <- reactiveValues(
+      selected_table = NULL,
+      h5p = NULL,
+      learnr = NULL,
+      shiny = NULL,
+    )
+    
+    # Updating the vars
+    observe({
+      right_sidebar_vars$selected_table <- input$selected_table
+    })
+    observe({
+      right_sidebar_vars$h5p <- h5p()
+      right_sidebar_vars$learnr <- learnr()
+      right_sidebar_vars$shiny <- shiny()
+    })
+    
+    return(right_sidebar_vars)
     
   })
 }

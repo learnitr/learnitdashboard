@@ -13,7 +13,7 @@ app_ui <- function(request) {
       
       # Head of Dashboard
       header = dashboardHeader(
-        title = "LearnItDashboard"
+        title = h3("LearnItDashboard")
       ),
       
       # Sidebar of Dashboard
@@ -22,11 +22,11 @@ app_ui <- function(request) {
         # Creation of the sidebar
         sidebarMenu(
           # First tab
-          menuItem("Raw Data Exploration", tabName = "rawdatatable"),
+          menuItem(h4("Raw Data Exploration"), tabName = "rawdatatable"),
           # Second tab
-          menuItem("Students Progression", tabName = "std_progression"),
+          menuItem(h4("Students Progression"), tabName = "std_progression"),
           # Third tab
-          menuItem("Courses Progression", tabName = "cls_progression")
+          menuItem(h4("Courses Progression"), tabName = "cls_progression")
         )
         
       ),
@@ -38,8 +38,6 @@ app_ui <- function(request) {
           
           # First tab
           tabItem(tabName = "rawdatatable",
-            # Page title
-            h1("Raw Data Exploration"),
             # Page Module
             mod_sdd_tables_ui("sdd_tables_1")
           ),
@@ -48,14 +46,14 @@ app_ui <- function(request) {
           tabItem(tabName = "std_progression",
             h1("Students Progression"),
             # Page Module
-            mod_std_progression_ui("std_progression_1")
+            # mod_std_progression_ui("std_progression_1")
           ),
           
           # Third tab (test)
           tabItem(tabName = "cls_progression",
             h1("Courses Progression"),
             # Page Module
-            mod_cls_progression_ui("cls_progression_1")
+            # mod_cls_progression_ui("cls_progression_1")
           )
           
         )
