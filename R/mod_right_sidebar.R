@@ -103,7 +103,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       if (!inherits(table_apps, "try-error")) {
         tagList(
           tags$h3("Application :"),
-          selectInput(ns("sdd_selected_app"), NULL, choices = c("All", table_apps), selected = "All")
+          selectInput(ns("selected_app"), NULL, choices = c("All", table_apps), selected = "All")
         )
       }
     })
@@ -115,7 +115,7 @@ mod_right_sidebar_server <- function(id, all_vars){
         tagList(
           tags$h3("Login :"),
           # Creation of selector with choices "All" and the logins
-          selectInput(ns("sdd_selected_login"), NULL, choices = c("All", logins))
+          selectInput(ns("selected_login"), NULL, choices = c("All", logins))
         )
       } else { NULL }
     })
@@ -126,22 +126,22 @@ mod_right_sidebar_server <- function(id, all_vars){
         tagList(
           # First selector of date
           tags$h4("From :"),
-          dateInput(ns("sdd_selected_date1"), NULL, value = input$sdd_selected_date1),
+          dateInput(ns("selected_date1"), NULL, value = input$selected_date1),
           # First selector of time
-          timeInput(ns("sdd_selected_time1"), NULL, value = input$sdd_selected_time1, seconds = FALSE),
+          timeInput(ns("selected_time1"), NULL, value = input$selected_time1, seconds = FALSE),
           # Second selector of date
           tags$h4("To :"),
-          dateInput(ns("sdd_selected_date2"), NULL, value = input$sdd_selected_date2),
+          dateInput(ns("selected_date2"), NULL, value = input$selected_date2),
           # Second selector of time
-          timeInput(ns("sdd_selected_time2"), NULL, value = input$sdd_selected_time2, seconds = FALSE),
+          timeInput(ns("selected_time2"), NULL, value = input$selected_time2, seconds = FALSE),
         )
       } else {
         # To create the inputs but without making them available to user (for reactivity)
         tagList(
-          shinyjs::hidden(dateInput(ns("sdd_selected_date1"), NULL, value = input$sdd_selected_date1)),
-          shinyjs::hidden(timeInput(ns("sdd_selected_time1"), NULL, value = input$sdd_selected_time1)),
-          shinyjs::hidden(dateInput(ns("sdd_selected_date2"), NULL, value = input$sdd_selected_date2)),
-          shinyjs::hidden(timeInput(ns("sdd_selected_time2"), NULL, value = input$sdd_selected_time2)),
+          shinyjs::hidden(dateInput(ns("selected_date1"), NULL, value = input$selected_date1)),
+          shinyjs::hidden(timeInput(ns("selected_time1"), NULL, value = input$selected_time1)),
+          shinyjs::hidden(dateInput(ns("selected_date2"), NULL, value = input$selected_date2)),
+          shinyjs::hidden(timeInput(ns("selected_time2"), NULL, value = input$selected_time2)),
         )
       }
     })
@@ -153,34 +153,34 @@ mod_right_sidebar_server <- function(id, all_vars){
     
     # Variable : Definition of the request depending on login, app and dates/times
     observeEvent({
-      input$sdd_selected_login
-      input$sdd_selected_app
+      input$selected_login
+      input$selected_app
       input$is_dates
-      input$sdd_selected_date1
-      input$sdd_selected_date2
-      input$sdd_selected_time1
-      input$sdd_selected_time2
+      input$selected_date1
+      input$selected_date2
+      input$selected_time1
+      input$selected_time2
     }, {
       # Creation of empty vector for the request
       request_vector <- c()
       
       # --- Is there an app request ?
-      app_request <- !is.null(input$sdd_selected_app) && input$sdd_selected_app != "All"
+      app_request <- !is.null(input$selected_app) && input$selected_app != "All"
       # Creation of the request part for app
       if (app_request) {
-        request_vector <- append(request_vector, glue::glue(r"--["app" : "<<input$sdd_selected_app>>"]--", .open = "<<", .close = ">>"))
+        request_vector <- append(request_vector, glue::glue(r"--["app" : "<<input$selected_app>>"]--", .open = "<<", .close = ">>"))
       }
       # --- Is there a login request ?
-      login_request <- !is.null(input$sdd_selected_login) && input$sdd_selected_login != "All"
+      login_request <- !is.null(input$selected_login) && input$selected_login != "All"
       # Creation of the request part for login
       if (login_request) {
-        request_vector <- append(request_vector, glue::glue(r"--[login" : "<<input$sdd_selected_login>>"]--", .open = "<<", .close = ">>"))
+        request_vector <- append(request_vector, glue::glue(r"--["login" : "<<input$selected_login>>"]--", .open = "<<", .close = ">>"))
       }
       # --- Is there a date request ?
       date_request <- input$is_dates == TRUE
       # Creation of the request part for dates
       if (date_request) {
-        request_vector <- append(request_vector, glue::glue(r"--["date" : { "$gte" : "<<paste0(input$sdd_selected_date1, " ", strftime(input$sdd_selected_time1, "%H:%M"))>>" , "$lte" : "<<paste0(input$sdd_selected_date2, " ", strftime(input$sdd_selected_time2, "%H:%M"))>>" }]--", .open = "<<", .close = ">>"))
+        request_vector <- append(request_vector, glue::glue(r"--["date" : { "$gte" : "<<paste0(input$selected_date1, " ", strftime(input$selected_time1, "%H:%M"))>>" , "$lte" : "<<paste0(input$selected_date2, " ", strftime(input$selected_time2, "%H:%M"))>>" }]--", .open = "<<", .close = ">>"))
       }
       
       # Definition of the request
@@ -204,6 +204,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     # Variable : all of module's vars
     right_sidebar_vars <- reactiveValues(
       selected_table = NULL,
+      selected_login = NULL,
       h5p = NULL,
       learnr = NULL,
       shiny = NULL,
@@ -212,6 +213,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     # Updating the vars
     observe({
       right_sidebar_vars$selected_table <- input$selected_table
+      right_sidebar_vars$selected_login <- input$selected_login
     })
     observe({
       right_sidebar_vars$h5p <- h5p()

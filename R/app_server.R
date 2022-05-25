@@ -10,7 +10,7 @@ app_server <- function(input, output, session) {
   all_vars <- reactiveValues(
     right_sidebar_vars = NULL,
     sdd_tables_vars = NULL,
-    # std_progression_vars = NULL,
+    std_progression_vars = NULL,
   )
   
   # Updating the modules vars
@@ -20,17 +20,17 @@ app_server <- function(input, output, session) {
   observe({
     all_vars$sdd_tables_vars <- sdd_tables_vars
   })
-  # observe({
-  #   all_vars$std_progression_vars <- std_progression_vars
-  # })
+  observe({
+    all_vars$std_progression_vars <- std_progression_vars
+  })
   
   # Server module of the right sidebar for selectors
   right_sidebar_vars <- mod_right_sidebar_server("right_sidebar_1", all_vars = all_vars)
   # Server module of 1st page
   sdd_tables_vars <- mod_sdd_tables_server("sdd_tables_1", all_vars = all_vars)
   # Server module of 2nd page
-  # std_progression_vars <- mod_std_progression_server("std_progression_1", all_vars = all_vars)
+  std_progression_vars <- mod_std_progression_server("std_progression_1", all_vars = all_vars)
   # Server module of 3rd page
-  # mod_cls_progression_server("cls_progression_1")
+  mod_cls_progression_server("cls_progression_1")
   
 }

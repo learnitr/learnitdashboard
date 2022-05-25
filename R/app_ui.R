@@ -46,14 +46,14 @@ app_ui <- function(request) {
           tabItem(tabName = "std_progression",
             h1("Students Progression"),
             # Page Module
-            # mod_std_progression_ui("std_progression_1")
+            mod_std_progression_ui("std_progression_1")
           ),
           
           # Third tab (test)
           tabItem(tabName = "cls_progression",
             h1("Courses Progression"),
             # Page Module
-            # mod_cls_progression_ui("cls_progression_1")
+            mod_cls_progression_ui("cls_progression_1")
           )
           
         )
