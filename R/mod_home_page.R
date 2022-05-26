@@ -40,38 +40,62 @@ mod_home_page_server <- function(id, all_vars){
 
     # Display // Info Box 1
     output$infobox_1 <- renderInfoBox({
-      en_nb_std <- try(length(sdd_users$distinct("user_login", query = '{ "enrolled" : "yes" }')))
+      en_nb_std <- try(length(sdd_users$distinct("user_login", query = '{ "enrolled" : "yes" }')), silent = TRUE)
       
-      infoBox(
-        title = "Enrolled Students",
-        value = en_nb_std,
-        icon = icon("graduation-cap", verify_fa = FALSE),
-        color = "purple"
-      )
+      if (!inherits(en_nb_std, "try-error")) {
+        infoBox(
+          title = "Enrolled Students",
+          value = en_nb_std,
+          icon = icon("graduation-cap", verify_fa = FALSE),
+          color = "purple"
+        )
+      } else {
+        infoBox(
+          title = "",
+          icon = icon("graduation-cap", verify_fa = FALSE),
+          color = "purple"
+        )
+      }
     })
     
     # Display // Info Box 2
     output$infobox_2 <- renderInfoBox({
-      nen_nb_std <- try(length(sdd_users$distinct("user_login")))
+      nen_nb_std <- try(length(sdd_users$distinct("user_login")), silent = TRUE)
       
-      infoBox(
-        title = "Non Enrolled Students",
-        value = nen_nb_std,
-        icon = icon("graduation-cap", verify_fa = FALSE),
-        color = "purple"
-      )
+      if (!inherits(nen_nb_std, "try-error")) {
+        infoBox(
+          title = "Non Enrolled Students",
+          value = nen_nb_std,
+          icon = icon("graduation-cap", verify_fa = FALSE),
+          color = "purple"
+        )
+      } else {
+        infoBox(
+          title = "",
+          icon = icon("graduation-cap", verify_fa = FALSE),
+          color = "purple"
+        )
+      }
     })
     
     # Display // Info Box 3
     output$infobox_3 <- renderInfoBox({
-      nb_courses <- try(length(sdd_users$distinct("icourse")))
+      nb_courses <- try(length(sdd_users$distinct("icourse")), silent = TRUE)
       
-      infoBox(
-        title = "Courses",
-        value = nb_courses,
-        icon = icon("school", verify_fa = FALSE),
-        color = "purple"
-      )
+      if (!inherits(nb_courses, "try-error")) {
+        infoBox(
+          title = "Courses",
+          value = nb_courses,
+          icon = icon("school", verify_fa = FALSE),
+          color = "purple"
+        )
+      } else {
+        infoBox(
+          title = "",
+          icon = icon("school", verify_fa = FALSE),
+          color = "purple"
+        )
+      }
     })
     
     # Display // Value Box 1
@@ -79,12 +103,20 @@ mod_home_page_server <- function(id, all_vars){
       h5p_apps <- try(sdd_h5p$distinct("app"), silent = TRUE)
       h5p_apps <- try(length(h5p_apps[h5p_apps != ""]), silent = TRUE)
       
-      valueBox(
-        value = h5p_apps,
-        subtitle = "H5P Apps",
-        icon = icon("gears", verify_fa = FALSE),
-        color = "purple"
-      )
+      if (!inherits(h5p_apps, "try-error")) {
+        valueBox(
+          value = h5p_apps,
+          subtitle = "H5P Apps",
+          icon = icon("gears", verify_fa = FALSE),
+          color = "purple"
+        )
+      } else {
+        valueBox(
+          subtitle = "",
+          icon = icon("gears", verify_fa = FALSE),
+          color = "purple"
+        )
+      }
     })
     
     # Display // Value Box 2
@@ -92,12 +124,20 @@ mod_home_page_server <- function(id, all_vars){
       learnr_apps <- try(sdd_learnr$distinct("app"), silent = TRUE)
       learnr_apps <- try(length(learnr_apps[learnr_apps != ""]), silent = TRUE)
       
-      valueBox(
-        value = learnr_apps,
-        subtitle = "Learnr Apps",
-        icon = icon("gears", verify_fa = FALSE),
-        color = "purple"
-      )
+      if (!inherits(learnr_apps, "try-error")) {
+        valueBox(
+          value = learnr_apps,
+          subtitle = "Learnr Apps",
+          icon = icon("gears", verify_fa = FALSE),
+          color = "purple"
+        )
+      } else {
+        valueBox(
+          subtitle = "",
+          icon = icon("gears", verify_fa = FALSE),
+          color = "purple"
+        )
+      }
     })
     
     # Display // Value Box 3
@@ -105,12 +145,20 @@ mod_home_page_server <- function(id, all_vars){
       shiny_apps <- try(sdd_shiny$distinct("app"), silent = TRUE)
       shiny_apps <- try(length(shiny_apps[shiny_apps != ""]), silent = TRUE)
       
-      valueBox(
-        value = shiny_apps,
-        subtitle = "Shiny Apps",
-        icon = icon("gears", verify_fa = FALSE),
-        color = "purple"
-      )
+      if (!inherits(shiny_apps, "try-error")) {
+        valueBox(
+          value = shiny_apps,
+          subtitle = "Shiny Apps",
+          icon = icon("gears", verify_fa = FALSE),
+          color = "purple"
+        )
+      } else {
+        valueBox(
+          subtitle = "",
+          icon = icon("gears", verify_fa = FALSE),
+          color = "purple"
+        )
+      }
     })
  
   })
