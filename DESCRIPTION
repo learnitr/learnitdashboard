@@ -18,6 +18,7 @@ Imports:
     shinyjs,
     shinythemes,
     shinyTime,
+    trelliscopejs,
     utils
 Suggests: 
     spelling,
