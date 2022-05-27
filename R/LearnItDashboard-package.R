@@ -11,7 +11,7 @@
 #' 
 #' 
 #' @importFrom DT DTOutput renderDT
-#' @importFrom ggplot2 ggplot geom_count aes geom_bar theme_bw
+#' @importFrom ggplot2 ggplot geom_count aes geom_bar theme_bw coord_flip xlab ylab
 #' @importFrom glue glue
 #' @import mongolite
 #' @import rlang
@@ -21,7 +21,7 @@
 #' @importFrom shinyjs useShinyjs disabled disable enable
 #' @import shinythemes
 #' @import shinyTime
-#' @importFrom trelliscopejs facet_trelliscope
+#' @importFrom trelliscopejs facet_trelliscope renderTrelliscope trelliscopeOutput
 #' @importFrom utils head
 #' 
 NULL

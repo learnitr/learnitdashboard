@@ -26,7 +26,7 @@ mod_cls_progression_server <- function(id, all_vars){
 # Getting Modules Vars ----------------------------------------------------
 
     # Vars from right sidebar
-    selected_course <- reactive({all_vars$right_sidebar_vars$selected_course})    
+    selected_course <- reactive({all_vars$right_sidebar_vars$selected_course})
 
 # Display Course Progression -------------------------------------------------------------
 
@@ -61,10 +61,12 @@ mod_cls_progression_server <- function(id, all_vars){
       # sdd_h5p <-try(mongolite::mongo("h5p", url = "mongodb://127.0.0.1:27017/sdd"), silent = TRUE)
       # h5pt <- try(sdd_h5p$find(query = '{ "grade" : { "$gte" : 0}}', fields = '{ "login" : true, "grade" : true, "app" : true}', limit = 2000), silent = TRUE)
       # sdd_h5p$disconnect()
+      # return(
       # ggplot(data = h5pt) +
       #   geom_bar(mapping = aes(grade))+
       #   theme_bw() +
       #   facet_trelliscope(~ login, nrow = 2, ncol = 5, width = 300)
+      # )
     })
 
 # Communication -----------------------------------------------------------
