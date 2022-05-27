@@ -63,18 +63,9 @@ mod_right_sidebar_server <- function(id, all_vars){
     # Variable : Users
     sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
     
-    # Variable : Logins
-    all_logins <- try(sort(unique(c(sdd_users$distinct("user_login"), sdd_h5p$distinct("login")))), silent = TRUE)
     # Variable : Courses
     courses <- try(sort(sdd_users$distinct("icourse")), silent = TRUE)
-    # Variable : Apps
-    # h5p_apps <- try(sdd_h5p$distinct("app"), silent = TRUE)
-    # learnr_apps <- try(sdd_learnr$distinct("app"), silent = TRUE)
-    # shiny_apps <- try(sdd_shiny$distinct("app"), silent = TRUE)
-    # all_modules <- try(sort(unique(substring(c(h5p_apps, learnr_apps, shiny_apps), 1, 3))), silent = TRUE)
 
-    # If all_logins occurred an error or is empty, it becomes NULL
-    if (inherits(all_logins, "try-error") || length(all_logins) == 0) {all_logins <- NULL}
     # If courses occured an error or is empty, it becomes NULL
     if (inherits(courses, "try-error") || length(courses) == 0) {courses <- NULL}
 
