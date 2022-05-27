@@ -19,6 +19,8 @@ mod_right_sidebar_ui <- function(id){
       uiOutput(ns("ui_module_selector")),
       # Selector of app :
       uiOutput(ns("ui_app_selector")),
+      # Selector of enrolled :
+      uiOutput(ns("ui_enrolled_selector")),
       # Selector of login :
       uiOutput(ns("ui_login_selector")),
       # Selectors of time range :
@@ -159,25 +161,53 @@ mod_right_sidebar_server <- function(id, all_vars){
       }
     })
     
+    # Display // Enrolled selector
+    output$ui_enrolled_selector <- renderUI({
+      
+      if (!inherits(sdd_users, "try-error")) {
+      tagList(
+        tags$h3("Login :"),
+        checkboxInput(ns("only_enrolled"), "Only Enrolled", value = FALSE)
+      )
+      } else { NULL }
+    })
+    
     # Display // Login selector
     output$ui_login_selector <- renderUI({
-      # If a course is selected
+      
+      logins <- c()
+      # Getting the logins from selected course
       if (req(input$selected_course) != "All") {
-        # Getting the logins of the selected course
-        logins <- try(sdd_users$distinct("user_login", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>", "enrolled" : "yes" }]--", .open = "<<", .close = ">>")), silent = TRUE)
+        # If only the enrolled
+        if (input$only_enrolled == TRUE) {
+          logins <- try(sort(sdd_users$distinct("user_login", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" , "enrolled" : "yes" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        # If not only the enrolled
+        } else {
+          logins <- try(sort(sdd_users$distinct("user_login", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        }
+      # Getting the logins from all courses
+      } else {
+        # If only the enrolled
+        if (input$only_enrolled == TRUE) {
+          logins <- try(sort(sdd_users$distinct("user_login", query = r"--[{"enrolled" : "yes"}]--")), silent = TRUE)
+        # If not only the enrolled
+        } else {
+          logins <- try(sort(unique(c(sdd_users$distinct("user_login"), sdd_h5p$distinct("login")))), silent = TRUE)
+        }
+      }
+      print(length(logins))
+      
+      # If no errors to get the logins : Display the selector
+      if (!inherits(logins, "try-error") && length(logins > 0)) {
         tagList(
-          tags$h3("Login :"),
-          # Creation of selector with choices "All" and the logins of the course
+          # Creation of selector with choices "All" and the logins of course or all
           selectInput(ns("selected_login"), NULL, choices = c("All", logins))
         )
-      } else if (!is.null(all_logins)) {
-      # If there was no error while getting the all of the logins of all courses
-        tagList(
-          tags$h3("Login :"),
-          # Creation of selector with choices "All" and the logins
-          selectInput(ns("selected_login"), NULL, choices = c("All", all_logins))
-        )
-      } else { NULL }
+      # Create an invisible selector with value NULL to get nothing from the request
+      } else { 
+        shinyjs::hidden(selectInput(ns("selected_login"), NULL, choices = "NULL"))
+      }
+      
     })
     
     # Display // Dates selectors

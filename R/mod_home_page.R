@@ -189,7 +189,7 @@ mod_home_page_server <- function(id, all_vars){
       users <- try(sdd_users$find('{}', fields = '{ "user_login" : true , "icourse" : true , "enrolled" : true}')[c("user_login", "icourse", "enrolled")], silent = TRUE)
       
       # Put off the NA's if show_na is false 
-      if (input$show_na == FALSE) {
+      if (input$show_na == FALSE && !inherits(users, "try-error")) {
         users <- na.omit(users)
       }
       
