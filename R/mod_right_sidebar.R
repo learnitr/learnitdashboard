@@ -183,7 +183,7 @@ mod_right_sidebar_server <- function(id, all_vars){
           logins <- try(sort(sdd_users$distinct("user_login", query = r"--[{"enrolled" : "yes"}]--")), silent = TRUE)
         # If not only the enrolled
         } else {
-          logins <- try(sort(unique(c(sdd_users$distinct("user_login"), sdd_h5p$distinct("login")))), silent = TRUE)
+          logins <- try(sort(sdd_users$distinct("user_login")), silent = TRUE)
         }
       }
       print(length(logins))
@@ -247,6 +247,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       # Creation of empty vector for the request
       request_vector <- c()
       
+      # Could use a function
       # --- Is there a course request ?
       course_request <- !is.null(input$selected_course) && input$selected_course != "All"
       # --- Is there a module request  ?
@@ -265,7 +266,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       
       # Creation of the request part for module
       if (mod_request && !app_request) {
-        request_vector <- append(request_vector, glue::glue(r"--["app" : { "$regex" : "<<input$selected_module>>", "$options" : "" }]--", .open = "<<", .close = ">>"))
+        request_vector <- append(request_vector, glue::glue(r"--["app" : { "$regex" : "^<<input$selected_module>>", "$options" : "" }]--", .open = "<<", .close = ">>"))
       }
       
       # Creation of the request part for app

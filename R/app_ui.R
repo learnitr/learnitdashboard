@@ -69,6 +69,7 @@ app_ui <- function(request) {
       
       # Right sidebar with module : selectors and request maker
       controlbar = dashboardControlbar(
+        collapsed = FALSE,
         skin = "dark",
         mod_right_sidebar_ui("right_sidebar_1")
       )
