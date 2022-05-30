@@ -210,8 +210,11 @@ mod_right_sidebar_server <- function(id, all_vars){
     output$ui_news_time_selector <- renderUI({
       
       if (!inherits(sdd_users, "try-error")) {
+        # Setting the date to 7 days before the actual date
         time <- Sys.time()
         lubridate::day(time) <- lubridate::day(time) - 7
+        
+        # Displaying the selector
         tagList(
           hr(),
           h3("See News From :"),
