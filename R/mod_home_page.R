@@ -172,32 +172,43 @@ mod_home_page_server <- function(id, all_vars){
 
 # Apps Timeline -----------------------------------------------------------
 
-    # apps_data <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "start" : true, "end" : true}')), silent = TRUE)
-    # names(apps_data) <- c("id", "content", "start", "end")
-    # Getting the data (tests)
-    apps_data <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "icourse" : true, "end" : true}')), silent = TRUE)
-    # Creating the groups from the icourse
-    apps_groups <- data.frame(
-      id = unique(apps_data$icourse),
-      content = unique(apps_data$icourse)
-    )
-    # Setting names for the dataframe for timevis
-    names(apps_data) <- c("id", "content", "group", "start")
-    print(apps_data)
+    # Getting the courses for the selector
+    apps_courses <- try(sdd_apps$distinct("icourse"), silent = TRUE)
     
     # Display the output inside the UI if there is no error to get the apps databases
     output$ui_apps_timeline <- renderUI({
       if (!inherits(sdd_apps, "try-error")) {
         tagList(
-          timevisOutput(ns("apps_timeline"))
+          box( title = "Apps Timeline", solidHeader = TRUE,
+            width = 12, icon = shiny::icon("timeline", verify_fa = FALSE), collapsible = TRUE,
+            # Selector of course to make the timeline more clear
+            selectInput(ns("at_selected_course"), NULL, choices = apps_courses),
+            timevisOutput(ns("apps_timeline"))
+          )
         )
       }
     })
     
-    # Display the timeline when the output is available and the table app is up
+    # Variable : Data for the timeline (apps depending on a selected course)
+    apps_data <- reactive({
+      req(input$at_selected_course)
+      # Preparing the request depending on the selected course
+      request <- glue::glue(r"--[{ "icourse" : "<<input$at_selected_course>>" }]--", .open = "<<", .close = ">>")
+      # Making the request to database
+      apps_datatable <- try(na.omit(sdd_apps$find(request, fields = '{"app" : true, "end" : true}')), silent = TRUE)
+      # If no error ...
+      if (!inherits(apps_datatable, "try-error")) {
+        # Change the names to make them fit with timevis
+        names(apps_datatable) <- c("id", "content", "start")
+        return(apps_datatable)
+      # If erro : NULL
+      } else { return(NULL) }
+    })
+    
+    # Display the timeline when the output is available and when the data is available
     output$apps_timeline <- renderTimevis({
-      if (!inherits(apps_data, "try-error")) {
-        timevis(apps_data, groups = apps_groups)
+      if (!is.null(apps_data())) {
+        timevis(apps_data())
       }
     })
 
@@ -209,7 +220,6 @@ mod_home_page_server <- function(id, all_vars){
         tagList(
           box( title = "Amount of Students per Course", solidHeader = TRUE,
             width = 10, icon = shiny::icon("chart-column", verify_fa = FALSE), collapsible = TRUE,
-            background = "purple",
             checkboxInput(ns("show_na"), "Show NA's"),
             plotOutput(ns("courses_students"))
           )
