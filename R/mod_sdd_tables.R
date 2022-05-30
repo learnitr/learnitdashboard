@@ -11,13 +11,8 @@ mod_sdd_tables_ui <- function(id){
   ns <- NS(id)
   tagList(
     
-    # Cols selector
-    uiOutput(ns("dt_cols_selector")),
-    
     # Displaying the data tables
     column( width = 12,
-      # First tab : H5P
-      tags$h3("Data Table Exploration"),
       DTOutput(ns("sdd_dt")),
     ),
     
@@ -38,29 +33,6 @@ mod_sdd_tables_server <- function(id, all_vars){
     h5p <- reactive({all_vars$right_sidebar_vars$h5p})
     learnr <- reactive({all_vars$right_sidebar_vars$learnr})
     shiny <- reactive({all_vars$right_sidebar_vars$shiny})
-
-# Selector ----------------------------------------------------------------
-
-    # Display // DT cols selector
-    output$dt_cols_selector <- renderUI({
-      req(selected_table())
-      
-      # Getting the right table depending on the tab
-      table <- switch (selected_table(),
-                       "H5P" = h5p(),
-                       "Learnr" = learnr(),
-                       "Shiny" = shiny()
-      )
-      
-      # If there was no error while loading the table
-      if (!inherits(table, "try-error")) {
-        tagList(
-          tags$h3("Columns :"),
-          # Creation of the selector of cols to show, because the page is too small for everything
-          selectInput(ns("dt_selected_cols"), NULL, choices = c("All",names(table)), multiple = TRUE, selected = "All")
-        )
-      } else { NULL }
-    })
     
 # DT Displays -------------------------------------------------------------
     
@@ -78,21 +50,20 @@ mod_sdd_tables_server <- function(id, all_vars){
       
       # If no errors to get the dataframe from mongoDB
       if (!inherits(table, "try-error") && length(table > 0)) {
-        # Displaying everything or only selected cols
-        if ("All" %in% req(input$dt_selected_cols)) {
-          table
-        } else {
-          table[req(input$dt_selected_cols)]
-        }
+        # The columns selection is now rendered by DT !
+        table
       } else {
         NULL
       }
     },
+    extensions = 'Buttons',
     # Options for the data table
     options = list(
       scrollX = TRUE,
       pageLength = 100,
-      lengthMenu = c(50,100,200,500)
+      lengthMenu = c(50,100,200,500),
+      dom = 'Bfrtip',
+      buttons = I('colvis')
     )
     )
 

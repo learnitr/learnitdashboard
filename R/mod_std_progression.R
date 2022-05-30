@@ -11,6 +11,7 @@ mod_std_progression_ui <- function(id){
   ns <- NS(id)
   tagList(
     
+    # uiOutput to display the progression of the selected student
     uiOutput(ns("stdp_progression"))
     
   )

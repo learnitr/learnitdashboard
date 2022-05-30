@@ -46,6 +46,8 @@ mod_right_sidebar_server <- function(id, all_vars){
     sdd_h5p <- try(mongolite::mongo("h5p", url = sdd_url), silent = TRUE)
     sdd_learnr <- try(mongolite::mongo("learnr", url = sdd_url), silent = TRUE)
     sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url), silent = TRUE)
+    sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
+    sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
     
     # === H5P Variables ===
     # Variable : H5P
@@ -58,10 +60,6 @@ mod_right_sidebar_server <- function(id, all_vars){
     # === Shiny Variables ===
     # Variable : Shiny
     shiny <- reactiveVal()
-    
-    # === SDD Variables ===
-    # Variable : Users
-    sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
     
     # Variable : Courses
     courses <- try(sort(sdd_users$distinct("icourse")), silent = TRUE)
@@ -94,19 +92,17 @@ mod_right_sidebar_server <- function(id, all_vars){
     output$ui_module_selector <- renderUI({
       req(input$selected_table)
       
-      # Getting the right table
-      table <- switch (input$selected_table,
-                       "H5P" = sdd_h5p,
-                       "Learnr" = sdd_learnr,
-                       "Shiny" = sdd_shiny
-      )
-      
-      # Selecting the modules : If not All : modules from the selected table and course
+      # Selecting the modules : If not All : modules from the table apps for selected course
       if (req(input$selected_course) != "All") {
-        modules <- try(sort(unique(substring(table$distinct("app", query = glue::glue(r"--[{ "course" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>")), 1, 3))), silent = TRUE)
+        modules <- try(sort(sdd_apps$distinct("module", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
       } else {
-      # Else : modules from the selcted table
-        modules <- try(sort(unique(substring(table$distinct("app"), 1, 3))), silent = TRUE)
+      # Else : modules from the apps table for all courses
+        modules <- try(sort(sdd_apps$distinct("module")), silent = TRUE)
+      }
+      
+      # modules to NULL if error while getting them
+      if(inherits(modules, "try-error")) {
+        modules <- NULL
       }
       
       # Elements to display
@@ -121,26 +117,19 @@ mod_right_sidebar_server <- function(id, all_vars){
     output$ui_app_selector <- renderUI({
       req(input$selected_table)
       
-      # Getting the right table
-      table <- switch (input$selected_table,
-                       "H5P" = sdd_h5p,
-                       "Learnr" = sdd_learnr,
-                       "Shiny" = sdd_shiny
-      )
-      
       # Getting table's apps
       # If module and course selected
       if (req(input$selected_module) != "All" && req(input$selected_course) != "All") {
-        table_apps <- try(sort(table$distinct("app", query = glue::glue(r"--[{ "course" : "<<input$selected_course>>" , "app" : { "$regex" : "^<<input$selected_module>>" , "$options" : "" } }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        table_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "course" : "<<input$selected_course>>" , "app" : { "$regex" : "^<<input$selected_module>>" , "$options" : "" } }]--", .open = "<<", .close = ">>"))), silent = TRUE)
       # If only module selected
       } else if (req(input$selected_module) != "All" && req(input$selected_course) == "All") {
-        table_apps <- try(sort(table$distinct("app", query = glue::glue(r"--[{ "app" : { "$regex" : "^<<input$selected_module>>" , "$options" : "" } }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        table_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "app" : { "$regex" : "^<<input$selected_module>>" , "$options" : "" } }]--", .open = "<<", .close = ">>"))), silent = TRUE)
       # If only course selected
       } else if (req(input$selected_module) == "All" && req(input$selected_course) != "All") {
-        table_apps <- try(sort(table$distinct("app", query = glue::glue(r"--[{ "course" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        table_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "course" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
       # If nothing selected
       } else {
-        table_apps <- try(sort(table$distinct("app")), silent = TRUE)
+        table_apps <- try(sort(sdd_apps$distinct("app")), silent = TRUE)
       }
       
       # Displaying the selector if table_apps didn't occur error
@@ -247,40 +236,28 @@ mod_right_sidebar_server <- function(id, all_vars){
       # Creation of empty vector for the request
       request_vector <- c()
       
-      # Could use a function
-      # --- Is there a course request ?
-      course_request <- !is.null(input$selected_course) && input$selected_course != "All"
-      # --- Is there a module request  ?
-      mod_request <- !is.null(input$selected_module) && input$selected_module != "All"
-      # --- Is there an app request ?
-      app_request <- !is.null(input$selected_app) && input$selected_app != "All"
-      # --- Is there a login request ?
-      login_request <- !is.null(input$selected_login) && input$selected_login != "All"
-      # --- Is there a date request ?
-      date_request <- input$is_dates == TRUE
-      
-      # Creation of the request part for course
-      if (course_request) {
+      # Creation of the request part for course if request there is
+      if (is_request(input$selected_course)) {
         request_vector <- append(request_vector, glue::glue(r"--["course" : "<<input$selected_course>>"]--", .open = "<<", .close = ">>"))
       }
       
-      # Creation of the request part for module
-      if (mod_request && !app_request) {
+      # Creation of the request part for module if request there is
+      if (is_request(input$selected_module) && !is_request(input$selected_app)) {
         request_vector <- append(request_vector, glue::glue(r"--["app" : { "$regex" : "^<<input$selected_module>>", "$options" : "" }]--", .open = "<<", .close = ">>"))
       }
       
-      # Creation of the request part for app
-      if (app_request) {
+      # Creation of the request part for app if request there is
+      if (is_request(input$selected_app)) {
         request_vector <- append(request_vector, glue::glue(r"--["app" : "<<input$selected_app>>"]--", .open = "<<", .close = ">>"))
       }
       
-      # Creation of the request part for login
-      if (login_request) {
+      # Creation of the request part for login if request there is
+      if (is_request(input$selected_login)) {
         request_vector <- append(request_vector, glue::glue(r"--["login" : "<<input$selected_login>>"]--", .open = "<<", .close = ">>"))
       }
       
-      # Creation of the request part for dates
-      if (date_request) {
+      # Creation of the request part for dates if request there is
+      if (input$is_dates == TRUE) {
         request_vector <- append(request_vector, glue::glue(r"--["date" : { "$gte" : "<<paste0(input$selected_date1, " ", strftime(input$selected_time1, "%H:%M"))>>" , "$lte" : "<<paste0(input$selected_date2, " ", strftime(input$selected_time2, "%H:%M"))>>" }]--", .open = "<<", .close = ">>"))
       }
       

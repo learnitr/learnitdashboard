@@ -11,6 +11,7 @@ mod_cls_progression_ui <- function(id){
   ns <- NS(id)
   tagList(
     
+    # uiOutput to display the progrssion of the selected course
     uiOutput(ns("cls_course_progression"))
     
   )
