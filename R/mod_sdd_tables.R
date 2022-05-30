@@ -63,7 +63,8 @@ mod_sdd_tables_server <- function(id, all_vars){
       scrollX = TRUE,
       pageLength = 100,
       lengthMenu = c(50,100,200,500),
-      dom = 'Bfrtip',
+      # Options to get the col selector and lengthmenu
+      dom = 'Blfrtip',
       buttons = I('colvis')
     )
     )
@@ -86,7 +87,8 @@ mod_sdd_tables_server <- function(id, all_vars){
       scrollX = TRUE,
       pageLength = 100,
       lengthMenu = c(50,100,200,500),
-      dom = 'Bfrtip',
+      # Options to get the col selector and lengthmenu
+      dom = 'Blfrtip',
       buttons = I('colvis')
     )
     )
@@ -109,7 +111,8 @@ mod_sdd_tables_server <- function(id, all_vars){
       scrollX = TRUE,
       pageLength = 100,
       lengthMenu = c(50,100,200,500),
-      dom = 'Bfrtip',
+      # Options to get the col selector and lengthmenu
+      dom = 'Blfrtip',
       buttons = I('colvis')
     )
     )

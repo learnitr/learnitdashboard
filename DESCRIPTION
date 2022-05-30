@@ -10,6 +10,7 @@ Imports:
     DT,
     glue,
     golem (>= 0.3.2),
+    lubridate,
     mongolite,
     rlang,
     shiny (>= 1.7.1),

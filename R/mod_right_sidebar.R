@@ -13,8 +13,6 @@ mod_right_sidebar_ui <- function(id){
     column( width = 12,
       # Selector of course :
       uiOutput(ns("ui_course_selector")),
-      # Selector of table :
-      uiOutput(ns("ui_table_selector")),
       # Selector of module :
       uiOutput(ns("ui_module_selector")),
       # Selector of app :
@@ -26,7 +24,9 @@ mod_right_sidebar_ui <- function(id){
       # Selectors of time range :
       tags$h3("Time :"),
       checkboxInput(ns("is_dates"), h4("Select dates", style = "margin : 0px;")),
-      uiOutput(ns("ui_dates_selectors"))
+      uiOutput(ns("ui_dates_selectors")),
+      # Selector of news_time
+      uiOutput(ns("ui_news_time_selector"))
     )
   )
 }
@@ -80,14 +80,6 @@ mod_right_sidebar_server <- function(id, all_vars){
       } else { NULL }
     })
     
-    # Display // Table selector
-    output$ui_table_selector <- renderUI({
-      tagList(
-        tags$h3("Table :"),
-        selectInput(ns("selected_table"), NULL, choices = c("H5P", "Learnr", "Shiny"), selected = "H5P")
-      )
-    })
-    
     # Display // Module selector
     output$ui_module_selector <- renderUI({
       
@@ -115,26 +107,26 @@ mod_right_sidebar_server <- function(id, all_vars){
     # Display // App selector
     output$ui_app_selector <- renderUI({
       
-      # Getting table's apps
+      # Getting apps
       # If module and course selected
       if (req(input$selected_module) != "All" && req(input$selected_course) != "All") {
-        table_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "course" : "<<input$selected_course>>" , "app" : { "$regex" : "^<<input$selected_module>>" , "$options" : "" } }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "course" : "<<input$selected_course>>" , "app" : { "$regex" : "^<<input$selected_module>>" , "$options" : "" } }]--", .open = "<<", .close = ">>"))), silent = TRUE)
       # If only module selected
       } else if (req(input$selected_module) != "All" && req(input$selected_course) == "All") {
-        table_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "app" : { "$regex" : "^<<input$selected_module>>" , "$options" : "" } }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "app" : { "$regex" : "^<<input$selected_module>>" , "$options" : "" } }]--", .open = "<<", .close = ">>"))), silent = TRUE)
       # If only course selected
       } else if (req(input$selected_module) == "All" && req(input$selected_course) != "All") {
-        table_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "course" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "course" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
       # If nothing selected
       } else {
-        table_apps <- try(sort(sdd_apps$distinct("app")), silent = TRUE)
+        apps <- try(sort(sdd_apps$distinct("app")), silent = TRUE)
       }
       
-      # Displaying the selector if table_apps didn't occur error
-      if (!inherits(table_apps, "try-error")) {
+      # Displaying the selector if apps didn't occur error
+      if (!inherits(apps, "try-error")) {
         tagList(
           tags$h3("Application :"),
-          selectInput(ns("selected_app"), NULL, choices = c("All", table_apps), selected = "All")
+          selectInput(ns("selected_app"), NULL, choices = c("All", apps), selected = "All")
         )
       }
     })
@@ -214,7 +206,22 @@ mod_right_sidebar_server <- function(id, all_vars){
       }
     })
     
-# Request ---------------------------------------------------------
+    # Display // News Time selector
+    output$ui_news_time_selector <- renderUI({
+      
+      if (!inherits(sdd_users, "try-error")) {
+        time <- Sys.time()
+        lubridate::day(time) <- lubridate::day(time) - 7
+        tagList(
+          hr(),
+          h3("See News From :"),
+          dateInput(ns("selected_news_time"), NULL, value = time)
+          # timeInput()
+        )
+      } else { NULL }
+    })
+    
+# Main Request ---------------------------------------------------------
     
     # Variable : Request
     request <- reactiveVal()
@@ -266,35 +273,59 @@ mod_right_sidebar_server <- function(id, all_vars){
       request(glue::glue(build_request, .open = "<<", .close = ">>"))
     })
     
-    # Defining tables depending on the request
+    # Defining of main tables depending on the request
     observeEvent(request(), {
       print(request())
       {message("requete h5p");h5p(try(sdd_h5p$find(request(), limit = 1000), silent = TRUE))}
       {message("requete learnr");learnr(try(sdd_learnr$find(request(), limit = 1000), silent = TRUE))}
       {message("requete shiny");shiny(try(sdd_shiny$find(request(), limit = 1000), silent = TRUE))}
     })
+
+# News Request ------------------------------------------------------------
+
+    # Variable : Request for news
+    news_request <- reactive({
+      req(input$selected_news_time)
+      try(glue::glue(r"--[{ "date" : { "$gte" : "<<input$selected_news_time>>" } }]--", .open = "<<", .close = ">>"), silent = TRUE)
+    })
     
+    # Variable : h5p table with request for news
+    h5p_news <- reactive({
+      try(sdd_h5p$find(news_request()), silent = TRUE)
+    })
+    # Variable : learnr table with request for news
+    learnr_news <- reactive({
+      try(sdd_learnr$find(news_request()), silent = TRUE)
+    })
+    # Variable : shiny table with request for news
+    shiny_news <- reactive({
+      try(sdd_shiny$find(news_request()), silent = TRUE)
+    })
 
 # Communication -----------------------------------------------------------
 
     # Variable : all of module's vars
     right_sidebar_vars <- reactiveValues(
-      selected_table = NULL,
       selected_login = NULL,
       selected_course = NULL,
       h5p = NULL,
       learnr = NULL,
       shiny = NULL,
+      h5p_news = NULL,
+      learnr_news = NULL,
+      shiny_news = NULL
     )
     
     # Updating the vars
     observe({
-      right_sidebar_vars$selected_table <- input$selected_table
       right_sidebar_vars$selected_login <- input$selected_login
       right_sidebar_vars$selected_course <- input$selected_course
       right_sidebar_vars$h5p <- h5p()
       right_sidebar_vars$learnr <- learnr()
       right_sidebar_vars$shiny <- shiny()
+      right_sidebar_vars$h5p_news <- h5p_news()
+      right_sidebar_vars$learnr_news <- learnr_news()
+      right_sidebar_vars$shiny_news <- shiny_news()
     })
     
     return(right_sidebar_vars)

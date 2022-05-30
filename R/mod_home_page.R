@@ -16,9 +16,9 @@ mod_home_page_ui <- function(id){
       infoBoxOutput(ns("infobox_1")),
       infoBoxOutput(ns("infobox_2")),
       infoBoxOutput(ns("infobox_3")),
-      valueBoxOutput(ns("valuebox_1")),
-      valueBoxOutput(ns("valuebox_2")),
-      valueBoxOutput(ns("valuebox_3"))
+      # valueBoxOutput(ns("valuebox_1")),
+      # valueBoxOutput(ns("valuebox_2")),
+      # valueBoxOutput(ns("valuebox_3"))
     ),
     
     # UIoutput to generate a box and a plot inside (of students per courses)
@@ -33,33 +33,36 @@ mod_home_page_server <- function(id, all_vars){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
+# Getting Modules Vars ----------------------------------------------------
+
+    # Vars from right_sidebar
+    h5p_news <- reactive({all_vars$right_sidebar_vars$h5p_news})
+    learnr_news <- reactive({all_vars$right_sidebar_vars$learnr_news})
+    shiny_news <- reactive({all_vars$right_sidebar_vars$shiny_news})
+    
 # Global Vars -------------------------------------------------------------
 
     # URL to access databases
     sdd_url <- "mongodb://127.0.0.1:27017/sdd"
-    # To connect to them
-    sdd_h5p <- try(mongolite::mongo("h5p", url = sdd_url), silent = TRUE)
-    sdd_learnr <- try(mongolite::mongo("learnr", url = sdd_url), silent = TRUE)
-    sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url), silent = TRUE)
+    # To connect to users
     sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
     
 # Display Boxes -----------------------------------------------------------
 
     # Display // Info Box 1
     output$infobox_1 <- renderInfoBox({
-      en_nb_std <- try(length(sdd_users$distinct("user_login", query = '{ "enrolled" : "yes" }')), silent = TRUE)
       
-      if (!inherits(en_nb_std, "try-error")) {
+      if (!inherits(h5p_news(), "try-error")) {
         infoBox(
-          title = "Enrolled Students",
-          value = en_nb_std,
-          icon = icon("graduation-cap", verify_fa = FALSE),
+          title = "H5P Entries",
+          value = nrow(h5p_news()),
+          icon = icon("gears", verify_fa = FALSE),
           color = "purple"
         )
       } else {
         infoBox(
           title = "",
-          icon = icon("graduation-cap", verify_fa = FALSE),
+          icon = icon("gears", verify_fa = FALSE),
           color = "purple"
         )
       }
@@ -67,19 +70,18 @@ mod_home_page_server <- function(id, all_vars){
     
     # Display // Info Box 2
     output$infobox_2 <- renderInfoBox({
-      all_nb_std <- try(length(sdd_users$distinct("user_login")), silent = TRUE)
       
-      if (!inherits(all_nb_std, "try-error")) {
+      if (!inherits(learnr_news(), "try-error")) {
         infoBox(
-          title = "All Students",
-          value = all_nb_std,
-          icon = icon("graduation-cap", verify_fa = FALSE),
+          title = "Learnr Entries",
+          value = nrow(learnr_news()),
+          icon = icon("gears", verify_fa = FALSE),
           color = "purple"
         )
       } else {
         infoBox(
           title = "",
-          icon = icon("graduation-cap", verify_fa = FALSE),
+          icon = icon("gears", verify_fa = FALSE),
           color = "purple"
         )
       }
@@ -87,86 +89,82 @@ mod_home_page_server <- function(id, all_vars){
     
     # Display // Info Box 3
     output$infobox_3 <- renderInfoBox({
-      nb_courses <- try(length(sdd_users$distinct("icourse")), silent = TRUE)
       
-      if (!inherits(nb_courses, "try-error")) {
+      if (!inherits(shiny_news(), "try-error")) {
         infoBox(
-          title = "Courses",
-          value = nb_courses,
-          icon = icon("school", verify_fa = FALSE),
+          title = "Shiny Entries",
+          value = nrow(shiny_news()),
+          icon = icon("gears", verify_fa = FALSE),
           color = "purple"
         )
       } else {
         infoBox(
           title = "",
-          icon = icon("school", verify_fa = FALSE),
-          color = "purple"
-        )
-      }
-    })
-    
-    # Display // Value Box 1
-    output$valuebox_1 <- renderValueBox({
-      h5p_apps <- try(sdd_h5p$distinct("app"), silent = TRUE)
-      h5p_apps <- try(length(h5p_apps[h5p_apps != ""]), silent = TRUE)
-      
-      if (!inherits(h5p_apps, "try-error")) {
-        valueBox(
-          value = h5p_apps,
-          subtitle = "H5P Apps",
-          icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
-        )
-      } else {
-        valueBox(
-          subtitle = "",
           icon = icon("gears", verify_fa = FALSE),
           color = "purple"
         )
       }
     })
     
-    # Display // Value Box 2
-    output$valuebox_2 <- renderValueBox({
-      learnr_apps <- try(sdd_learnr$distinct("app"), silent = TRUE)
-      learnr_apps <- try(length(learnr_apps[learnr_apps != ""]), silent = TRUE)
-      
-      if (!inherits(learnr_apps, "try-error")) {
-        valueBox(
-          value = learnr_apps,
-          subtitle = "Learnr Apps",
-          icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
-        )
-      } else {
-        valueBox(
-          subtitle = "",
-          icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
-        )
-      }
-    })
-    
-    # Display // Value Box 3
-    output$valuebox_3 <- renderValueBox({
-      shiny_apps <- try(sdd_shiny$distinct("app"), silent = TRUE)
-      shiny_apps <- try(length(shiny_apps[shiny_apps != ""]), silent = TRUE)
-      
-      if (!inherits(shiny_apps, "try-error")) {
-        valueBox(
-          value = shiny_apps,
-          subtitle = "Shiny Apps",
-          icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
-        )
-      } else {
-        valueBox(
-          subtitle = "",
-          icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
-        )
-      }
-    })
+    # # Display // Value Box 1
+    # output$valuebox_1 <- renderValueBox({
+    #   
+    #   if (!inherits(h5p_news(), "try-error")) {
+    #     valueBox(
+    #       value = paste0(nrow(h5p_news()), " entries"),
+    #       subtitle = "H5P Apps",
+    #       icon = icon("gears", verify_fa = FALSE),
+    #       color = "purple"
+    #     )
+    #   } else {
+    #     valueBox(
+    #       value = NULL,
+    #       subtitle = "",
+    #       icon = icon("gears", verify_fa = FALSE),
+    #       color = "purple"
+    #     )
+    #   }
+    # })
+    # 
+    # # Display // Value Box 2
+    # output$valuebox_2 <- renderValueBox({
+    #   
+    #   if (!inherits(learnr_news(), "try-error")) {
+    #     valueBox(
+    #       value = paste0(nrow(learnr_news()), " entries"),
+    #       subtitle = "Learnr Apps",
+    #       icon = icon("gears", verify_fa = FALSE),
+    #       color = "purple"
+    #     )
+    #   } else {
+    #     valueBox(
+    #       value = NULL,
+    #       subtitle = "",
+    #       icon = icon("gears", verify_fa = FALSE),
+    #       color = "purple"
+    #     )
+    #   }
+    # })
+    # 
+    # # Display // Value Box 3
+    # output$valuebox_3 <- renderValueBox({
+    #   
+    #   if (!inherits(shiny_news(), "try-error")) {
+    #     valueBox(
+    #       value = paste0(nrow(shiny_news()), " entries"),
+    #       subtitle = "Shiny Apps",
+    #       icon = icon("gears", verify_fa = FALSE),
+    #       color = "purple"
+    #     )
+    #   } else {
+    #     valueBox(
+    #       value = NULL,
+    #       subtitle = "",
+    #       icon = icon("gears", verify_fa = FALSE),
+    #       color = "purple"
+    #     )
+    #   }
+    # })
  
     # Display // UI for the plot of students in courses
     output$courses_students_plot <- renderUI({
