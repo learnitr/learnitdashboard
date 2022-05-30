@@ -90,7 +90,6 @@ mod_right_sidebar_server <- function(id, all_vars){
     
     # Display // Module selector
     output$ui_module_selector <- renderUI({
-      req(input$selected_table)
       
       # Selecting the modules : If not All : modules from the table apps for selected course
       if (req(input$selected_course) != "All") {
@@ -115,7 +114,6 @@ mod_right_sidebar_server <- function(id, all_vars){
     
     # Display // App selector
     output$ui_app_selector <- renderUI({
-      req(input$selected_table)
       
       # Getting table's apps
       # If module and course selected

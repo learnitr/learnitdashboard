@@ -11,10 +11,20 @@ mod_sdd_tables_ui <- function(id){
   ns <- NS(id)
   tagList(
     
-    # Displaying the data tables
-    column( width = 12,
-      DTOutput(ns("sdd_dt")),
-    ),
+    tabBox( title = "Raw Data Exploration", width = 12,
+      # Display of the result H5P table
+      tabPanel("H5P",
+        DTOutput(ns("sdd_dt_h5p")),
+      ),
+      # Display of the result Learnr table
+      tabPanel("Learnr",
+        DTOutput(ns("sdd_dt_learnr")),
+      ),
+      # Display of the result Shiny table
+      tabPanel("Shiny",
+        DTOutput(ns("sdd_dt_shiny")),
+      )
+    )
     
   )
 }
@@ -29,33 +39,70 @@ mod_sdd_tables_server <- function(id, all_vars){
 # Getting Modules Vars ----------------------------------------------------
     
     # Vars from right_sidebar
-    selected_table <- reactive({all_vars$right_sidebar_vars$selected_table})
     h5p <- reactive({all_vars$right_sidebar_vars$h5p})
     learnr <- reactive({all_vars$right_sidebar_vars$learnr})
     shiny <- reactive({all_vars$right_sidebar_vars$shiny})
     
 # DT Displays -------------------------------------------------------------
     
-    # Display // H5P or Learnr or Shiny datatable
-    output$sdd_dt <- renderDT({
-      
-      req(selected_table())
-      
-      # Getting the right table depending on the tab
-      table <- switch (selected_table(),
-                       "H5P" = h5p(),
-                       "Learnr" = learnr(),
-                       "Shiny" = shiny()
-      )
+    # Display // H5P datatable
+    output$sdd_dt_h5p <- renderDT({
       
       # If no errors to get the dataframe from mongoDB
-      if (!inherits(table, "try-error") && length(table > 0)) {
+      if (!inherits(h5p(), "try-error") && length(h5p() > 0)) {
         # The columns selection is now rendered by DT !
-        table
+        h5p()
       } else {
         NULL
       }
     },
+    # Extension to display a button that allow col selection
+    extensions = 'Buttons',
+    # Options for the data table
+    options = list(
+      scrollX = TRUE,
+      pageLength = 100,
+      lengthMenu = c(50,100,200,500),
+      dom = 'Bfrtip',
+      buttons = I('colvis')
+    )
+    )
+    
+    # Display // Learnr datatable
+    output$sdd_dt_learnr <- renderDT({
+      
+      # If no errors to get the dataframe from mongoDB
+      if (!inherits(learnr(), "try-error") && length(learnr() > 0)) {
+        # The columns selection is now rendered by DT !
+        learnr()
+      } else {
+        NULL
+      }
+    },
+    # Extension to display a button that allow col selection
+    extensions = 'Buttons',
+    # Options for the data table
+    options = list(
+      scrollX = TRUE,
+      pageLength = 100,
+      lengthMenu = c(50,100,200,500),
+      dom = 'Bfrtip',
+      buttons = I('colvis')
+    )
+    )
+    
+    # Display // Shiny datatable
+    output$sdd_dt_shiny <- renderDT({
+      
+      # If no errors to get the dataframe from mongoDB
+      if (!inherits(shiny(), "try-error") && length(shiny() > 0)) {
+        # The columns selection is now rendered by DT !
+        shiny()
+      } else {
+        NULL
+      }
+    },
+    # Extension to display a button that allow col selection
     extensions = 'Buttons',
     # Options for the data table
     options = list(
