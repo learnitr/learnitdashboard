@@ -22,7 +22,7 @@
 #' @importFrom shinyjs useShinyjs disabled disable enable
 #' @import shinythemes
 #' @import shinyTime
-#' @importFrom trelliscopejs facet_trelliscope renderTrelliscope trelliscopeOutput
+#' @importFrom timevis timevisOutput renderTimevis timevis
 #' @importFrom utils head
 #' 
 NULL

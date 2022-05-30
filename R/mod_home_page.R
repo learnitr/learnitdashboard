@@ -21,6 +21,9 @@ mod_home_page_ui <- function(id){
       # valueBoxOutput(ns("valuebox_3"))
     ),
     
+    # UIoutput to generate a timeline of the different apps
+    uiOutput(ns("ui_apps_timeline")),
+    
     # UIoutput to generate a box and a plot inside (of students per courses)
     uiOutput(ns("courses_students_plot"))
   )
@@ -46,6 +49,7 @@ mod_home_page_server <- function(id, all_vars){
     sdd_url <- "mongodb://127.0.0.1:27017/sdd"
     # To connect to users
     sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
+    sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
     
 # Display Boxes -----------------------------------------------------------
 
@@ -165,7 +169,40 @@ mod_home_page_server <- function(id, all_vars){
     #     )
     #   }
     # })
- 
+
+# Apps Timeline -----------------------------------------------------------
+
+    # apps_data <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "start" : true, "end" : true}')), silent = TRUE)
+    # names(apps_data) <- c("id", "content", "start", "end")
+    # Getting the data (tests)
+    apps_data <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "icourse" : true, "end" : true}')), silent = TRUE)
+    # Creating the groups from the icourse
+    apps_groups <- data.frame(
+      id = unique(apps_data$icourse),
+      content = unique(apps_data$icourse)
+    )
+    # Setting names for the dataframe for timevis
+    names(apps_data) <- c("id", "content", "group", "start")
+    print(apps_data)
+    
+    # Display the output inside the UI if there is no error to get the apps databases
+    output$ui_apps_timeline <- renderUI({
+      if (!inherits(sdd_apps, "try-error")) {
+        tagList(
+          timevisOutput(ns("apps_timeline"))
+        )
+      }
+    })
+    
+    # Display the timeline when the output is available and the table app is up
+    output$apps_timeline <- renderTimevis({
+      if (!inherits(apps_data, "try-error")) {
+        timevis(apps_data, groups = apps_groups)
+      }
+    })
+
+# Courses Students Plot ---------------------------------------------------
+
     # Display // UI for the plot of students in courses
     output$courses_students_plot <- renderUI({
       if (!inherits(sdd_users, "try-error")) {

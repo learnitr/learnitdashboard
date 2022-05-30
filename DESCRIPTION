@@ -19,7 +19,7 @@ Imports:
     shinyjs,
     shinythemes,
     shinyTime,
-    trelliscopejs,
+    timevis,
     utils
 Suggests: 
     spelling,
