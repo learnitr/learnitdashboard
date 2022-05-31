@@ -110,13 +110,13 @@ mod_right_sidebar_server <- function(id, all_vars){
       # Getting apps
       # If module and course selected
       if (req(input$selected_module) != "All" && req(input$selected_course) != "All") {
-        apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "course" : "<<input$selected_course>>" , "app" : { "$regex" : "^<<input$selected_module>>" , "$options" : "" } }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" , "app" : { "$regex" : "^<<input$selected_module>>" , "$options" : "" } }]--", .open = "<<", .close = ">>"))), silent = TRUE)
       # If only module selected
       } else if (req(input$selected_module) != "All" && req(input$selected_course) == "All") {
         apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "app" : { "$regex" : "^<<input$selected_module>>" , "$options" : "" } }]--", .open = "<<", .close = ">>"))), silent = TRUE)
       # If only course selected
       } else if (req(input$selected_module) == "All" && req(input$selected_course) != "All") {
-        apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "course" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
       # If nothing selected
       } else {
         apps <- try(sort(sdd_apps$distinct("app")), silent = TRUE)
@@ -165,7 +165,6 @@ mod_right_sidebar_server <- function(id, all_vars){
           logins <- try(sort(sdd_users$distinct("user_login")), silent = TRUE)
         }
       }
-      print(length(logins))
       
       # If no errors to get the logins : Display the selector
       if (!inherits(logins, "try-error") && length(logins > 0)) {
@@ -316,7 +315,8 @@ mod_right_sidebar_server <- function(id, all_vars){
       shiny = NULL,
       h5p_news = NULL,
       learnr_news = NULL,
-      shiny_news = NULL
+      shiny_news = NULL,
+      selected_news_time = NULL,
     )
     
     # Updating the vars
@@ -329,6 +329,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       right_sidebar_vars$h5p_news <- h5p_news()
       right_sidebar_vars$learnr_news <- learnr_news()
       right_sidebar_vars$shiny_news <- shiny_news()
+      right_sidebar_vars$selected_news_time <- input$selected_news_time
     })
     
     return(right_sidebar_vars)

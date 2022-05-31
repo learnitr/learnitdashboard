@@ -16,9 +16,12 @@ mod_home_page_ui <- function(id){
       infoBoxOutput(ns("infobox_1")),
       infoBoxOutput(ns("infobox_2")),
       infoBoxOutput(ns("infobox_3")),
+      
+      infoBoxOutput(ns("infobox_4")),
+      infoBoxOutput(ns("infobox_5")),
+      infoBoxOutput(ns("infobox_6")),
+      
       # valueBoxOutput(ns("valuebox_1")),
-      # valueBoxOutput(ns("valuebox_2")),
-      # valueBoxOutput(ns("valuebox_3"))
     ),
     
     # UIoutput to generate a timeline of the different apps
@@ -42,6 +45,7 @@ mod_home_page_server <- function(id, all_vars){
     h5p_news <- reactive({all_vars$right_sidebar_vars$h5p_news})
     learnr_news <- reactive({all_vars$right_sidebar_vars$learnr_news})
     shiny_news <- reactive({all_vars$right_sidebar_vars$shiny_news})
+    selected_news_time <- reactive({all_vars$right_sidebar_vars$selected_news_time})
     
 # Global Vars -------------------------------------------------------------
 
@@ -56,9 +60,11 @@ mod_home_page_server <- function(id, all_vars){
     # Display // Info Box 1
     output$infobox_1 <- renderInfoBox({
       
+      # The boxes need to have something inside, even empty, so it tests if we can put our data inside
       if (!inherits(h5p_news(), "try-error")) {
         infoBox(
-          title = "H5P Entries",
+          title = "H5P",
+          subtitle = paste0("New entries since : ", selected_news_time()),
           value = nrow(h5p_news()),
           icon = icon("gears", verify_fa = FALSE),
           color = "purple"
@@ -77,7 +83,8 @@ mod_home_page_server <- function(id, all_vars){
       
       if (!inherits(learnr_news(), "try-error")) {
         infoBox(
-          title = "Learnr Entries",
+          title = "Learnr",
+          subtitle = paste0("New entries since : ", selected_news_time()),
           value = nrow(learnr_news()),
           icon = icon("gears", verify_fa = FALSE),
           color = "purple"
@@ -96,7 +103,69 @@ mod_home_page_server <- function(id, all_vars){
       
       if (!inherits(shiny_news(), "try-error")) {
         infoBox(
-          title = "Shiny Entries",
+          title = "Shiny",
+          subtitle = paste0("New entries since : ", selected_news_time()),
+          value = nrow(shiny_news()),
+          icon = icon("gears", verify_fa = FALSE),
+          color = "purple"
+        )
+      } else {
+        infoBox(
+          title = "",
+          icon = icon("gears", verify_fa = FALSE),
+          color = "purple"
+        )
+      }
+    })
+    
+    # Display // Info Box 4
+    output$infobox_4 <- renderInfoBox({
+      
+      # The boxes need to have something inside, even empty, so it tests if we can put our data inside
+      if (!inherits(h5p_news(), "try-error")) {
+        infoBox(
+          title = "H5P",
+          subtitle = paste0("New entries since : ", selected_news_time()),
+          value = nrow(h5p_news()),
+          icon = icon("gears", verify_fa = FALSE),
+          color = "purple"
+        )
+      } else {
+        infoBox(
+          title = "",
+          icon = icon("gears", verify_fa = FALSE),
+          color = "purple"
+        )
+      }
+    })
+    
+    # Display // Info Box 5
+    output$infobox_5 <- renderInfoBox({
+      
+      if (!inherits(learnr_news(), "try-error")) {
+        infoBox(
+          title = "Learnr",
+          subtitle = paste0("New entries since : ", selected_news_time()),
+          value = nrow(learnr_news()),
+          icon = icon("gears", verify_fa = FALSE),
+          color = "purple"
+        )
+      } else {
+        infoBox(
+          title = "",
+          icon = icon("gears", verify_fa = FALSE),
+          color = "purple"
+        )
+      }
+    })
+    
+    # Display // Info Box 6
+    output$infobox_6 <- renderInfoBox({
+      
+      if (!inherits(shiny_news(), "try-error")) {
+        infoBox(
+          title = "Shiny",
+          subtitle = paste0("New entries since : ", selected_news_time()),
           value = nrow(shiny_news()),
           icon = icon("gears", verify_fa = FALSE),
           color = "purple"
@@ -129,46 +198,6 @@ mod_home_page_server <- function(id, all_vars){
     #     )
     #   }
     # })
-    # 
-    # # Display // Value Box 2
-    # output$valuebox_2 <- renderValueBox({
-    #   
-    #   if (!inherits(learnr_news(), "try-error")) {
-    #     valueBox(
-    #       value = paste0(nrow(learnr_news()), " entries"),
-    #       subtitle = "Learnr Apps",
-    #       icon = icon("gears", verify_fa = FALSE),
-    #       color = "purple"
-    #     )
-    #   } else {
-    #     valueBox(
-    #       value = NULL,
-    #       subtitle = "",
-    #       icon = icon("gears", verify_fa = FALSE),
-    #       color = "purple"
-    #     )
-    #   }
-    # })
-    # 
-    # # Display // Value Box 3
-    # output$valuebox_3 <- renderValueBox({
-    #   
-    #   if (!inherits(shiny_news(), "try-error")) {
-    #     valueBox(
-    #       value = paste0(nrow(shiny_news()), " entries"),
-    #       subtitle = "Shiny Apps",
-    #       icon = icon("gears", verify_fa = FALSE),
-    #       color = "purple"
-    #     )
-    #   } else {
-    #     valueBox(
-    #       value = NULL,
-    #       subtitle = "",
-    #       icon = icon("gears", verify_fa = FALSE),
-    #       color = "purple"
-    #     )
-    #   }
-    # })
 
 # Apps Timeline -----------------------------------------------------------
 
@@ -181,6 +210,7 @@ mod_home_page_server <- function(id, all_vars){
         tagList(
           box( title = "Apps Timeline", solidHeader = TRUE,
             width = 12, icon = shiny::icon("timeline", verify_fa = FALSE), collapsible = TRUE,
+            label = boxLabel(1, "danger"),
             # Selector of course to make the timeline more clear
             selectInput(ns("at_selected_course"), NULL, choices = apps_courses),
             timevisOutput(ns("apps_timeline"))
@@ -195,13 +225,13 @@ mod_home_page_server <- function(id, all_vars){
       # Preparing the request depending on the selected course
       request <- glue::glue(r"--[{ "icourse" : "<<input$at_selected_course>>" }]--", .open = "<<", .close = ">>")
       # Making the request to database
-      apps_datatable <- try(na.omit(sdd_apps$find(request, fields = '{"app" : true, "end" : true}')), silent = TRUE)
+      apps_datatable <- try(na.omit(sdd_apps$find(request, fields = '{"app" : true, "start" : true ,"end" : true}')), silent = TRUE)
       # If no error ...
       if (!inherits(apps_datatable, "try-error")) {
         # Change the names to make them fit with timevis
-        names(apps_datatable) <- c("id", "content", "start")
+        names(apps_datatable) <- c("id", "content", "end", "start")
         return(apps_datatable)
-      # If erro : NULL
+      # If error : NULL
       } else { return(NULL) }
     })
     
@@ -240,11 +270,11 @@ mod_home_page_server <- function(id, all_vars){
       
       # If there are no errors, create the plot of nb of students in courses filled by enrolled or not
       if (!inherits(users, "try-error") && !is.null(users)) {
-      ggplot(data = users) +
-        geom_bar(mapping = aes(icourse, fill = enrolled)) +
-        xlab("Courses") +
-        ylab("Number of Students") +
-        coord_flip()
+        ggplot(data = users) +
+          geom_bar(mapping = aes(icourse, fill = enrolled)) +
+          xlab("Courses") +
+          ylab("Number of Students") +
+          coord_flip()
       }
     })
   })

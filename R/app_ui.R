@@ -19,19 +19,8 @@ app_ui <- function(request) {
       
       # Sidebar of Dashboard
       sidebar = dashboardSidebar(
-        
-        # Creation of the sidebar
-        sidebarMenu(
-          # First tab
-          menuItem("Home Page", tabName = "home_page", icon = shiny::icon("home", verify_fa = FALSE)),
-          # Second tab
-          menuItem("Students Progression", tabName = "std_progression", icon = shiny::icon("graduation-cap", verify_fa = FALSE)),
-          # Third tab
-          menuItem("Courses Progression", tabName = "cls_progression", icon = shiny::icon("school", verify_fa = FALSE)),
-          # Forth tab
-          menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE))
-        )
-        
+        # Sidebar dynamically generated in server
+        sidebarMenuOutput("menuitems")
       ),
       
       # Body of Dashboard

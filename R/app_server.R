@@ -39,4 +39,28 @@ app_server <- function(input, output, session) {
   # Server module of 4th page
   sdd_tables_vars <- mod_sdd_tables_server("sdd_tables_1", all_vars = all_vars)
   
+  # Display the menuitems
+  output$menuitems <- renderMenu({
+    # New elements from tables_news
+    new_elements <- nrow(req(right_sidebar_vars$h5p_news)) + nrow(req(right_sidebar_vars$learnr_news)) + nrow(req(right_sidebar_vars$shiny_news))
+    
+    # Tabs of the sidebar
+    tagList(
+      sidebarMenu(
+        # First tab
+        menuItem("Home Page", tabName = "home_page", icon = shiny::icon("home", verify_fa = FALSE), badgeLabel = boxLabel("News", status = "success")),
+        # Second tab
+        menuItem("Students Progression", tabName = "std_progression", icon = shiny::icon("graduation-cap", verify_fa = FALSE)),
+        # Third tab
+        menuItem("Courses Progression", tabName = "cls_progression", icon = shiny::icon("school", verify_fa = FALSE)),
+        # Forth tab
+        # If there are news, put a badge
+        if (!is.null(new_elements) && new_elements > 0) {
+          menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE), badgeLabel = new_elements, badgeColor = "red")
+        } else {
+          menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE))
+        }
+      )
+    )
+  })
 }
