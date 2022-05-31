@@ -65,7 +65,12 @@ mod_home_page_server <- function(id, all_vars){
         infoBox(
           title = "H5P",
           subtitle = paste0("New entries since : ", selected_news_time()),
-          value = nrow(h5p_news()),
+          # Show the amount of changes if there are some
+          value = if (nrow(h5p_news()) > 0) {
+            nrow(h5p_news())
+          } else {
+            "No changes"
+          },
           icon = icon("gears", verify_fa = FALSE),
           color = "purple"
         )
@@ -85,7 +90,12 @@ mod_home_page_server <- function(id, all_vars){
         infoBox(
           title = "Learnr",
           subtitle = paste0("New entries since : ", selected_news_time()),
-          value = nrow(learnr_news()),
+          # Show the amount of changes if there are some
+          value = if (nrow(learnr_news()) > 0) {
+            nrow(learnr_news())
+          } else {
+            "No changes"
+          },
           icon = icon("gears", verify_fa = FALSE),
           color = "purple"
         )
@@ -105,7 +115,12 @@ mod_home_page_server <- function(id, all_vars){
         infoBox(
           title = "Shiny",
           subtitle = paste0("New entries since : ", selected_news_time()),
-          value = nrow(shiny_news()),
+          # Show the amount of changes if there are some
+          value = if (nrow(shiny_news()) > 0) {
+            nrow(shiny_news())
+          } else {
+            "No changes"
+          },
           icon = icon("gears", verify_fa = FALSE),
           color = "purple"
         )
@@ -123,17 +138,27 @@ mod_home_page_server <- function(id, all_vars){
       
       # The boxes need to have something inside, even empty, so it tests if we can put our data inside
       if (!inherits(h5p_news(), "try-error")) {
+        # Getting h5p news apps
+        h5p_news_apps <- sort(unique(h5p_news()$app))
         infoBox(
           title = "H5P",
-          subtitle = paste0("New entries since : ", selected_news_time()),
-          value = nrow(h5p_news()),
-          icon = icon("gears", verify_fa = FALSE),
+          # Show the apps if there are
+          subtitle = if (!is.null(h5p_news_apps)) {
+            selectInput(ns("h5p_apps_show"), NULL, choices = h5p_news_apps)
+          } else {
+            NULL
+          },
+          # Show the amoun of apps that changed and in how much courses
+          value = if (nrow(h5p_news()) > 0) {
+            paste0(length(unique(h5p_news()$app)), " apps changed in ", length(unique(h5p_news()$course)), " courses")
+          } else { "No changes" },
+          icon = icon("briefcase", verify_fa = FALSE),
           color = "purple"
         )
       } else {
         infoBox(
           title = "",
-          icon = icon("gears", verify_fa = FALSE),
+          icon = icon("briefcase", verify_fa = FALSE),
           color = "purple"
         )
       }
@@ -143,17 +168,27 @@ mod_home_page_server <- function(id, all_vars){
     output$infobox_5 <- renderInfoBox({
       
       if (!inherits(learnr_news(), "try-error")) {
+        # Getting learnr news apps
+        learnr_news_apps <- sort(unique(learnr_news()$app))
         infoBox(
           title = "Learnr",
-          subtitle = paste0("New entries since : ", selected_news_time()),
-          value = nrow(learnr_news()),
-          icon = icon("gears", verify_fa = FALSE),
+          # Show the apps if there are
+          subtitle = if (!is.null(learnr_news_apps)) {
+            selectInput(ns("learnr_apps_show"), NULL, choices = learnr_news_apps)
+          } else {
+            NULL
+          },
+          # Show the amoun of apps that changed and in how much courses
+          value = if (nrow(learnr_news()) > 0) {
+            paste0(length(unique(learnr_news()$app)), " apps changed in ", length(unique(learnr_news()$course)), " courses")
+          } else { "No changes" },
+          icon = icon("briefcase", verify_fa = FALSE),
           color = "purple"
         )
       } else {
         infoBox(
           title = "",
-          icon = icon("gears", verify_fa = FALSE),
+          icon = icon("briefcase", verify_fa = FALSE),
           color = "purple"
         )
       }
@@ -163,17 +198,27 @@ mod_home_page_server <- function(id, all_vars){
     output$infobox_6 <- renderInfoBox({
       
       if (!inherits(shiny_news(), "try-error")) {
+        # Getting shiny news apps
+        shiny_news_apps <- sort(unique(shiny_news()$app))
         infoBox(
           title = "Shiny",
-          subtitle = paste0("New entries since : ", selected_news_time()),
-          value = nrow(shiny_news()),
-          icon = icon("gears", verify_fa = FALSE),
+          # Show the apps if there are
+          subtitle = if (!is.null(shiny_news_apps)) {
+            selectInput(ns("shiny_apps_show"), NULL, choices = shiny_news_apps)
+          } else {
+            NULL
+          },
+          # Show the amoun of apps that changed and in how much courses
+          value = if (nrow(shiny_news()) > 0) {
+            paste0(length(unique(shiny_news()$app)), " apps changed in ", length(unique(shiny_news()$course)), " courses")
+          } else { "No changes" },
+          icon = icon("briefcase", verify_fa = FALSE),
           color = "purple"
         )
       } else {
         infoBox(
           title = "",
-          icon = icon("gears", verify_fa = FALSE),
+          icon = icon("briefcase", verify_fa = FALSE),
           color = "purple"
         )
       }
