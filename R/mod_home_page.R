@@ -25,7 +25,9 @@ mod_home_page_ui <- function(id){
     ),
     
     # UIoutput to generate a timeline of the different apps
-    uiOutput(ns("ui_apps_timeline")),
+    uiOutput(ns("ui_apps_timeline_1")),
+    # test 2
+    uiOutput(ns("ui_apps_timeline_2")),
     
     # UIoutput to generate a box and a plot inside (of students per courses)
     uiOutput(ns("courses_students_plot"))
@@ -249,41 +251,97 @@ mod_home_page_server <- function(id, all_vars){
     # Getting the courses for the selector
     apps_courses <- try(sdd_apps$distinct("icourse"), silent = TRUE)
     
-    # Display the output inside the UI if there is no error to get the apps databases
-    output$ui_apps_timeline <- renderUI({
+    # --- (1) --- Display the output inside the UI if there is no error to get the apps databases
+    output$ui_apps_timeline_1 <- renderUI({
       if (!inherits(sdd_apps, "try-error")) {
         tagList(
-          box( title = "Apps Timeline", solidHeader = TRUE,
+          # Box in which the timeline will appear
+          box( title = "Apps Timeline (grouped by type)", solidHeader = TRUE,
             width = 12, icon = shiny::icon("timeline", verify_fa = FALSE), collapsible = TRUE,
-            label = boxLabel(1, "danger"),
+            label = boxLabel(1, "danger"), collapsed = TRUE,
             # Selector of course to make the timeline more clear
             selectInput(ns("at_selected_course"), NULL, choices = apps_courses),
-            timevisOutput(ns("apps_timeline"))
+            timevisOutput(ns("apps_timeline_1"))
           )
         )
       }
     })
     
     # Variable : Data for the timeline (apps depending on a selected course)
-    apps_data <- reactive({
+    timeline_data_1 <- reactive({
       req(input$at_selected_course)
+      
       # Preparing the request depending on the selected course
       request <- glue::glue(r"--[{ "icourse" : "<<input$at_selected_course>>" }]--", .open = "<<", .close = ">>")
       # Making the request to database
-      apps_datatable <- try(na.omit(sdd_apps$find(request, fields = '{"app" : true, "start" : true ,"end" : true}')), silent = TRUE)
-      # If no error ...
+      apps_datatable <- try(na.omit(sdd_apps$find(request, fields = '{"app" : true, "start" : true ,"end" : true, "type" : true, "url" : true}')), silent = TRUE)
+      
       if (!inherits(apps_datatable, "try-error")) {
-        # Change the names to make them fit with timevis
-        names(apps_datatable) <- c("id", "content", "end", "start")
+        
+        # Preparing the content with a link (url from app)
+        apps_datatable$content <- try(html_link_with_app_name(apps_datatable))
+        apps_datatable <- apps_datatable[c("_id", "content", "type", "start", "end")]
+        
+        # Change the names to make them fit with timevis (_id = id, app = content, type = group, end = end, start = start)
+        names(apps_datatable) <- c("id", "content", "group", "start", "end")
+        
+        # Creating groups from the type
+        timeline_data_1_groups <- data.frame(
+          id = unique(apps_datatable$group),
+          content = unique(apps_datatable$group)
+        )
+        
+        # Attaching the groups to the datatable
+        attr(apps_datatable, "groups") <- timeline_data_1_groups
+        
         return(apps_datatable)
       # If error : NULL
       } else { return(NULL) }
     })
     
     # Display the timeline when the output is available and when the data is available
-    output$apps_timeline <- renderTimevis({
-      if (!is.null(apps_data())) {
-        timevis(apps_data())
+    output$apps_timeline_1 <- renderTimevis({
+      if (!is.null(timeline_data_1())) {
+        timevis(timeline_data_1(), groups = attr(timeline_data_1(), "groups"))
+      }
+    })
+    
+    # --- (2) --- Display the output inside the UI if there is no error to get the apps databases
+    output$ui_apps_timeline_2 <- renderUI({
+      if (!inherits(sdd_apps, "try-error")) {
+        tagList(
+          # Box in which the timeline will appear
+          box( title = "Apps Timeline (grouped by icourse)", solidHeader = TRUE,
+               width = 12, icon = shiny::icon("timeline", verify_fa = FALSE), collapsible = TRUE,
+               label = boxLabel(2, "danger"), collapsed = TRUE,
+               timevisOutput(ns("apps_timeline_2"))
+          )
+        )
+      }
+    })
+    
+    # Variable : Data of the second timeline, to make groups by icourse
+    timeline_data_2 <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "start" : true ,"end" : true, "icourse" : true, "url" : true}')), silent = TRUE)
+    # Preparing the timeline_data_2
+    if (!inherits(timeline_data_2, "try-error")) {
+      
+      # Preparing the content with a link (url from app)
+      timeline_data_2$content <- try(html_link_with_app_name(timeline_data_2))
+      timeline_data_2 <- timeline_data_2[c("_id", "content", "icourse", "start", "end")]
+      # Setting the good names to fit timevis
+      names(timeline_data_2) <- c("id", "content", "group", "start", "end")
+      
+      # Preparing the groups for timevis
+      attr(timeline_data_2, "groups") <- data.frame(
+        id = unique(timeline_data_2$group),
+        content = unique(timeline_data_2$group)
+      )
+    } else { timeline_data_2 <- NULL }
+    
+    # Display the timeline when the output is available and when the data is available
+    output$apps_timeline_2 <- renderTimevis({
+      if (!is.null(timeline_data_2)) {
+        timevis( timeline_data_2, groups = attr(timeline_data_2, "groups") )
       }
     })
 
