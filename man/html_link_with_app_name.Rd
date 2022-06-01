@@ -13,7 +13,7 @@ html_link_with_app_name(data_frame)
 A vector of html links.
 }
 \description{
-HTML Link with App Names
+Description
 }
 \examples{
 # Need special data frame
