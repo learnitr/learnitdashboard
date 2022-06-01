@@ -248,7 +248,7 @@ mod_home_page_server <- function(id, all_vars){
 
 # Apps Timeline -----------------------------------------------------------
 
-    # Getting the courses for the selector
+    # Variable : Courses from Apps table
     apps_courses <- try(sdd_apps$distinct("icourse"), silent = TRUE)
     
     # --- (1) --- Display the output inside the UI if there is no error to get the apps databases
@@ -280,21 +280,25 @@ mod_home_page_server <- function(id, all_vars){
         
         # Preparing the content with a link (url from app)
         apps_datatable$content <- try(html_link_with_app_name(apps_datatable))
-        apps_datatable <- apps_datatable[c("_id", "content", "type", "start", "end")]
         
-        # Change the names to make them fit with timevis (_id = id, app = content, type = group, end = end, start = start)
-        names(apps_datatable) <- c("id", "content", "group", "start", "end")
-        
-        # Creating groups from the type
-        timeline_data_1_groups <- data.frame(
-          id = unique(apps_datatable$group),
-          content = unique(apps_datatable$group)
-        )
-        
-        # Attaching the groups to the datatable
-        attr(apps_datatable, "groups") <- timeline_data_1_groups
-        
-        return(apps_datatable)
+        if (!is.null(apps_datatable$content)) {
+          # Getting only the interesting columns (and throwing away the rows where start is after end)
+          apps_datatable <- apps_datatable[apps_datatable$start < apps_datatable$end,c("_id", "content", "type", "start", "end")]
+          
+          # Change the names to make them fit with timevis (_id = id, app = content, type = group, end = end, start = start)
+          names(apps_datatable) <- c("id", "content", "group", "start", "end")
+          
+          # Creating groups from the type
+          timeline_data_1_groups <- data.frame(
+            id = unique(apps_datatable$group),
+            content = unique(apps_datatable$group)
+          )
+          
+          # Attaching the groups to the datatable
+          attr(apps_datatable, "groups") <- timeline_data_1_groups
+          
+          return(apps_datatable)
+        } else { return (NULL) }
       # If error : NULL
       } else { return(NULL) }
     })
@@ -327,15 +331,18 @@ mod_home_page_server <- function(id, all_vars){
       
       # Preparing the content with a link (url from app)
       timeline_data_2$content <- try(html_link_with_app_name(timeline_data_2))
-      timeline_data_2 <- timeline_data_2[c("_id", "content", "icourse", "start", "end")]
-      # Setting the good names to fit timevis
-      names(timeline_data_2) <- c("id", "content", "group", "start", "end")
       
-      # Preparing the groups for timevis
-      attr(timeline_data_2, "groups") <- data.frame(
-        id = unique(timeline_data_2$group),
-        content = unique(timeline_data_2$group)
-      )
+      if (!is.null(timeline_data_2$content)) {
+        timeline_data_2 <- timeline_data_2[timeline_data_2$start < timeline_data_2$end ,c("_id", "content", "icourse", "start", "end")]
+        # Setting the good names to fit timevis
+        names(timeline_data_2) <- c("id", "content", "group", "start", "end")
+        
+        # Preparing the groups for timevis
+        attr(timeline_data_2, "groups") <- data.frame(
+          id = unique(timeline_data_2$group),
+          content = unique(timeline_data_2$group)
+        )
+      } else { timeline_data_2 <- NULL }
     } else { timeline_data_2 <- NULL }
     
     # Display the timeline when the output is available and when the data is available
