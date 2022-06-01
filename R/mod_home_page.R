@@ -51,6 +51,7 @@ mod_home_page_server <- function(id, all_vars){
     learnr_news <- reactive({all_vars$right_sidebar_vars$learnr_news})
     shiny_news <- reactive({all_vars$right_sidebar_vars$shiny_news})
     selected_news_time <- reactive({all_vars$right_sidebar_vars$selected_news_time})
+    selected_app <- reactive({all_vars$right_sidebar_vars$selected_app})
     
 # Global Vars -------------------------------------------------------------
 
@@ -318,10 +319,10 @@ mod_home_page_server <- function(id, all_vars){
         
         if (!is.null(apps_datatable$content)) {
           # Getting only the interesting columns (and throwing away the rows where start is after end)
-          apps_datatable <- apps_datatable[apps_datatable$start < apps_datatable$end,c("_id", "content", "type", "start", "end")]
+          apps_datatable <- apps_datatable[apps_datatable$start < apps_datatable$end,c("_id", "content", "type", "start", "end", "app")]
           
           # Change the names to make them fit with timevis (_id = id, app = content, type = group, end = end, start = start)
-          names(apps_datatable) <- c("id", "content", "group", "start", "end")
+          names(apps_datatable) <- c("id", "content", "group", "start", "end", "app")
           
           # Creating groups from the type
           timeline_data_1_groups <- data.frame(
@@ -370,9 +371,9 @@ mod_home_page_server <- function(id, all_vars){
       timeline_data_2$content <- try(html_link_with_app_name(timeline_data_2))
       
       if (!is.null(timeline_data_2$content)) {
-        timeline_data_2 <- timeline_data_2[timeline_data_2$start < timeline_data_2$end ,c("_id", "content", "icourse", "start", "end")]
+        timeline_data_2 <- timeline_data_2[timeline_data_2$start < timeline_data_2$end ,c("_id", "content", "icourse", "start", "end", "app")]
         # Setting the good names to fit timevis
-        names(timeline_data_2) <- c("id", "content", "group", "start", "end")
+        names(timeline_data_2) <- c("id", "content", "group", "start", "end", "app")
         
         # Preparing the groups for timevis
         attr(timeline_data_2, "groups") <- data.frame(
@@ -386,6 +387,30 @@ mod_home_page_server <- function(id, all_vars){
     output$apps_timeline_2 <- renderTimevis({
       if (!is.null(timeline_data_2)) {
         timevis( timeline_data_2, groups = attr(timeline_data_2, "groups") )
+      }
+    })
+
+# Update the Timelines ----------------------------------------------------
+
+    # Update - Changing the timevis window
+    observeEvent(selected_app(), {
+      if (selected_app() != "All") {
+        # Get the dates of start and end of selected app
+        start_1 <- as.POSIXct(timeline_data_1()[timeline_data_1()$app == selected_app(),"start"])
+        start_2 <- as.POSIXct(timeline_data_2[timeline_data_2$app == selected_app(),"start"])
+        end_1 <- as.POSIXct(timeline_data_1()[timeline_data_1()$app == selected_app(),"end"])
+        end_2 <- as.POSIXct(timeline_data_2[timeline_data_2$app == selected_app(),"end"])
+        # Change dates to have a range (7 days before the start <-> 7 days after the end)
+        lubridate::day(start_1) <- lubridate::day(start_1) - 7
+        lubridate::day(start_2) <- lubridate::day(start_2) - 7
+        lubridate::day(end_1) <- lubridate::day(end_1) + 7
+        lubridate::day(end_2) <- lubridate::day(end_2) + 7
+        # Center on the selected app (only one of centerItem or setWindow is useful)
+        # centerItem("apps_timeline_1", timeline_data_1()[timeline_data_1()$app == selected_app(),"id"])
+        # centerItem("apps_timeline_2", timeline_data_2[timeline_data_2$app == selected_app(),"id"])
+        # Set the window on the range of dates
+        setWindow("apps_timeline_1", start = start_1, end = end_1)
+        setWindow("apps_timeline_2", start = start_2, end = end_2)
       }
     })
 

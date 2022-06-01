@@ -13,7 +13,7 @@
 #' @importFrom DT DTOutput renderDT
 #' @importFrom ggplot2 ggplot geom_count aes geom_bar theme_bw coord_flip xlab ylab qplot
 #' @importFrom glue glue
-#' @importFrom lubridate year month day
+#' @importFrom lubridate year month day floor_date ceiling_date
 #' @import mongolite
 #' @import rlang
 #' @import shiny
@@ -22,7 +22,7 @@
 #' @importFrom shinyjs useShinyjs disabled disable enable
 #' @import shinythemes
 #' @import shinyTime
-#' @importFrom timevis timevisOutput renderTimevis timevis
+#' @importFrom timevis timevisOutput renderTimevis timevis centerItem setWindow
 #' @importFrom utils head
 #' 
 NULL
