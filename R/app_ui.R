@@ -9,7 +9,7 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    dashboardPage( skin = "purple",
+    dashboardPage( skin = "blue-light",
       
       # Head of Dashboard
       header = dashboardHeader(

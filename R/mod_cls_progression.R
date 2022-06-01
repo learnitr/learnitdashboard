@@ -40,7 +40,7 @@ mod_cls_progression_server <- function(id, all_vars){
         tagList(
           # Dashboard Box
           box( title = "Graph :", status = "primary", solidHeader = TRUE, width = 8,
-            tags$h4("Nothing to display, please select a course")
+            tags$h4("Nothing to display, please select a course.")
           )
         )
         # Progression if login selected

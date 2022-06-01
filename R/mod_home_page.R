@@ -74,13 +74,13 @@ mod_home_page_server <- function(id, all_vars){
             "No changes"
           },
           icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
+          color = "maroon"
         )
       } else {
         infoBox(
           title = "",
           icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
+          color = "maroon"
         )
       }
     })
@@ -99,13 +99,13 @@ mod_home_page_server <- function(id, all_vars){
             "No changes"
           },
           icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
+          color = "maroon"
         )
       } else {
         infoBox(
           title = "",
           icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
+          color = "maroon"
         )
       }
     })
@@ -124,13 +124,13 @@ mod_home_page_server <- function(id, all_vars){
             "No changes"
           },
           icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
+          color = "maroon"
         )
       } else {
         infoBox(
           title = "",
           icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
+          color = "maroon"
         )
       }
     })
@@ -154,14 +154,14 @@ mod_home_page_server <- function(id, all_vars){
           value = if (nrow(h5p_news()) > 0) {
             paste0(length(unique(h5p_news()$app)), " apps changed in ", length(unique(h5p_news()$course)), " courses")
           } else { "No changes" },
-          icon = icon("briefcase", verify_fa = FALSE),
-          color = "purple"
+          icon = icon("pencil", verify_fa = FALSE),
+          color = "maroon"
         )
       } else {
         infoBox(
           title = "",
-          icon = icon("briefcase", verify_fa = FALSE),
-          color = "purple"
+          icon = icon("pencil", verify_fa = FALSE),
+          color = "maroon"
         )
       }
     })
@@ -184,14 +184,14 @@ mod_home_page_server <- function(id, all_vars){
           value = if (nrow(learnr_news()) > 0) {
             paste0(length(unique(learnr_news()$app)), " apps changed in ", length(unique(learnr_news()$course)), " courses")
           } else { "No changes" },
-          icon = icon("briefcase", verify_fa = FALSE),
-          color = "purple"
+          icon = icon("chalkboard", verify_fa = FALSE),
+          color = "maroon"
         )
       } else {
         infoBox(
           title = "",
-          icon = icon("briefcase", verify_fa = FALSE),
-          color = "purple"
+          icon = icon("chalkboard", verify_fa = FALSE),
+          color = "maroon"
         )
       }
     })
@@ -214,14 +214,14 @@ mod_home_page_server <- function(id, all_vars){
           value = if (nrow(shiny_news()) > 0) {
             paste0(length(unique(shiny_news()$app)), " apps changed in ", length(unique(shiny_news()$course)), " courses")
           } else { "No changes" },
-          icon = icon("briefcase", verify_fa = FALSE),
-          color = "purple"
+          icon = icon("tablet", verify_fa = FALSE),
+          color = "maroon"
         )
       } else {
         infoBox(
           title = "",
-          icon = icon("briefcase", verify_fa = FALSE),
-          color = "purple"
+          icon = icon("tablet", verify_fa = FALSE),
+          color = "maroon"
         )
       }
     })
@@ -234,31 +234,31 @@ mod_home_page_server <- function(id, all_vars){
     #       value = paste0(nrow(h5p_news()), " entries"),
     #       subtitle = "H5P Apps",
     #       icon = icon("gears", verify_fa = FALSE),
-    #       color = "purple"
+    #       color = "maroon"
     #     )
     #   } else {
     #     valueBox(
     #       value = NULL,
     #       subtitle = "",
     #       icon = icon("gears", verify_fa = FALSE),
-    #       color = "purple"
+    #       color = "maroon"
     #     )
     #   }
     # })
 
-# Apps Timeline -----------------------------------------------------------
+# 1 Apps Timeline (grouped by type) -----------------------------------------------------------
 
     # Variable : Courses from Apps table
     apps_courses <- try(sdd_apps$distinct("icourse"), silent = TRUE)
     
-    # --- (1) --- Display the output inside the UI if there is no error to get the apps databases
+    # Display the output inside the UI if there is no error to get the apps databases
     output$ui_apps_timeline_1 <- renderUI({
       if (!inherits(sdd_apps, "try-error")) {
         tagList(
           # Box in which the timeline will appear
           box( title = "Apps Timeline (grouped by type)", solidHeader = TRUE,
-            width = 12, icon = shiny::icon("timeline", verify_fa = FALSE), collapsible = TRUE,
-            label = boxLabel(1, "danger"), collapsed = TRUE,
+            width = 12, icon = shiny::icon("calendar", verify_fa = FALSE), collapsible = TRUE,
+            label = boxLabel(1, "info"), collapsed = TRUE, status = "maroon",
             # Selector of course to make the timeline more clear
             selectInput(ns("at_selected_course"), NULL, choices = apps_courses),
             timevisOutput(ns("apps_timeline_1"))
@@ -309,15 +309,17 @@ mod_home_page_server <- function(id, all_vars){
         timevis(timeline_data_1(), groups = attr(timeline_data_1(), "groups"))
       }
     })
-    
-    # --- (2) --- Display the output inside the UI if there is no error to get the apps databases
+
+# 2 Apps Timeline (grouped by icourse) --------------------------------------
+
+    # Display the output inside the UI if there is no error to get the apps databases
     output$ui_apps_timeline_2 <- renderUI({
       if (!inherits(sdd_apps, "try-error")) {
         tagList(
           # Box in which the timeline will appear
           box( title = "Apps Timeline (grouped by icourse)", solidHeader = TRUE,
-               width = 12, icon = shiny::icon("timeline", verify_fa = FALSE), collapsible = TRUE,
-               label = boxLabel(2, "danger"), collapsed = TRUE,
+               width = 12, icon = shiny::icon("calendar", verify_fa = FALSE), collapsible = TRUE,
+               label = boxLabel(2, "info"), collapsed = TRUE, status = "maroon",
                timevisOutput(ns("apps_timeline_2"))
           )
         )
@@ -359,7 +361,8 @@ mod_home_page_server <- function(id, all_vars){
       if (!inherits(sdd_users, "try-error")) {
         tagList(
           box( title = "Amount of Students per Course", solidHeader = TRUE,
-            width = 10, icon = shiny::icon("chart-column", verify_fa = FALSE), collapsible = TRUE,
+            width = 10, icon = shiny::icon("user-check", verify_fa = FALSE), collapsible = TRUE,
+            collapsed = TRUE, status = "maroon",
             checkboxInput(ns("show_na"), "Show NA's"),
             plotOutput(ns("courses_students"))
           )

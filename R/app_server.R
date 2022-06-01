@@ -48,7 +48,7 @@ app_server <- function(input, output, session) {
     tagList(
       sidebarMenu(
         # First tab
-        menuItem("Home Page", tabName = "home_page", icon = shiny::icon("home", verify_fa = FALSE), badgeLabel = boxLabel("News", status = "success")),
+        menuItem("Home Page", tabName = "home_page", icon = shiny::icon("home", verify_fa = FALSE), badgeLabel = "News"),
         # Second tab
         menuItem("Students Progression", tabName = "std_progression", icon = shiny::icon("graduation-cap", verify_fa = FALSE)),
         # Third tab
@@ -58,7 +58,7 @@ app_server <- function(input, output, session) {
         if (!is.null(new_elements) && new_elements > 0) {
           menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE), badgeLabel = new_elements, badgeColor = "red")
         } else {
-          menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE))
+          menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE), badgeLabel = "News")
         }
       )
     )
