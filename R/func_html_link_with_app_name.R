@@ -8,7 +8,7 @@
 #' @examples
 #' # Need special data frame
 html_link_with_app_name <- function(data_frame) {
-  if (!any(!c("url", "app") %in% names(data_frame))) {
-    return(glue::glue(r"--[<a href="<<data_frame$url>>"><<data_frame$app>></a>]--", .open = "<<", .close = ">>"))
+  if (!any(!c("alt_url", "url", "app") %in% names(data_frame))) {
+    return(glue::glue(r"--[<a href="<<data_frame$url>>"><<data_frame$app>></a><br><a href="<<data_frame$alt_url>>">Alternative URL</a>]--", .open = "<<", .close = ">>"))
   }
 }

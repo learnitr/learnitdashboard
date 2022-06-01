@@ -24,6 +24,9 @@ mod_home_page_ui <- function(id){
       # valueBoxOutput(ns("valuebox_1")),
     ),
     
+    # UIoutput to generate the timelines of differents apps
+    uiOutput(ns("ui_apps_timelines")),
+    
     # UIoutput to generate a timeline of the different apps
     uiOutput(ns("ui_apps_timeline_1")),
     # test 2
@@ -246,6 +249,38 @@ mod_home_page_server <- function(id, all_vars){
     #   }
     # })
 
+# Apps Timelines ----------------------------------------------------------
+
+    # Display the output of the tabbox
+    output$ui_apps_timelines <- renderUI({
+      if (!inherits(sdd_apps, "try-error")) {
+        tagList(
+          tabBox( title = "Apps Timelines", width = 12, id = "selected_app_tab",
+            # Display of the H5P timeline
+            tabPanel("Ind. GitHub",
+              timevisOutput(ns("igh_timeline"))
+            ),
+            # Display of the H5P timeline
+            tabPanel("Group GitHub",
+              timevisOutput(ns("ggh_timeline"))
+            ),
+            # Display of the H5P timeline
+            tabPanel("H5P",
+              timevisOutput(ns("h5p_timeline"))
+            ),
+            # Display of the Learnr timeline
+            tabPanel("Learnr",
+              timevisOutput(ns("learnr_timeline"))
+            ),
+            # Display of the Shiny timeline
+            tabPanel("Shiny",
+              timevisOutput(ns("shiny_timeline"))
+            )
+          )
+        )
+      }
+    })
+
 # 1 Apps Timeline (grouped by type) -----------------------------------------------------------
 
     # Variable : Courses from Apps table
@@ -274,7 +309,7 @@ mod_home_page_server <- function(id, all_vars){
       # Preparing the request depending on the selected course
       request <- glue::glue(r"--[{ "icourse" : "<<input$at_selected_course>>" }]--", .open = "<<", .close = ">>")
       # Making the request to database
-      apps_datatable <- try(na.omit(sdd_apps$find(request, fields = '{"app" : true, "start" : true ,"end" : true, "type" : true, "url" : true}')), silent = TRUE)
+      apps_datatable <- try(na.omit(sdd_apps$find(request, fields = '{"app" : true, "start" : true ,"end" : true, "type" : true, "url" : true, "alt_url" : true}')), silent = TRUE)
       
       if (!inherits(apps_datatable, "try-error")) {
         
@@ -327,7 +362,7 @@ mod_home_page_server <- function(id, all_vars){
     })
     
     # Variable : Data of the second timeline, to make groups by icourse
-    timeline_data_2 <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "start" : true ,"end" : true, "icourse" : true, "url" : true}')), silent = TRUE)
+    timeline_data_2 <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "start" : true ,"end" : true, "icourse" : true, "url" : true, "alt_url" : true}')), silent = TRUE)
     # Preparing the timeline_data_2
     if (!inherits(timeline_data_2, "try-error")) {
       
