@@ -23,6 +23,14 @@ mod_sdd_tables_ui <- function(id){
       # Display of the result Shiny table
       tabPanel("Shiny",
         DTOutput(ns("sdd_dt_shiny")),
+      ),
+      # Display of the result Shiny table
+      tabPanel("Apps",
+               DTOutput(ns("sdd_dt_apps")),
+      ),
+      # Display of the result Shiny table
+      tabPanel("Planning",
+               DTOutput(ns("sdd_dt_planning")),
       )
     )
     
@@ -42,6 +50,17 @@ mod_sdd_tables_server <- function(id, all_vars){
     h5p <- reactive({all_vars$right_sidebar_vars$h5p})
     learnr <- reactive({all_vars$right_sidebar_vars$learnr})
     shiny <- reactive({all_vars$right_sidebar_vars$shiny})
+
+# Global Vars -------------------------------------------------------------
+
+    # URL to access databases
+    sdd_url <- "mongodb://127.0.0.1:27017/sdd"
+    # To connect to them
+    sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
+    sdd_planning <- try(mongolite::mongo("planning", url = sdd_url), silent = TRUE)
+    # Tables of everything
+    apps <- try(sdd_apps$find('{}'), silent = TRUE)
+    planning <- try(sdd_planning$find('{}'), silent = TRUE)
     
 # DT Displays -------------------------------------------------------------
     
@@ -111,6 +130,54 @@ mod_sdd_tables_server <- function(id, all_vars){
       scrollX = TRUE,
       pageLength = 100,
       lengthMenu = c(50,100,200,500),
+      # Options to get the col selector and lengthmenu
+      dom = 'Blfrtip',
+      buttons = I('colvis')
+    )
+    )
+    
+    # Display // Apps datatable
+    output$sdd_dt_apps <- renderDT({
+      
+      # If no errors to get the dataframe from mongoDB
+      if (!inherits(apps, "try-error") && length(apps > 0)) {
+        # The columns selection is now rendered by DT !
+        apps
+      } else {
+        NULL
+      }
+    },
+    # Extension to display a button that allow col selection
+    extensions = 'Buttons',
+    # Options for the data table
+    options = list(
+      scrollX = TRUE,
+      pageLength = 50,
+      lengthMenu = c(20,50,100),
+      # Options to get the col selector and lengthmenu
+      dom = 'Blfrtip',
+      buttons = I('colvis')
+    )
+    )
+    
+    # Display // Planning datatable
+    output$sdd_dt_planning <- renderDT({
+      
+      # If no errors to get the dataframe from mongoDB
+      if (!inherits(planning, "try-error") && length(planning > 0)) {
+        # The columns selection is now rendered by DT !
+        planning
+      } else {
+        NULL
+      }
+    },
+    # Extension to display a button that allow col selection
+    extensions = 'Buttons',
+    # Options for the data table
+    options = list(
+      scrollX = TRUE,
+      pageLength = 50,
+      lengthMenu = c(20,50,100),
       # Options to get the col selector and lengthmenu
       dom = 'Blfrtip',
       buttons = I('colvis')

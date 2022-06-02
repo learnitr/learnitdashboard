@@ -35,6 +35,7 @@ mod_timeslines_server <- function(id, all_vars){
     sdd_url <- "mongodb://127.0.0.1:27017/sdd"
     # To connect to users
     sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
+    sdd_planning <- try(mongolite::mongo("planning", url = sdd_url), silent = TRUE)
 
 # Apps Timeline -----------------------------------------------------------
 
@@ -45,25 +46,41 @@ mod_timeslines_server <- function(id, all_vars){
           # Box in which the timeline will appear
           box( title = "Apps Timeline (grouped by icourse)", solidHeader = TRUE,
                width = 12, icon = shiny::icon("calendar", verify_fa = FALSE), collapsible = TRUE,
-               label = boxLabel(2, "danger"), collapsed = TRUE, status = "purple",
+               label = boxLabel(2, "danger"), status = "purple",
                timevisOutput(ns("apps_timeline"))
           )
         )
       }
     })
     
-    # Variable : Data of the second timeline, to make groups by icourse
-    timeline_data <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "start" : true ,"end" : true, "icourse" : true, "type" : true, "url" : true, "alt_url" : true}')), silent = TRUE)
+    # Variable : Data of the timeline
+    timeline_data <- NULL
+    apps_data <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "start" : true ,"end" : true, "icourse" : true, "type" : true, "url" : true, "alt_url" : true}')), silent = TRUE)
+    planning_data <- try(na.omit(sdd_planning$find('{}', fields = '{"label" : true, "start" : true, "end" : true, "url" : true, "alt_url" : true, "summary" : true}')), silent = TRUE)
+    
     # Preparing the timeline_data
-    if (!inherits(timeline_data, "try-error")) {
+    if (!inherits(apps_data, "try-error") && !inherits(planning_data, "try-error")) {
       
-      # Preparing the content with a link (url from app)
-      timeline_data$content <- try(html_link_with_app_name(timeline_data))
+      # Preparing app dataframe's content (with url and else)
+      apps_data$content <- try(prepare_content(apps_data))
+      apps_data$title <- NA
+      # Preparing app dataframe's content (with url and else) and group and app
+      planning_data$content <- try(prepare_content(planning_data))
+      planning_data$group <- "Classes"
+      planning_data$app <- NA
+      print(is.null(apps_data$content))
+      print(is.null(planning_data$content))
       
-      if (!is.null(timeline_data$content)) {
-        timeline_data <- timeline_data[timeline_data$start < timeline_data$end ,c("_id", "content", "icourse", "start", "end", "app")]
+      if (!is.null(apps_data$content) && !is.null(planning_data$content)) {
+        # Taking only interesting columns
+        apps_data <- apps_data[apps_data$start < apps_data$end ,c("_id", "content", "icourse", "start", "end", "app", "title")]
+        planning_data <- planning_data[c("_id", "content", "group", "start", "end", "app", "summary")]
         # Setting the good names to fit timevis
-        names(timeline_data) <- c("id", "content", "group", "start", "end", "app")
+        names(apps_data) <- c("id", "content", "group", "start", "end", "app", "title")
+        names(planning_data) <- c("id", "content", "group", "start", "end", "app", "title")
+        
+        # Binding apps and planning dataframes
+        timeline_data <- rbind(apps_data, planning_data)
         
         # Preparing the groups for timevis
         attr(timeline_data, "groups") <- data.frame(

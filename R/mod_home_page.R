@@ -272,7 +272,7 @@ mod_home_page_server <- function(id, all_vars){
     #   if (!inherits(apps_datatable, "try-error")) {
     #     
     #     # Preparing the content with a link (url from app)
-    #     apps_datatable$content <- try(html_link_with_app_name(apps_datatable))
+    #     apps_datatable$content <- try(prepare_content(apps_datatable))
     #     
     #     if (!is.null(apps_datatable$content)) {
     #       # Getting only the interesting columns (and throwing away the rows where start is after end)
