@@ -42,7 +42,7 @@ app_server <- function(input, output, session) {
   # Display the menuitems
   output$menuitems <- renderMenu({
     # New elements from tables_news
-    new_elements <- nrow(req(right_sidebar_vars$h5p_news)) + nrow(req(right_sidebar_vars$learnr_news)) + nrow(req(right_sidebar_vars$shiny_news))
+    new_elements <- req(right_sidebar_vars$h5p_news) + req(right_sidebar_vars$learnr_news) + req(right_sidebar_vars$shiny_news)
     
     # Tabs of the sidebar
     tagList(

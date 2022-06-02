@@ -293,15 +293,24 @@ mod_right_sidebar_server <- function(id, all_vars){
     
     # Variable : h5p table with request for news
     h5p_news <- reactive({
-      try(sdd_h5p$find(news_request()), silent = TRUE)
+      news <- try(sdd_h5p$count(news_request()), silent = TRUE)
+      attr(news, "apps") <- try(sdd_h5p$distinct("app", query = news_request()), silent = TRUE)
+      attr(news, "courses") <- try(sdd_h5p$distinct("course", query = news_request()), silent = TRUE)
+      return(news)
     })
     # Variable : learnr table with request for news
     learnr_news <- reactive({
-      try(sdd_learnr$find(news_request()), silent = TRUE)
+      news <- try(sdd_learnr$count(news_request()), silent = TRUE)
+      attr(news, "apps") <- try(sdd_learnr$distinct("app", query = news_request()), silent = TRUE)
+      attr(news, "courses") <- try(sdd_learnr$distinct("course", query = news_request()), silent = TRUE)
+      return(news)
     })
     # Variable : shiny table with request for news
     shiny_news <- reactive({
-      try(sdd_shiny$find(news_request()), silent = TRUE)
+      news <- try(sdd_shiny$count(news_request()), silent = TRUE)
+      attr(news, "apps") <- try(sdd_shiny$distinct("app", query = news_request()), silent = TRUE)
+      attr(news, "courses") <- try(sdd_shiny$distinct("course", query = news_request()), silent = TRUE)
+      return(news)
     })
 
 # Communication -----------------------------------------------------------

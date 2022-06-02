@@ -24,9 +24,6 @@ mod_home_page_ui <- function(id){
       # valueBoxOutput(ns("valuebox_1")),
     ),
     
-    # UIoutput to generate the timelines of differents apps
-    uiOutput(ns("ui_apps_timelines")),
-    
     # UIoutput to generate a timeline of the different apps
     uiOutput(ns("ui_apps_timeline_1")),
     # test 2
@@ -72,8 +69,8 @@ mod_home_page_server <- function(id, all_vars){
           title = "H5P",
           subtitle = paste0("New entries since : ", selected_news_time()),
           # Show the amount of changes if there are some
-          value = if (nrow(h5p_news()) > 0) {
-            nrow(h5p_news())
+          value = if (h5p_news() > 0) {
+            h5p_news()
           } else {
             "No changes"
           },
@@ -97,8 +94,8 @@ mod_home_page_server <- function(id, all_vars){
           title = "Learnr",
           subtitle = paste0("New entries since : ", selected_news_time()),
           # Show the amount of changes if there are some
-          value = if (nrow(learnr_news()) > 0) {
-            nrow(learnr_news())
+          value = if (learnr_news() > 0) {
+            learnr_news()
           } else {
             "No changes"
           },
@@ -122,8 +119,8 @@ mod_home_page_server <- function(id, all_vars){
           title = "Shiny",
           subtitle = paste0("New entries since : ", selected_news_time()),
           # Show the amount of changes if there are some
-          value = if (nrow(shiny_news()) > 0) {
-            nrow(shiny_news())
+          value = if (shiny_news() > 0) {
+            shiny_news()
           } else {
             "No changes"
           },
@@ -144,19 +141,17 @@ mod_home_page_server <- function(id, all_vars){
       
       # The boxes need to have something inside, even empty, so it tests if we can put our data inside
       if (!inherits(h5p_news(), "try-error")) {
-        # Getting h5p news apps
-        h5p_news_apps <- sort(unique(h5p_news()$app))
         infoBox(
           title = "H5P",
           # Show the apps if there are
-          subtitle = if (!is.null(h5p_news_apps)) {
-            selectInput(ns("h5p_apps_show"), NULL, choices = h5p_news_apps)
+          subtitle = if (length(attr(h5p_news(), "apps")) > 0) {
+            selectInput(ns("h5p_apps_show"), NULL, choices = attr(h5p_news(), "apps"))
           } else {
             NULL
           },
           # Show the amoun of apps that changed and in how much courses
-          value = if (nrow(h5p_news()) > 0) {
-            paste0(length(unique(h5p_news()$app)), " apps changed in ", length(unique(h5p_news()$course)), " courses")
+          value = if (h5p_news() > 0) {
+            paste0(length(attr(h5p_news(), "apps")), " apps changed in ", length(attr(h5p_news(), "courses")), " courses")
           } else { "No changes" },
           icon = icon("pencil", verify_fa = FALSE),
           color = "purple"
@@ -174,19 +169,17 @@ mod_home_page_server <- function(id, all_vars){
     output$infobox_5 <- renderInfoBox({
       
       if (!inherits(learnr_news(), "try-error")) {
-        # Getting learnr news apps
-        learnr_news_apps <- sort(unique(learnr_news()$app))
         infoBox(
           title = "Learnr",
           # Show the apps if there are
-          subtitle = if (!is.null(learnr_news_apps)) {
-            selectInput(ns("learnr_apps_show"), NULL, choices = learnr_news_apps)
+          subtitle = if (length(attr(learnr_news(), "apps")) > 0) {
+            selectInput(ns("learnr_apps_show"), NULL, choices = attr(learnr_news(), "apps"))
           } else {
             NULL
           },
           # Show the amoun of apps that changed and in how much courses
-          value = if (nrow(learnr_news()) > 0) {
-            paste0(length(unique(learnr_news()$app)), " apps changed in ", length(unique(learnr_news()$course)), " courses")
+          value = if (learnr_news() > 0) {
+            paste0(length(attr(learnr_news(), "apps")), " apps changed in ", length(attr(learnr_news(), "courses")), " courses")
           } else { "No changes" },
           icon = icon("chalkboard", verify_fa = FALSE),
           color = "purple"
@@ -204,19 +197,17 @@ mod_home_page_server <- function(id, all_vars){
     output$infobox_6 <- renderInfoBox({
       
       if (!inherits(shiny_news(), "try-error")) {
-        # Getting shiny news apps
-        shiny_news_apps <- sort(unique(shiny_news()$app))
         infoBox(
           title = "Shiny",
           # Show the apps if there are
-          subtitle = if (!is.null(shiny_news_apps)) {
-            selectInput(ns("shiny_apps_show"), NULL, choices = shiny_news_apps)
+          subtitle = if (length(attr(shiny_news(), "apps")) > 0) {
+            selectInput(ns("shiny_apps_show"), NULL, choices = attr(shiny_news(), "apps"))
           } else {
             NULL
           },
           # Show the amoun of apps that changed and in how much courses
-          value = if (nrow(shiny_news()) > 0) {
-            paste0(length(unique(shiny_news()$app)), " apps changed in ", length(unique(shiny_news()$course)), " courses")
+          value = if (shiny_news() > 0) {
+            paste0(length(attr(shiny_news(), "apps")), " apps changed in ", length(attr(shiny_news(), "courses")), " courses")
           } else { "No changes" },
           icon = icon("tablet", verify_fa = FALSE),
           color = "purple"
@@ -249,38 +240,6 @@ mod_home_page_server <- function(id, all_vars){
     #     )
     #   }
     # })
-
-# Apps Timelines ----------------------------------------------------------
-
-    # Display the output of the tabbox
-    output$ui_apps_timelines <- renderUI({
-      if (!inherits(sdd_apps, "try-error")) {
-        tagList(
-          tabBox( title = "Apps Timelines", width = 12, id = "selected_app_tab",
-            # Display of the H5P timeline
-            tabPanel("Ind. GitHub",
-              timevisOutput(ns("igh_timeline"))
-            ),
-            # Display of the H5P timeline
-            tabPanel("Group GitHub",
-              timevisOutput(ns("ggh_timeline"))
-            ),
-            # Display of the H5P timeline
-            tabPanel("H5P",
-              timevisOutput(ns("h5p_timeline"))
-            ),
-            # Display of the Learnr timeline
-            tabPanel("Learnr",
-              timevisOutput(ns("learnr_timeline"))
-            ),
-            # Display of the Shiny timeline
-            tabPanel("Shiny",
-              timevisOutput(ns("shiny_timeline"))
-            )
-          )
-        )
-      }
-    })
 
 # 1 Apps Timeline (grouped by type) -----------------------------------------------------------
 
