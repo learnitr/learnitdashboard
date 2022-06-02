@@ -11,6 +11,8 @@ mod_timeslines_ui <- function(id){
   ns <- NS(id)
   tagList(
     
+    tags$img(src = "www/images/auto.png"),
+    
     # UIoutput for the timeline
     uiOutput(ns("ui_apps_timeline")),
   )
@@ -51,7 +53,7 @@ mod_timeslines_server <- function(id, all_vars){
     })
     
     # Variable : Data of the second timeline, to make groups by icourse
-    timeline_data <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "start" : true ,"end" : true, "icourse" : true, "url" : true, "alt_url" : true}')), silent = TRUE)
+    timeline_data <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "start" : true ,"end" : true, "icourse" : true, "type" : true, "url" : true, "alt_url" : true}')), silent = TRUE)
     # Preparing the timeline_data
     if (!inherits(timeline_data, "try-error")) {
       
@@ -74,8 +76,10 @@ mod_timeslines_server <- function(id, all_vars){
     # Display the timeline when the output is available and when the data is available
     output$apps_timeline <- renderTimevis({
       if (!is.null(timeline_data)) {
+        # Creation of start date for the initial window of the timeline
         start <- lubridate::floor_date(Sys.time(), "week")
         lubridate::day(start) <- lubridate::day(start) + 1
+        # Creation of end date for the initial window of the timeline
         end <- lubridate::ceiling_date(Sys.time(), "week")
         lubridate::day(end) <- lubridate::day(end) + 1
         config <- list(
