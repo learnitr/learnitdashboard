@@ -33,10 +33,12 @@ app_server <- function(input, output, session) {
   # Server module of 1st page
   mod_home_page_server("home_page_1", all_vars = all_vars)
   # Server module of 2nd page
-  std_progression_vars <- mod_std_progression_server("std_progression_1", all_vars = all_vars)
+  mod_timeslines_server("timeslines_1", all_vars = all_vars)
   # Server module of 3rd page
-  cls_progression_vars <- mod_cls_progression_server("cls_progression_1", all_vars = all_vars)
+  std_progression_vars <- mod_std_progression_server("std_progression_1", all_vars = all_vars)
   # Server module of 4th page
+  cls_progression_vars <- mod_cls_progression_server("cls_progression_1", all_vars = all_vars)
+  # Server module of 5th page
   sdd_tables_vars <- mod_sdd_tables_server("sdd_tables_1", all_vars = all_vars)
   
   # Display the menuitems
@@ -48,12 +50,14 @@ app_server <- function(input, output, session) {
     tagList(
       sidebarMenu(
         # First tab
-        menuItem("Home Page", tabName = "home_page", icon = shiny::icon("home", verify_fa = FALSE), badgeLabel = "News"),
+        menuItem("Home Page", tabName = "home_page", icon = shiny::icon("home", verify_fa = FALSE)),
         # Second tab
-        menuItem("Students Progression", tabName = "std_progression", icon = shiny::icon("graduation-cap", verify_fa = FALSE)),
+        menuItem("Timelines", tabName = "timelines", icon = shiny::icon("calendar", verify_fa = FALSE), badgeLabel = "News"),
         # Third tab
-        menuItem("Courses Progression", tabName = "cls_progression", icon = shiny::icon("school", verify_fa = FALSE)),
+        menuItem("Students Progression", tabName = "std_progression", icon = shiny::icon("graduation-cap", verify_fa = FALSE)),
         # Forth tab
+        menuItem("Courses Progression", tabName = "cls_progression", icon = shiny::icon("school", verify_fa = FALSE)),
+        # Fifth tab
         # If there are news, put a badge
         if (!is.null(new_elements) && new_elements > 0) {
           menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE), badgeLabel = new_elements, badgeColor = "red")

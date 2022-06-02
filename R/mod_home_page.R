@@ -25,9 +25,7 @@ mod_home_page_ui <- function(id){
     ),
     
     # UIoutput to generate a timeline of the different apps
-    uiOutput(ns("ui_apps_timeline_1")),
-    # test 2
-    uiOutput(ns("ui_apps_timeline_2")),
+    # uiOutput(ns("ui_apps_timeline_1")),
     
     # UIoutput to generate a box and a plot inside (of students per courses)
     uiOutput(ns("courses_students_plot"))
@@ -243,135 +241,83 @@ mod_home_page_server <- function(id, all_vars){
 
 # 1 Apps Timeline (grouped by type) -----------------------------------------------------------
 
-    # Variable : Courses from Apps table
-    apps_courses <- try(sdd_apps$distinct("icourse"), silent = TRUE)
-    
-    # Display the output inside the UI if there is no error to get the apps databases
-    output$ui_apps_timeline_1 <- renderUI({
-      if (!inherits(sdd_apps, "try-error")) {
-        tagList(
-          # Box in which the timeline will appear
-          box( title = "Apps Timeline (grouped by type)", solidHeader = TRUE,
-            width = 12, icon = shiny::icon("calendar", verify_fa = FALSE), collapsible = TRUE,
-            label = boxLabel(1, "danger"), collapsed = TRUE, status = "purple",
-            # Selector of course to make the timeline more clear
-            selectInput(ns("at_selected_course"), NULL, choices = apps_courses),
-            timevisOutput(ns("apps_timeline_1"))
-          )
-        )
-      }
-    })
-    
-    # Variable : Data for the timeline (apps depending on a selected course)
-    timeline_data_1 <- reactive({
-      req(input$at_selected_course)
-      
-      # Preparing the request depending on the selected course
-      request <- glue::glue(r"--[{ "icourse" : "<<input$at_selected_course>>" }]--", .open = "<<", .close = ">>")
-      # Making the request to database
-      apps_datatable <- try(na.omit(sdd_apps$find(request, fields = '{"app" : true, "start" : true ,"end" : true, "type" : true, "url" : true, "alt_url" : true}')), silent = TRUE)
-      
-      if (!inherits(apps_datatable, "try-error")) {
-        
-        # Preparing the content with a link (url from app)
-        apps_datatable$content <- try(html_link_with_app_name(apps_datatable))
-        
-        if (!is.null(apps_datatable$content)) {
-          # Getting only the interesting columns (and throwing away the rows where start is after end)
-          apps_datatable <- apps_datatable[apps_datatable$start < apps_datatable$end,c("_id", "content", "type", "start", "end", "app")]
-          
-          # Change the names to make them fit with timevis (_id = id, app = content, type = group, end = end, start = start)
-          names(apps_datatable) <- c("id", "content", "group", "start", "end", "app")
-          
-          # Creating groups from the type
-          timeline_data_1_groups <- data.frame(
-            id = unique(apps_datatable$group),
-            content = unique(apps_datatable$group)
-          )
-          
-          # Attaching the groups to the datatable
-          attr(apps_datatable, "groups") <- timeline_data_1_groups
-          
-          return(apps_datatable)
-        } else { return (NULL) }
-      # If error : NULL
-      } else { return(NULL) }
-    })
-    
-    # Display the timeline when the output is available and when the data is available
-    output$apps_timeline_1 <- renderTimevis({
-      if (!is.null(timeline_data_1())) {
-        timevis(timeline_data_1(), groups = attr(timeline_data_1(), "groups"))
-      }
-    })
-
-# 2 Apps Timeline (grouped by icourse) --------------------------------------
-
-    # Display the output inside the UI if there is no error to get the apps databases
-    output$ui_apps_timeline_2 <- renderUI({
-      if (!inherits(sdd_apps, "try-error")) {
-        tagList(
-          # Box in which the timeline will appear
-          box( title = "Apps Timeline (grouped by icourse)", solidHeader = TRUE,
-               width = 12, icon = shiny::icon("calendar", verify_fa = FALSE), collapsible = TRUE,
-               label = boxLabel(2, "danger"), collapsed = TRUE, status = "purple",
-               timevisOutput(ns("apps_timeline_2"))
-          )
-        )
-      }
-    })
-    
-    # Variable : Data of the second timeline, to make groups by icourse
-    timeline_data_2 <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "start" : true ,"end" : true, "icourse" : true, "url" : true, "alt_url" : true}')), silent = TRUE)
-    # Preparing the timeline_data_2
-    if (!inherits(timeline_data_2, "try-error")) {
-      
-      # Preparing the content with a link (url from app)
-      timeline_data_2$content <- try(html_link_with_app_name(timeline_data_2))
-      
-      if (!is.null(timeline_data_2$content)) {
-        timeline_data_2 <- timeline_data_2[timeline_data_2$start < timeline_data_2$end ,c("_id", "content", "icourse", "start", "end", "app")]
-        # Setting the good names to fit timevis
-        names(timeline_data_2) <- c("id", "content", "group", "start", "end", "app")
-        
-        # Preparing the groups for timevis
-        attr(timeline_data_2, "groups") <- data.frame(
-          id = unique(timeline_data_2$group),
-          content = unique(timeline_data_2$group)
-        )
-      } else { timeline_data_2 <- NULL }
-    } else { timeline_data_2 <- NULL }
-    
-    # Display the timeline when the output is available and when the data is available
-    output$apps_timeline_2 <- renderTimevis({
-      if (!is.null(timeline_data_2)) {
-        timevis( timeline_data_2, groups = attr(timeline_data_2, "groups") )
-      }
-    })
+    # # Variable : Courses from Apps table
+    # apps_courses <- try(sdd_apps$distinct("icourse"), silent = TRUE)
+    # 
+    # # Display the output inside the UI if there is no error to get the apps databases
+    # output$ui_apps_timeline_1 <- renderUI({
+    #   if (!inherits(sdd_apps, "try-error")) {
+    #     tagList(
+    #       # Box in which the timeline will appear
+    #       box( title = "Apps Timeline (grouped by type)", solidHeader = TRUE,
+    #         width = 12, icon = shiny::icon("calendar", verify_fa = FALSE), collapsible = TRUE,
+    #         label = boxLabel(1, "danger"), collapsed = TRUE, status = "purple",
+    #         # Selector of course to make the timeline more clear
+    #         selectInput(ns("at_selected_course"), NULL, choices = apps_courses),
+    #         timevisOutput(ns("apps_timeline_1"))
+    #       )
+    #     )
+    #   }
+    # })
+    # 
+    # # Variable : Data for the timeline (apps depending on a selected course)
+    # timeline_data_1 <- reactive({
+    #   req(input$at_selected_course)
+    #   
+    #   # Preparing the request depending on the selected course
+    #   request <- glue::glue(r"--[{ "icourse" : "<<input$at_selected_course>>" }]--", .open = "<<", .close = ">>")
+    #   # Making the request to database
+    #   apps_datatable <- try(na.omit(sdd_apps$find(request, fields = '{"app" : true, "start" : true ,"end" : true, "type" : true, "url" : true, "alt_url" : true}')), silent = TRUE)
+    #   
+    #   if (!inherits(apps_datatable, "try-error")) {
+    #     
+    #     # Preparing the content with a link (url from app)
+    #     apps_datatable$content <- try(html_link_with_app_name(apps_datatable))
+    #     
+    #     if (!is.null(apps_datatable$content)) {
+    #       # Getting only the interesting columns (and throwing away the rows where start is after end)
+    #       apps_datatable <- apps_datatable[apps_datatable$start < apps_datatable$end,c("_id", "content", "type", "start", "end", "app")]
+    #       
+    #       # Change the names to make them fit with timevis (_id = id, app = content, type = group, end = end, start = start)
+    #       names(apps_datatable) <- c("id", "content", "group", "start", "end", "app")
+    #       
+    #       # Creating groups from the type
+    #       timeline_data_1_groups <- data.frame(
+    #         id = unique(apps_datatable$group),
+    #         content = unique(apps_datatable$group)
+    #       )
+    #       
+    #       # Attaching the groups to the datatable
+    #       attr(apps_datatable, "groups") <- timeline_data_1_groups
+    #       
+    #       return(apps_datatable)
+    #     } else { return (NULL) }
+    #   # If error : NULL
+    #   } else { return(NULL) }
+    # })
+    # 
+    # # Display the timeline when the output is available and when the data is available
+    # output$apps_timeline_1 <- renderTimevis({
+    #   if (!is.null(timeline_data_1())) {
+    #     timevis(timeline_data_1(), groups = attr(timeline_data_1(), "groups"))
+    #   }
+    # })
 
 # Update the Timelines ----------------------------------------------------
 
-    # Update - Changing the timevis window
-    observeEvent(selected_app(), {
-      if (selected_app() != "All") {
-        # Get the dates of start and end of selected app
-        start_1 <- as.POSIXct(timeline_data_1()[timeline_data_1()$app == selected_app(),"start"])
-        start_2 <- as.POSIXct(timeline_data_2[timeline_data_2$app == selected_app(),"start"])
-        end_1 <- as.POSIXct(timeline_data_1()[timeline_data_1()$app == selected_app(),"end"])
-        end_2 <- as.POSIXct(timeline_data_2[timeline_data_2$app == selected_app(),"end"])
-        # Change dates to have a range (7 days before the start <-> 7 days after the end)
-        lubridate::day(start_1) <- lubridate::day(start_1) - 7
-        lubridate::day(start_2) <- lubridate::day(start_2) - 7
-        lubridate::day(end_1) <- lubridate::day(end_1) + 7
-        lubridate::day(end_2) <- lubridate::day(end_2) + 7
-        # Center on the selected app (only one of centerItem or setWindow is useful)
-        # centerItem("apps_timeline_1", timeline_data_1()[timeline_data_1()$app == selected_app(),"id"])
-        # centerItem("apps_timeline_2", timeline_data_2[timeline_data_2$app == selected_app(),"id"])
-        # Set the window on the range of dates
-        setWindow("apps_timeline_1", start = start_1, end = end_1)
-        setWindow("apps_timeline_2", start = start_2, end = end_2)
-      }
-    })
+    # # Update - Changing the timevis window
+    # observeEvent(selected_app(), {
+    #   if (selected_app() != "All") {
+    #     # Get the dates of start and end of selected app
+    #     start_1 <- as.POSIXct(timeline_data_1()[timeline_data_1()$app == selected_app(),"start"])
+    #     end_1 <- as.POSIXct(timeline_data_1()[timeline_data_1()$app == selected_app(),"end"])
+    #     # Change dates to have a range (7 days before the start <-> 7 days after the end)
+    #     lubridate::day(start_1) <- lubridate::day(start_1) - 7
+    #     lubridate::day(end_1) <- lubridate::day(end_1) + 7
+    #     # Set the window on the range of dates
+    #     setWindow("apps_timeline_1", start = start_1, end = end_1)
+    #   }
+    # })
 
 # Courses Students Plot ---------------------------------------------------
 

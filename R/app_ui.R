@@ -34,19 +34,25 @@ app_ui <- function(request) {
             mod_home_page_ui("home_page_1")
           ),
           
-          # Second tab : Student progression
+          # Second tab : Timelines
+          tabItem(tabName = "timelines",
+            # Page Module
+            mod_timeslines_ui("timeslines_1")
+          ),
+          
+          # Third tab : Student progression
           tabItem(tabName = "std_progression",
             # Page Module
             mod_std_progression_ui("std_progression_1")
           ),
           
-          # Third tab : Course progression
+          # Forth tab : Course progression
           tabItem(tabName = "cls_progression",
             # Page Module
             mod_cls_progression_ui("cls_progression_1")
           ),
           
-          # Forth tab : Data Table Exploration
+          # Fifth tab : Data Table Exploration
           tabItem(tabName = "rawdatatable",
             # Page Module
             mod_sdd_tables_ui("sdd_tables_1")
