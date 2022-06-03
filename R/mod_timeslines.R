@@ -64,20 +64,20 @@ mod_timeslines_server <- function(id, all_vars){
       # Preparing app dataframe's content (with url and else)
       apps_data$content <- try(prepare_content(apps_data))
       apps_data$title <- NA
+      apps_data$style <- try(prepare_style(apps_data))
       # Preparing app dataframe's content (with url and else) and group and app
       planning_data$content <- try(prepare_content(planning_data))
       planning_data$group <- "Classes"
       planning_data$app <- NA
-      print(is.null(apps_data$content))
-      print(is.null(planning_data$content))
+      planning_data$style <- "background-color : Wheat; font-weight : bold;"
       
       if (!is.null(apps_data$content) && !is.null(planning_data$content)) {
         # Taking only interesting columns
-        apps_data <- apps_data[apps_data$start < apps_data$end ,c("_id", "content", "icourse", "start", "end", "app", "title")]
-        planning_data <- planning_data[c("_id", "content", "group", "start", "end", "app", "summary")]
+        apps_data <- apps_data[apps_data$start < apps_data$end ,c("_id", "content", "icourse", "start", "end", "app", "title", "style")]
+        planning_data <- planning_data[c("_id", "content", "group", "start", "end", "app", "summary", "style")]
         # Setting the good names to fit timevis
-        names(apps_data) <- c("id", "content", "group", "start", "end", "app", "title")
-        names(planning_data) <- c("id", "content", "group", "start", "end", "app", "title")
+        names(apps_data) <- c("id", "content", "group", "start", "end", "app", "title", "style")
+        names(planning_data) <- c("id", "content", "group", "start", "end", "app", "title", "style")
         
         # Binding apps and planning dataframes
         timeline_data <- rbind(apps_data, planning_data)

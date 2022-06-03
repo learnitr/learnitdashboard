@@ -7,7 +7,7 @@
 prepare_content(data_frame)
 }
 \arguments{
-\item{data_frame}{data.frame on which prepare the content}
+\item{data_frame}{data.frame on which prepare the content.}
 }
 \value{
 A vector of html links.
