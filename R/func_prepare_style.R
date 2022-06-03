@@ -12,13 +12,13 @@
 prepare_style <- function(data_frame) {
   if ("type" %in% names(data_frame)) {
     styles <- sapply(data_frame$type, switch,
-      "group challenge" = "background-color : #8B4513; font-weight : bold;",
-      "group github" = "background-color : #8B4513; font-weight : bold;",
-      "ind. challenge" = "background-color : #FFFF00; font-weight : bold;",
-      "ind. github" = "background-color : #FFFF00; font-weight : bold;",
-      "h5p" = "background-color : #1E90FF; font-weight : bold;",
-      "learnr" = "background-color : #32CD32; font-weight : bold;",
-      "shiny" = "background-color : #663399; font-weight : bold;"
+      "group challenge" = "background-color : #D2B48C; font-weight : bold;",
+      "group github" = "background-color : #D2B48C; font-weight : bold;",
+      "ind. challenge" = "background-color : #F7CAC9; font-weight : bold;",
+      "ind. github" = "background-color : #F7CAC9; font-weight : bold;",
+      "h5p" = "background-color : #7FCDCD; font-weight : bold;",
+      "learnr" = "background-color : #98FB98; font-weight : bold;",
+      "shiny" = "background-color : #92A8D1; font-weight : bold;"
     )
     return(styles)
   }

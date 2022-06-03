@@ -27,8 +27,6 @@ mod_timeslines_server <- function(id, all_vars){
 
 # Getting Modules Vars ----------------------------------------------------
     
-    selected_app <- reactive({all_vars$right_sidebar_vars$selected_app})
-    
 # Global Vars -------------------------------------------------------------
 
     # URL to access databases
@@ -45,13 +43,31 @@ mod_timeslines_server <- function(id, all_vars){
         tagList(
           # Box in which the timeline will appear
           box( title = "Apps Timeline (grouped by icourse)", solidHeader = TRUE,
-               width = 12, icon = shiny::icon("calendar", verify_fa = FALSE), collapsible = TRUE,
-               label = boxLabel(2, "danger"), status = "purple",
-               timevisOutput(ns("apps_timeline"))
+            width = 12, icon = shiny::icon("calendar", verify_fa = FALSE),
+            collapsible = TRUE, label = boxLabel(2, "danger"), status = "purple",
+            # Sidebar for timeline options
+            sidebar = boxSidebar(
+              id = ns("apps_timeline_sb"),
+              width = 25,
+              tagList(
+                tags$br(),
+                tags$h4("Navigation :"),
+                actionButton(ns("center_to_actual_week"), "Center to current Week"),
+                tags$br(),
+                tags$br(),
+                selectInput(ns("center_to_month"), NULL, choices = c("Center to Month","September", "October", "November", "December", "January", "February", "March", "April", "May", "June", "July", "August"), width = "90%"),
+                tags$h4("App :"),
+                selectInput(ns("selected_app"), NULL, choices = c("Center to App", sdd_apps$distinct("app")), width = "90%")
+              )
+            ),
+            timevisOutput(ns("apps_timeline"))
           )
         )
       }
     })
+    
+    # Updating the boxsidebar to make it available
+    updateBoxSidebar("apps_timeline_sb", session = session)
     
     # Variable : Data of the timeline
     timeline_data <- NULL
@@ -69,7 +85,7 @@ mod_timeslines_server <- function(id, all_vars){
       planning_data$content <- try(prepare_content(planning_data))
       planning_data$group <- "Classes"
       planning_data$app <- NA
-      planning_data$style <- "background-color : Wheat; font-weight : bold;"
+      planning_data$style <- "background-color : #F4A460; font-weight : bold;"
       
       if (!is.null(apps_data$content) && !is.null(planning_data$content)) {
         # Taking only interesting columns
@@ -110,15 +126,59 @@ mod_timeslines_server <- function(id, all_vars){
 # Timeline Update ---------------------------------------------------------
 
     # Update - Changing the timevis window
-    observeEvent(selected_app(), {
-      if (selected_app() != "All") {
+    observeEvent(input$selected_app, {
+      if (input$selected_app != "Center to App") {
         # Get the dates of start and end of selected app
-        start <- as.POSIXct(timeline_data[timeline_data$app == selected_app(),"start"])
-        end <- as.POSIXct(timeline_data[timeline_data$app == selected_app(),"end"])
+        start <- as.POSIXct(na.omit(timeline_data[timeline_data$app == input$selected_app,"start"]))
+        end <- as.POSIXct(na.omit(timeline_data[timeline_data$app == input$selected_app,"end"]))
         # Change dates to have a range (7 days before the start <-> 7 days after the end)
         lubridate::day(start) <- lubridate::day(start) - 7
         lubridate::day(end) <- lubridate::day(end) + 7
         # Set the window on the range of dates
+        setWindow("apps_timeline", start = start, end = end)
+      }
+    })
+    
+    # Update - Getting back to the current week
+    observeEvent(input$center_to_actual_week, {
+      # Creation of start date of the week
+      start <- lubridate::floor_date(Sys.time(), "week")
+      lubridate::day(start) <- lubridate::day(start) + 1
+      # Creation of end date of the week
+      end <- lubridate::ceiling_date(Sys.time(), "week")
+      lubridate::day(end) <- lubridate::day(end) + 1
+      setWindow("apps_timeline", start = start, end = end)
+    })
+    
+    # Update - Getting back to the current week
+    observeEvent(input$center_to_month, {
+      if (input$center_to_month != "Center to Month") {
+        # Getting current time
+        time <- Sys.Date()
+        # Getting the month
+        sel_month <- switch (input$center_to_month,
+          "September" = 9,
+          "October" = 10,
+          "November" = 11,
+          "December" = 12,
+          "January" = 1,
+          "Februrary" = 2,
+          "March" = 3,
+          "April" = 4,
+          "May" = 5,
+          "June" = 6,
+          "July" = 7,
+          "August" = 8
+        )
+        # Setting the good year
+        if (sel_month > 8) {
+          lubridate::year(time) <- lubridate::year(time) - 1
+        }
+        # Setting the selected month
+        lubridate::month(time) <- sel_month
+        # Getting start day of month and end day
+        start <- lubridate::floor_date(time, "month")
+        end <- lubridate::ceiling_date(time, "month") - 1
         setWindow("apps_timeline", start = start, end = end)
       }
     })
