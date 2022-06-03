@@ -11,8 +11,6 @@ mod_timeslines_ui <- function(id){
   ns <- NS(id)
   tagList(
     
-    tags$img(src = "www/images/auto.png"),
-    
     # UIoutput for the timeline
     uiOutput(ns("ui_apps_timeline")),
   )
