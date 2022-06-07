@@ -245,42 +245,56 @@ mod_right_sidebar_server <- function(id, all_vars){
       
       # Creation of the request part for course if request there is
       if (is_request(input$selected_course)) {
-        request_vector <- append(request_vector, glue::glue(r"--["course" : "<<input$selected_course>>"]--", .open = "<<", .close = ">>"))
+        request_vector <- c(request_vector, "course" = glue::glue(r"--["course" : "<<input$selected_course>>"]--", .open = "<<", .close = ">>"))
       }
       
       # Creation of the request part for module if request there is
       if (is_request(input$selected_module) && !is_request(input$selected_app)) {
-        request_vector <- append(request_vector, glue::glue(r"--["app" : { "$regex" : "^<<input$selected_module>>", "$options" : "" }]--", .open = "<<", .close = ">>"))
+        request_vector <- c(request_vector, "mod" = glue::glue(r"--["app" : { "$regex" : "^<<input$selected_module>>", "$options" : "" }]--", .open = "<<", .close = ">>"))
       }
       
       # Creation of the request part for app if request there is
       if (is_request(input$selected_app)) {
-        request_vector <- append(request_vector, glue::glue(r"--["app" : "<<input$selected_app>>"]--", .open = "<<", .close = ">>"))
+        request_vector <- c(request_vector, "app" = glue::glue(r"--["app" : "<<input$selected_app>>"]--", .open = "<<", .close = ">>"))
       }
       
       # Creation of the request part for login if request there is
       if (is_request(input$selected_login)) {
-        request_vector <- append(request_vector, glue::glue(r"--["login" : "<<input$selected_login>>"]--", .open = "<<", .close = ">>"))
+        request_vector <- c(request_vector, "login" = glue::glue(r"--["login" : "<<input$selected_login>>"]--", .open = "<<", .close = ">>"))
       }
       
       # Creation of the request part for dates if request there is
       if (input$is_dates == TRUE) {
-        request_vector <- append(request_vector, glue::glue(r"--["date" : { "$gte" : "<<paste0(input$selected_date1, " ", strftime(input$selected_time1, "%H:%M"))>>" , "$lte" : "<<paste0(input$selected_date2, " ", strftime(input$selected_time2, "%H:%M"))>>" }]--", .open = "<<", .close = ">>"))
+        request_vector <- c(request_vector, "dates" = glue::glue(r"--["date" : { "$gte" : "<<paste0(input$selected_date1, " ", strftime(input$selected_time1, "%H:%M"))>>" , "$lte" : "<<paste0(input$selected_date2, " ", strftime(input$selected_time2, "%H:%M"))>>" }]--", .open = "<<", .close = ">>"))
       }
       
       # Definition of the request
-      build_request <- r"--[{<<paste(request_vector, collapse = " , ")>>}]--"
+      # build_request <- r"--[{<<paste(request_vector, collapse = " , ")>>}]--"
       
       # Send the request after evaluating it
-      request(glue::glue(build_request, .open = "<<", .close = ">>"))
+      # request(glue::glue(build_request, .open = "<<", .close = ">>"))
+      if (!is.null(request_vector)) {
+        request(request_vector)
+      } else {
+        request("empty")
+      }
     })
     
     # Defining of main tables depending on the request
     observeEvent(request(), {
       print(request())
-      {message("requete h5p");h5p(try(sdd_h5p$find(request(), limit = 1000), silent = TRUE))}
-      {message("requete learnr");learnr(try(sdd_learnr$find(request(), limit = 1000), silent = TRUE))}
-      {message("requete shiny");shiny(try(sdd_shiny$find(request(), limit = 1000), silent = TRUE))}
+      # Only args used for the events tables
+      events_args <- c("course", "mod", "app", "login", "dates")
+      # Preparing the request for the events tables
+      if (request() != "empty") {
+        events_request <- glue::glue(r"--[{<<paste(request()[events_args[events_args %in% names(request())]], collapse = " , ")>>}]--", .open = "<<", .close = ">>")
+      } else {
+        events_request <- "{}"
+      }
+      # Requesting to databases
+      {message("requete h5p");h5p(try(sdd_h5p$find(events_request, limit = 1000), silent = TRUE))}
+      {message("requete learnr");learnr(try(sdd_learnr$find(events_request, limit = 1000), silent = TRUE))}
+      {message("requete shiny");shiny(try(sdd_shiny$find(events_request, limit = 1000), silent = TRUE))}
     })
 
 # News Request ------------------------------------------------------------

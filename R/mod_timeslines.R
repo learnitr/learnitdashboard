@@ -83,7 +83,7 @@ mod_timeslines_server <- function(id, all_vars){
       apps_data$style <- try(prepare_style(apps_data))
       # Preparing app dataframe's content (with url and else) and group and app
       planning_data$content <- try(prepare_content(planning_data))
-      planning_data$group <- "Classes"
+      planning_data$group <- NA # "Classes"
       planning_data$app <- NA
       planning_data$style <- "background-color : #F4A460; font-weight : bold;"
       
@@ -94,14 +94,19 @@ mod_timeslines_server <- function(id, all_vars){
         # Setting the good names to fit timevis
         names(apps_data) <- c("id", "content", "group", "start", "end", "app", "title", "style")
         names(planning_data) <- c("id", "content", "group", "start", "end", "app", "title", "style")
+        apps_data$type <- NA
+        planning_data$type <- "background"
         
         # Binding apps and planning dataframes
         timeline_data <- rbind(apps_data, planning_data)
+        # timeline_data$type <- NA
+        
+        # background_test <- timeline_data[nrow(timeline_data) + 1,] <- c("test", "Test", NA, "2022-06-01", "2022-06-30", NA, NA, NA, "background")
         
         # Preparing the groups for timevis
         attr(timeline_data, "groups") <- data.frame(
-          id = unique(timeline_data$group),
-          content = unique(timeline_data$group)
+          id = unique(na.omit(timeline_data$group)),
+          content = unique(na.omit(timeline_data$group))
         )
       } else { timeline_data <- NULL }
     } else { timeline_data <- NULL }
