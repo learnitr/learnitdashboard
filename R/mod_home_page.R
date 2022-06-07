@@ -24,6 +24,10 @@ mod_home_page_ui <- function(id){
       # valueBoxOutput(ns("valuebox_1")),
     ),
     
+    # Template slots for graph
+    uiOutput(ns("slot1")),
+    uiOutput(ns("slot2")),
+    
     # UIoutput to generate a timeline of the different apps
     # uiOutput(ns("ui_apps_timeline_1")),
     
@@ -319,6 +323,32 @@ mod_home_page_server <- function(id, all_vars){
     #   }
     # })
 
+# Template slots ----------------------------------------------------------
+
+    output$slot1 <- renderUI({
+      if (!inherits(sdd_users, "try-error")) {
+        tagList(
+          box( title = "Slot 1", solidHeader = TRUE,
+               width = 6, icon = shiny::icon("user-check", verify_fa = FALSE), collapsible = TRUE,
+               collapsed = TRUE, status = "purple",
+               "Content"
+          )
+        )
+      }
+    })
+    
+    output$slot2 <- renderUI({
+      if (!inherits(sdd_users, "try-error")) {
+        tagList(
+          box( title = "Slot 2", solidHeader = TRUE,
+               width = 6, icon = shiny::icon("user-check", verify_fa = FALSE), collapsible = TRUE,
+               collapsed = TRUE, status = "purple",
+               "Content"
+          )
+        )
+      }
+    })
+    
 # Courses Students Plot ---------------------------------------------------
 
     # Display // UI for the plot of students in courses
@@ -334,6 +364,8 @@ mod_home_page_server <- function(id, all_vars){
         )
       }
     })
+    
+    
     
     # Display // Plot of students in courses
     output$courses_students <- renderPlot({

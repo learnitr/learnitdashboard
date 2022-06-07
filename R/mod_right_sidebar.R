@@ -273,6 +273,8 @@ mod_right_sidebar_server <- function(id, all_vars){
       
       # Send the request after evaluating it
       # request(glue::glue(build_request, .open = "<<", .close = ">>"))
+      
+      # If the vector is not null, return the vector, if it is, return "empty" to make empty request 
       if (!is.null(request_vector)) {
         request(request_vector)
       } else {
