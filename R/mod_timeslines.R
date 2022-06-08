@@ -82,8 +82,6 @@ mod_timeslines_server <- function(id, all_vars){
     timeline_data <- reactive({
       if (!inherits(apps(), "try-error") && length(apps()) > 0 && !inherits(planning(), "try-error") && length(planning()) > 0) {
         
-        print(names(apps()))
-        print(names(planning()))
         # Setting the apps and planning data
         apps_data <- na.omit(apps()[c("app", "start", "end", "icourse", "type", "url", "alt_url")])
         planning_data <- na.omit(planning()[c("label", "start", "end", "url", "alt_url", "summary", "icourse")])
