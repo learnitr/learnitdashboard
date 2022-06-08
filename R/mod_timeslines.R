@@ -28,6 +28,13 @@ mod_timeslines_server <- function(id, all_vars){
 
 # Getting Modules Vars ----------------------------------------------------
     
+    # Vars from rightsidebar
+    apps <- reactive({all_vars$right_sidebar_vars$apps})
+    
+    observe({
+      print(apps()[c("app", "start", "end")])
+    })
+    
 # Global Vars -------------------------------------------------------------
 
     # URL to access databases

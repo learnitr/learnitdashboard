@@ -49,20 +49,23 @@ mod_right_sidebar_server <- function(id, all_vars){
     sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
     sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
     
-    # === H5P Variables ===
+    # === H5P Table ===
     # Variable : H5P
     h5p <- reactiveVal()
     
-    # === Learnr Variables ===
+    # === Learnr Table ===
     # Variable : Learnr
     learnr <- reactiveVal()
     
-    # === Shiny Variables ===
+    # === Shiny Table ===
     # Variable : Shiny
     shiny <- reactiveVal()
     
+    # === Apps Table ===
+    apps <- reactiveVal()
+    
     # Variable : Courses
-    courses <- try(sort(sdd_users$distinct("icourse")), silent = TRUE)
+    courses <- try(sort(sdd_apps$distinct("icourse")), silent = TRUE)
 
     # If courses occured an error or is empty, it becomes NULL
     if (inherits(courses, "try-error") || length(courses) == 0) {courses <- NULL}
@@ -110,23 +113,23 @@ mod_right_sidebar_server <- function(id, all_vars){
       # Getting apps
       # If module and course selected
       if (req(input$selected_module) != "All" && req(input$selected_course) != "All") {
-        apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" , "app" : { "$regex" : "^<<input$selected_module>>" , "$options" : "" } }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        sel_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" , "module" : "<<input$selected_module>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
       # If only module selected
       } else if (req(input$selected_module) != "All" && req(input$selected_course) == "All") {
-        apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "app" : { "$regex" : "^<<input$selected_module>>" , "$options" : "" } }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        sel_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "module" : "<<input$selected_module>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
       # If only course selected
       } else if (req(input$selected_module) == "All" && req(input$selected_course) != "All") {
-        apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        sel_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
       # If nothing selected
       } else {
-        apps <- try(sort(sdd_apps$distinct("app")), silent = TRUE)
+        sel_apps <- try(sort(sdd_apps$distinct("app")), silent = TRUE)
       }
       
       # Displaying the selector if apps didn't occur error
-      if (!inherits(apps, "try-error")) {
+      if (!inherits(sel_apps, "try-error")) {
         tagList(
           tags$h3("Application :"),
-          selectInput(ns("selected_app"), NULL, choices = c("All", apps), selected = "All")
+          selectInput(ns("selected_app"), NULL, choices = c("All", sel_apps), selected = "All")
         )
       }
     })
@@ -174,7 +177,7 @@ mod_right_sidebar_server <- function(id, all_vars){
         )
       # Create an invisible selector with value NULL to get nothing from the request
       } else { 
-        shinyjs::hidden(selectInput(ns("selected_login"), NULL, choices = "NULL"))
+        selectInput(ns("selected_login"), NULL, choices = "NULL")
       }
       
     })
@@ -246,11 +249,13 @@ mod_right_sidebar_server <- function(id, all_vars){
       # Creation of the request part for course if request there is
       if (is_request(input$selected_course)) {
         request_vector <- c(request_vector, "course" = glue::glue(r"--["course" : "<<input$selected_course>>"]--", .open = "<<", .close = ">>"))
+        request_vector <- c(request_vector, "apps_course" = glue::glue(r"--["icourse" : "<<input$selected_course>>"]--", .open = "<<", .close = ">>"))
       }
       
       # Creation of the request part for module if request there is
       if (is_request(input$selected_module) && !is_request(input$selected_app)) {
         request_vector <- c(request_vector, "mod" = glue::glue(r"--["app" : { "$regex" : "^<<input$selected_module>>", "$options" : "" }]--", .open = "<<", .close = ">>"))
+        request_vector <- c(request_vector, "apps_mod" = glue::glue(r"--["module" : "<<input$selected_module>>"]--", .open = "<<", .close = ">>"))
       }
       
       # Creation of the request part for app if request there is
@@ -284,19 +289,24 @@ mod_right_sidebar_server <- function(id, all_vars){
     
     # Defining of main tables depending on the request
     observeEvent(request(), {
-      print(request())
       # Only args used for the events tables
       events_args <- c("course", "mod", "app", "login", "dates")
+      apps_args <- c("apps_course", "apps_mod", "app")
       # Preparing the request for the events tables
-      if (request() != "empty") {
-        events_request <- glue::glue(r"--[{<<paste(request()[events_args[events_args %in% names(request())]], collapse = " , ")>>}]--", .open = "<<", .close = ">>")
+      if (request()[1] != "empty") {
+        events_request <- prepare_request(request(), events_args)
+        apps_request <- prepare_request(request(), apps_args)
+        print(events_request)
       } else {
         events_request <- "{}"
+        apps_request <- "{}"
+        print(events_request)
       }
       # Requesting to databases
       {message("requete h5p");h5p(try(sdd_h5p$find(events_request, limit = 1000), silent = TRUE))}
       {message("requete learnr");learnr(try(sdd_learnr$find(events_request, limit = 1000), silent = TRUE))}
       {message("requete shiny");shiny(try(sdd_shiny$find(events_request, limit = 1000), silent = TRUE))}
+      {message("requete apps");apps(try(sdd_apps$find(apps_request), silent = TRUE))}
     })
 
 # News Request ------------------------------------------------------------
@@ -338,6 +348,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       h5p = NULL,
       learnr = NULL,
       shiny = NULL,
+      apps = NULL,
       h5p_news = NULL,
       learnr_news = NULL,
       shiny_news = NULL,
@@ -352,6 +363,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       right_sidebar_vars$h5p <- h5p()
       right_sidebar_vars$learnr <- learnr()
       right_sidebar_vars$shiny <- shiny()
+      right_sidebar_vars$apps <- apps()
       right_sidebar_vars$h5p_news <- h5p_news()
       right_sidebar_vars$learnr_news <- learnr_news()
       right_sidebar_vars$shiny_news <- shiny_news()

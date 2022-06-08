@@ -3,6 +3,7 @@
 export(is_request)
 export(my_glue)
 export(prepare_content)
+export(prepare_request)
 export(prepare_style)
 export(run_app)
 import(mongolite)
