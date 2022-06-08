@@ -30,10 +30,12 @@ mod_timeslines_server <- function(id, all_vars){
     
     # Vars from rightsidebar
     apps <- reactive({all_vars$right_sidebar_vars$apps})
+    planning <- reactive({all_vars$right_sidebar_vars$planning})
     
-    observe({
-      print(apps()[c("app", "start", "end")])
-    })
+    # observe({
+    #   print(apps()[c("app", "start", "end")])
+    #   print(planning()[c("label", "start", "end")])
+    # })
     
 # Global Vars -------------------------------------------------------------
 
@@ -64,7 +66,7 @@ mod_timeslines_server <- function(id, all_vars){
                 tags$br(),
                 tags$br(),
                 selectInput(ns("apps_center_to_month"), NULL, choices = c("Center to Month","September", "October", "November", "December", "January", "February", "March", "April", "May", "June", "July", "August"), width = "90%"),
-                selectInput(ns("selected_app"), NULL, choices = c("Center to App", sdd_apps$distinct("app")), width = "90%")
+                selectInput(ns("selected_app"), NULL, choices = c("Center to App", sort(unique(apps()$app))), width = "90%")
               )
             ),
             timevisOutput(ns("apps_timeline"))
@@ -76,51 +78,96 @@ mod_timeslines_server <- function(id, all_vars){
     # Updating the boxsidebar to make it available
     updateBoxSidebar("apps_timeline_sb", session = session)
     
-    # Variable : Data of the timeline
-    timeline_data <- NULL
-    apps_data <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "start" : true ,"end" : true, "icourse" : true, "type" : true, "url" : true, "alt_url" : true}')), silent = TRUE)
-    planning_data <- try(na.omit(sdd_planning$find('{}', fields = '{"label" : true, "start" : true, "end" : true, "url" : true, "alt_url" : true, "summary" : true, "icourse" : true}')), silent = TRUE)
-    
-    # Preparing the timeline_data
-    if (!inherits(apps_data, "try-error") && !inherits(planning_data, "try-error")) {
-      
-      # Preparing app dataframe's content (with url and else)
-      apps_data$content <- try(prepare_content(apps_data))
-      apps_data$title <- NA
-      apps_data$style <- try(prepare_style(apps_data))
-      # Preparing app dataframe's content (with url and else) and group and app
-      planning_data$content <- try(prepare_content(planning_data))
-      planning_data$group <- NA # "Classes"
-      planning_data$app <- NA
-      planning_data$style <- "background-color : #F4A460; font-weight : bold;"
-      
-      if (!is.null(apps_data$content) && !is.null(planning_data$content)) {
+    # Variable Data of the timeline
+    timeline_data <- reactive({
+      if (!inherits(apps(), "try-error") && length(apps()) > 0 && !inherits(planning(), "try-error") && length(planning()) > 0) {
+        
+        print(names(apps()))
+        print(names(planning()))
+        # Setting the apps and planning data
+        apps_data <- na.omit(apps()[c("app", "start", "end", "icourse", "type", "url", "alt_url")])
+        planning_data <- na.omit(planning()[c("label", "start", "end", "url", "alt_url", "summary", "icourse")])
+        
+        # Preparing apps dataframe
+        apps_data$content <- prepare_content(apps_data)
+        apps_data$style <- prepare_style(apps_data)
+        apps_data$title <- NA
+        apps_data$id <- 1:nrow(apps_data)
+        # Preparing planning dataframe
+        planning_data$content <- prepare_content(planning_data)
+        planning_data$style <- "background-color : #F4A460; font-weight : bold;"
+        planning_data$group <- NA # "Classes"
+        planning_data$app <- NA
+        planning_data$id <- (1+nrow(apps_data)):(nrow(apps_data)+nrow(planning_data))
+        
         # Taking only interesting columns
-        apps_data <- apps_data[apps_data$start < apps_data$end ,c("_id", "content", "icourse", "start", "end", "app", "title", "style")]
-        planning_data <- planning_data[c("_id", "content", "group", "start", "end", "app", "summary", "style")]
+        apps_data <- apps_data[apps_data$start < apps_data$end ,c("id", "content", "icourse", "start", "end", "app", "title", "style")]
+        planning_data <- planning_data[c("id", "content", "group", "start", "end", "app", "summary", "style")]
         # Setting the good names to fit timevis
         names(apps_data) <- c("id", "content", "group", "start", "end", "app", "title", "style")
         names(planning_data) <- c("id", "content", "group", "start", "end", "app", "title", "style")
+        # Adding style and type to data
         apps_data$type <- NA
         planning_data$type <- "background"
         
-        # Binding apps and planning dataframes
-        timeline_data <- rbind(apps_data, planning_data)
-        # timeline_data$type <- NA
-        
-        # background_test <- timeline_data[nrow(timeline_data) + 1,] <- c("test", "Test", NA, "2022-06-01", "2022-06-30", NA, NA, NA, "background")
+        # Creating the result dataframe
+        timeline_df <- rbind(apps_data, planning_data)
         
         # Preparing the groups for timevis
-        attr(timeline_data, "groups") <- data.frame(
-          id = unique(na.omit(timeline_data$group)),
-          content = unique(na.omit(timeline_data$group))
+        attr(timeline_df, "groups") <- data.frame(
+          id = unique(na.omit(timeline_df$group)),
+          content = unique(na.omit(timeline_df$group))
         )
-      } else { timeline_data <- NULL }
-    } else { timeline_data <- NULL }
+        
+        return(timeline_df)
+      } else { NULL }
+    })
+    
+    # # Variable : Data of the timeline
+    # timeline_data <- NULL
+    # apps_data <- try(na.omit(sdd_apps$find('{}', fields = '{"app" : true, "start" : true ,"end" : true, "icourse" : true, "type" : true, "url" : true, "alt_url" : true}')), silent = TRUE)
+    # planning_data <- try(na.omit(sdd_planning$find('{}', fields = '{"label" : true, "start" : true, "end" : true, "url" : true, "alt_url" : true, "summary" : true, "icourse" : true}')), silent = TRUE)
+    # 
+    # # Preparing the timeline_data
+    # if (!inherits(apps_data, "try-error") && !inherits(planning_data, "try-error")) {
+    #   
+    #   # Preparing app dataframe's content (with url and else)
+    #   apps_data$content <- try(prepare_content(apps_data))
+    #   apps_data$title <- NA
+    #   apps_data$style <- try(prepare_style(apps_data))
+    #   # Preparing app dataframe's content (with url and else) and group and app
+    #   planning_data$content <- try(prepare_content(planning_data))
+    #   planning_data$group <- NA # "Classes"
+    #   planning_data$app <- NA
+    #   planning_data$style <- "background-color : #F4A460; font-weight : bold;"
+    #   
+    #   if (!is.null(apps_data$content) && !is.null(planning_data$content)) {
+    #     # Taking only interesting columns
+    #     apps_data <- apps_data[apps_data$start < apps_data$end ,c("_id", "content", "icourse", "start", "end", "app", "title", "style")]
+    #     planning_data <- planning_data[c("_id", "content", "group", "start", "end", "app", "summary", "style")]
+    #     # Setting the good names to fit timevis
+    #     names(apps_data) <- c("id", "content", "group", "start", "end", "app", "title", "style")
+    #     names(planning_data) <- c("id", "content", "group", "start", "end", "app", "title", "style")
+    #     apps_data$type <- NA
+    #     planning_data$type <- "background"
+    #     
+    #     # Binding apps and planning dataframes
+    #     timeline_data <- rbind(apps_data, planning_data)
+    #     # timeline_data$type <- NA
+    #     
+    #     # background_test <- timeline_data[nrow(timeline_data) + 1,] <- c("test", "Test", NA, "2022-06-01", "2022-06-30", NA, NA, NA, "background")
+    #     
+    #     # Preparing the groups for timevis
+    #     attr(timeline_data, "groups") <- data.frame(
+    #       id = unique(na.omit(timeline_data$group)),
+    #       content = unique(na.omit(timeline_data$group))
+    #     )
+    #   } else { timeline_data <- NULL }
+    # } else { timeline_data <- NULL }
     
     # Display the timeline when the output is available and when the data is available
     output$apps_timeline <- renderTimevis({
-      if (!is.null(timeline_data)) {
+      if (!is.null(timeline_data())) {
         # Creation of start date for the initial window of the timeline
         start <- lubridate::floor_date(Sys.time(), "week")
         lubridate::day(start) <- lubridate::day(start) + 1
@@ -131,7 +178,7 @@ mod_timeslines_server <- function(id, all_vars){
           start = start,
           end = end
         )
-        return(timevis(timeline_data, groups = attr(timeline_data, "groups"), options = config))
+        return(timevis(timeline_data(), groups = attr(timeline_data(), "groups"), options = config))
       }
     })
 
@@ -213,8 +260,8 @@ mod_timeslines_server <- function(id, all_vars){
     observeEvent(input$selected_app, {
       if (input$selected_app != "Center to App") {
         # Get the dates of start and end of selected app
-        start <- as.POSIXct(na.omit(timeline_data[timeline_data$app == input$selected_app,"start"]))
-        end <- as.POSIXct(na.omit(timeline_data[timeline_data$app == input$selected_app,"end"]))
+        start <- as.POSIXct(na.omit(timeline_data()[timeline_data()$app == input$selected_app,"start"]))
+        end <- as.POSIXct(na.omit(timeline_data()[timeline_data()$app == input$selected_app,"end"]))
         # Change dates to have a range (7 days before the start <-> 7 days after the end)
         lubridate::day(start) <- lubridate::day(start) - 7
         lubridate::day(end) <- lubridate::day(end) + 7
@@ -227,8 +274,8 @@ mod_timeslines_server <- function(id, all_vars){
     observeEvent(input$selected_label, {
       if (input$selected_label != "Center to Label") {
         # Get the dates of start and end of selected label
-        start <- as.POSIXct(na.omit(planning_timeline_data[planning_timeline_data$label == input$selected_label,"start"]))
-        end <- as.POSIXct(na.omit(planning_timeline_data[planning_timeline_data$label == input$selected_label,"end"]))
+        start <- as.POSIXct(na.omit(planning_timeline_data()[planning_timeline_data()$label == input$selected_label,"start"]))
+        end <- as.POSIXct(na.omit(planning_timeline_data()[planning_timeline_data()$label == input$selected_label,"end"]))
         # Change dates to have a range the day to the next
         start <- lubridate::floor_date(start, "day")
         lubridate::day(end) <- lubridate::day(end) + 1

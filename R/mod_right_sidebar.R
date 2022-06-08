@@ -48,6 +48,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url), silent = TRUE)
     sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
     sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
+    sdd_planning <- try(mongolite::mongo("planning", url = sdd_url), silent = TRUE)
     
     # === H5P Table ===
     # Variable : H5P
@@ -63,6 +64,9 @@ mod_right_sidebar_server <- function(id, all_vars){
     
     # === Apps Table ===
     apps <- reactiveVal()
+    
+    # === Planning Table ===
+    planning <- reactiveVal()
     
     # Variable : Courses
     courses <- try(sort(sdd_apps$distinct("icourse")), silent = TRUE)
@@ -249,7 +253,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       # Creation of the request part for course if request there is
       if (is_request(input$selected_course)) {
         request_vector <- c(request_vector, "course" = glue::glue(r"--["course" : "<<input$selected_course>>"]--", .open = "<<", .close = ">>"))
-        request_vector <- c(request_vector, "apps_course" = glue::glue(r"--["icourse" : "<<input$selected_course>>"]--", .open = "<<", .close = ">>"))
+        request_vector <- c(request_vector, "icourse" = glue::glue(r"--["icourse" : "<<input$selected_course>>"]--", .open = "<<", .close = ">>"))
       }
       
       # Creation of the request part for module if request there is
@@ -291,15 +295,18 @@ mod_right_sidebar_server <- function(id, all_vars){
     observeEvent(request(), {
       # Only args used for the events tables
       events_args <- c("course", "mod", "app", "login", "dates")
-      apps_args <- c("apps_course", "apps_mod", "app")
+      apps_args <- c("icourse", "apps_mod", "app")
+      planning_args <- c("icourse")
       # Preparing the request for the events tables
       if (request()[1] != "empty") {
         events_request <- prepare_request(request(), events_args)
         apps_request <- prepare_request(request(), apps_args)
+        planning_request <- prepare_request(request(), planning_args)
         print(events_request)
       } else {
         events_request <- "{}"
         apps_request <- "{}"
+        planning_request <- "{}"
         print(events_request)
       }
       # Requesting to databases
@@ -307,6 +314,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       {message("requete learnr");learnr(try(sdd_learnr$find(events_request, limit = 1000), silent = TRUE))}
       {message("requete shiny");shiny(try(sdd_shiny$find(events_request, limit = 1000), silent = TRUE))}
       {message("requete apps");apps(try(sdd_apps$find(apps_request), silent = TRUE))}
+      {message("requete planning");planning(try(sdd_planning$find(planning_request), silent = TRUE))}
     })
 
 # News Request ------------------------------------------------------------
@@ -349,6 +357,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       learnr = NULL,
       shiny = NULL,
       apps = NULL,
+      planning = NULL,
       h5p_news = NULL,
       learnr_news = NULL,
       shiny_news = NULL,
@@ -364,6 +373,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       right_sidebar_vars$learnr <- learnr()
       right_sidebar_vars$shiny <- shiny()
       right_sidebar_vars$apps <- apps()
+      right_sidebar_vars$planning <- planning()
       right_sidebar_vars$h5p_news <- h5p_news()
       right_sidebar_vars$learnr_news <- learnr_news()
       right_sidebar_vars$shiny_news <- shiny_news()

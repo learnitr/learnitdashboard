@@ -50,17 +50,12 @@ mod_sdd_tables_server <- function(id, all_vars){
     h5p <- reactive({all_vars$right_sidebar_vars$h5p})
     learnr <- reactive({all_vars$right_sidebar_vars$learnr})
     shiny <- reactive({all_vars$right_sidebar_vars$shiny})
+    apps <- reactive({all_vars$right_sidebar_vars$apps})
+    planning <- reactive({all_vars$right_sidebar_vars$planning})
 
 # Global Vars -------------------------------------------------------------
-
-    # URL to access databases
-    sdd_url <- "mongodb://127.0.0.1:27017/sdd"
-    # To connect to them
-    sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
-    sdd_planning <- try(mongolite::mongo("planning", url = sdd_url), silent = TRUE)
-    # Tables of everything
-    apps <- try(sdd_apps$find('{}'), silent = TRUE)
-    planning <- try(sdd_planning$find('{}'), silent = TRUE)
+    
+    
     
 # DT Displays -------------------------------------------------------------
     
@@ -140,9 +135,9 @@ mod_sdd_tables_server <- function(id, all_vars){
     output$sdd_dt_apps <- renderDT({
       
       # If no errors to get the dataframe from mongoDB
-      if (!inherits(apps, "try-error") && length(apps > 0)) {
+      if (!inherits(apps(), "try-error") && length(apps() > 0)) {
         # The columns selection is now rendered by DT !
-        apps
+        apps()
       } else {
         NULL
       }
@@ -164,9 +159,9 @@ mod_sdd_tables_server <- function(id, all_vars){
     output$sdd_dt_planning <- renderDT({
       
       # If no errors to get the dataframe from mongoDB
-      if (!inherits(planning, "try-error") && length(planning > 0)) {
+      if (!inherits(planning(), "try-error") && length(planning() > 0)) {
         # The columns selection is now rendered by DT !
-        planning
+        planning()
       } else {
         NULL
       }
