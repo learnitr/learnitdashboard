@@ -23,7 +23,7 @@ mod_right_sidebar_ui <- function(id){
       uiOutput(ns("ui_login_selector")),
       # Selectors of time range :
       tags$h3("Time :"),
-      checkboxInput(ns("is_dates"), h4("Select dates", style = "margin : 0px;")),
+      checkboxInput(ns("is_dates"), h4("Select Dates", style = "margin : 0px;")),
       uiOutput(ns("ui_dates_selectors")),
       # Selector of news_time
       uiOutput(ns("ui_news_time_selector"))
@@ -43,12 +43,17 @@ mod_right_sidebar_server <- function(id, all_vars){
     # URL to access databases
     sdd_url <- "mongodb://127.0.0.1:27017/sdd"
     # To connect to them
+    sdd_events <- try(mongolite::mongo("events", url = sdd_url), silent = TRUE)
     sdd_h5p <- try(mongolite::mongo("h5p", url = sdd_url), silent = TRUE)
     sdd_learnr <- try(mongolite::mongo("learnr", url = sdd_url), silent = TRUE)
     sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url), silent = TRUE)
     sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
     sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
     sdd_planning <- try(mongolite::mongo("planning", url = sdd_url), silent = TRUE)
+    
+    # === Events Table ===
+    # Variable : Events
+    events <- reactiveVal()
     
     # === H5P Table ===
     # Variable : H5P
@@ -275,6 +280,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       # Creation of the request part for dates if request there is
       if (input$is_dates == TRUE) {
         request_vector <- c(request_vector, "dates" = glue::glue(r"--["date" : { "$gte" : "<<paste0(input$selected_date1, " ", strftime(input$selected_time1, "%H:%M"))>>" , "$lte" : "<<paste0(input$selected_date2, " ", strftime(input$selected_time2, "%H:%M"))>>" }]--", .open = "<<", .close = ">>"))
+        request_vector <- c(request_vector, "start_end" = glue::glue(r"--["start" : { "$gte" : "<<paste0(input$selected_date1, " ", strftime(input$selected_time1, "%H:%M"))>>" } , "end" : { "$lte" : "<<paste0(input$selected_date2, " ", strftime(input$selected_time2, "%H:%M"))>>" }]--", .open = "<<", .close = ">>"))
       }
       
       # Definition of the request
@@ -296,7 +302,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       # Only args used for the events tables
       events_args <- c("course", "mod", "app", "login", "dates")
       apps_args <- c("icourse", "apps_mod", "app")
-      planning_args <- c("icourse")
+      planning_args <- c("icourse", "start_end")
       # Preparing the request for the events tables
       if (request()[1] != "empty") {
         events_request <- prepare_request(request(), events_args)
@@ -310,6 +316,7 @@ mod_right_sidebar_server <- function(id, all_vars){
         print(events_request)
       }
       # Requesting to databases
+      {message("requete events");events(try(sdd_events$find(events_request, limit = 50000), silent = TRUE))}
       {message("requete h5p");h5p(try(sdd_h5p$find(events_request, limit = 1000), silent = TRUE))}
       {message("requete learnr");learnr(try(sdd_learnr$find(events_request, limit = 1000), silent = TRUE))}
       {message("requete shiny");shiny(try(sdd_shiny$find(events_request, limit = 1000), silent = TRUE))}
@@ -353,6 +360,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     right_sidebar_vars <- reactiveValues(
       selected_login = NULL,
       selected_course = NULL,
+      events = NULL,
       h5p = NULL,
       learnr = NULL,
       shiny = NULL,
@@ -369,6 +377,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     observe({
       right_sidebar_vars$selected_login <- input$selected_login
       right_sidebar_vars$selected_course <- input$selected_course
+      right_sidebar_vars$events <- events()
       right_sidebar_vars$h5p <- h5p()
       right_sidebar_vars$learnr <- learnr()
       right_sidebar_vars$shiny <- shiny()
