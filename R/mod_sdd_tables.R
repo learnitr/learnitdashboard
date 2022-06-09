@@ -64,8 +64,8 @@ mod_sdd_tables_server <- function(id, all_vars){
       # If no errors to get the dataframe from mongoDB
       if (!inherits(h5p(), "try-error") && length(h5p() > 0)) {
         # The columns selection is now rendered by DT !
-        # h5p()
-        events()[events()$type == "h5p",]
+        h5p()
+        # events()[events()$type == "h5p",]
       } else {
         NULL
       }
@@ -89,8 +89,8 @@ mod_sdd_tables_server <- function(id, all_vars){
       # If no errors to get the dataframe from mongoDB
       if (!inherits(learnr(), "try-error") && length(learnr() > 0)) {
         # The columns selection is now rendered by DT !
-        # learnr()
-        events()[events()$type == "learnr",]
+        learnr()
+        # events()[events()$type == "learnr",]
       } else {
         NULL
       }
@@ -114,7 +114,8 @@ mod_sdd_tables_server <- function(id, all_vars){
       # If no errors to get the dataframe from mongoDB
       if (!inherits(shiny(), "try-error") && length(shiny() > 0)) {
         # The columns selection is now rendered by DT !
-        events()[events()$type == "shiny",]
+        shiny()
+        # events()[events()$type == "shiny",]
       } else {
         NULL
       }

@@ -13,7 +13,7 @@
 #' @importFrom DT DTOutput renderDT
 #' @importFrom ggplot2 ggplot geom_count aes geom_bar theme_bw coord_flip xlab ylab qplot
 #' @importFrom glue glue
-#' @importFrom lubridate year month day floor_date ceiling_date
+#' @importFrom lubridate year month day floor_date ceiling_date hour minute
 #' @import mongolite
 #' @import rlang
 #' @import shiny

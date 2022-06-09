@@ -11,7 +11,10 @@
 #' @examples
 #' rv <- c("color" = "red", "type" = "flower")
 #' prepare_request(rv, "color")
-prepare_request <- function(request_vector, args) {
+prepare_request <- function(request_vector, args, type = NULL) {
+  if (!is.null(type)) {
+    request_vector <- c(request_vector, glue::glue(r"--["type" : "<<type>>"]--", .open = "<<", .close = ">>"))
+  }
   request <- paste(request_vector[args[args %in% names(request_vector)]], collapse = " , ")
   return(glue::glue(r"--[{<<request>>}]--", .open = "<<", .close = ">>"))
 }

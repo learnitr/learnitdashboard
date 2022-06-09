@@ -48,6 +48,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     sdd_learnr <- try(mongolite::mongo("learnr", url = sdd_url), silent = TRUE)
     sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url), silent = TRUE)
     sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
+    sdd_users2 <- try(mongolite::mongo("users2", url = sdd_url), silent = TRUE)
     sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
     sdd_planning <- try(mongolite::mongo("planning", url = sdd_url), silent = TRUE)
     
@@ -162,19 +163,19 @@ mod_right_sidebar_server <- function(id, all_vars){
       if (req(input$selected_course) != "All") {
         # If only the enrolled
         if (input$only_enrolled == TRUE) {
-          logins <- try(sort(sdd_users$distinct("user_login", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" , "enrolled" : "yes" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+          logins <- try(sort(sdd_users2$distinct("login", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" , "enrolled" : true }]--", .open = "<<", .close = ">>"))), silent = TRUE)
         # If not only the enrolled
         } else {
-          logins <- try(sort(sdd_users$distinct("user_login", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+          logins <- try(sort(sdd_users2$distinct("login", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
         }
       # Getting the logins from all courses
       } else {
         # If only the enrolled
         if (input$only_enrolled == TRUE) {
-          logins <- try(sort(sdd_users$distinct("user_login", query = r"--[{"enrolled" : "yes"}]--")), silent = TRUE)
+          logins <- try(sort(sdd_users2$distinct("login", query = r"--[{"enrolled" : true}]--")), silent = TRUE)
         # If not only the enrolled
         } else {
-          logins <- try(sort(sdd_users$distinct("user_login")), silent = TRUE)
+          logins <- try(sort(sdd_users2$distinct("login")), silent = TRUE)
         }
       }
       
@@ -257,14 +258,12 @@ mod_right_sidebar_server <- function(id, all_vars){
       
       # Creation of the request part for course if request there is
       if (is_request(input$selected_course)) {
-        request_vector <- c(request_vector, "course" = glue::glue(r"--["course" : "<<input$selected_course>>"]--", .open = "<<", .close = ">>"))
         request_vector <- c(request_vector, "icourse" = glue::glue(r"--["icourse" : "<<input$selected_course>>"]--", .open = "<<", .close = ">>"))
       }
       
       # Creation of the request part for module if request there is
       if (is_request(input$selected_module) && !is_request(input$selected_app)) {
-        request_vector <- c(request_vector, "mod" = glue::glue(r"--["app" : { "$regex" : "^<<input$selected_module>>", "$options" : "" }]--", .open = "<<", .close = ">>"))
-        request_vector <- c(request_vector, "apps_mod" = glue::glue(r"--["module" : "<<input$selected_module>>"]--", .open = "<<", .close = ">>"))
+        request_vector <- c(request_vector, "module" = glue::glue(r"--["module" : "<<input$selected_module>>"]--", .open = "<<", .close = ">>"))
       }
       
       # Creation of the request part for app if request there is
@@ -272,14 +271,22 @@ mod_right_sidebar_server <- function(id, all_vars){
         request_vector <- c(request_vector, "app" = glue::glue(r"--["app" : "<<input$selected_app>>"]--", .open = "<<", .close = ">>"))
       }
       
-      # Creation of the request part for login if request there is
+      # Creation of the request part for user if request there is
       if (is_request(input$selected_login)) {
-        request_vector <- c(request_vector, "login" = glue::glue(r"--["login" : "<<input$selected_login>>"]--", .open = "<<", .close = ">>"))
+        # Preparation of the request to get user from login
+        users2_request <- glue::glue(r"--[{"login" : "<<input$selected_login>>"}]--", .open = "<<", .close = ">>")
+        # Get the user from the selected login inside of the users2 table
+        user <- unique(sdd_users2$find(users2_request, fields = '{"user" : true}')$user)
+        request_vector <- c(request_vector, "user" = glue::glue(r"--["user" : "<<user>>"]--", .open = "<<", .close = ">>"))
       }
       
       # Creation of the request part for dates if request there is
       if (input$is_dates == TRUE) {
-        request_vector <- c(request_vector, "dates" = glue::glue(r"--["date" : { "$gte" : "<<paste0(input$selected_date1, " ", strftime(input$selected_time1, "%H:%M"))>>" , "$lte" : "<<paste0(input$selected_date2, " ", strftime(input$selected_time2, "%H:%M"))>>" }]--", .open = "<<", .close = ">>"))
+        # Preparation of the dates
+        date_from <- as.POSIXct(paste0(input$selected_date1, " ", as.character(strftime(input$selected_time1, "%R"))), tz = "UTC")
+        date_to <- as.POSIXct(paste0(input$selected_date2, " ", as.character(strftime(input$selected_time2, "%R"))), tz = "UTC")
+        # Preparation of the request
+        request_vector <- c(request_vector, "dates" = glue::glue(r"--["date" : { "$gte" : {"$date" : "<<date_from>>"} , "$lte" : {"$date" : "<<date_to>>"} }]--", .open = "<<", .close = ">>"))
         request_vector <- c(request_vector, "start_end" = glue::glue(r"--["start" : { "$gte" : "<<paste0(input$selected_date1, " ", strftime(input$selected_time1, "%H:%M"))>>" } , "end" : { "$lte" : "<<paste0(input$selected_date2, " ", strftime(input$selected_time2, "%H:%M"))>>" }]--", .open = "<<", .close = ">>"))
       }
       
@@ -300,26 +307,41 @@ mod_right_sidebar_server <- function(id, all_vars){
     # Defining of main tables depending on the request
     observeEvent(request(), {
       # Only args used for the events tables
-      events_args <- c("course", "mod", "app", "login", "dates")
-      apps_args <- c("icourse", "apps_mod", "app")
+      events_args <- c("icourse", "module", "app", "user", "dates", "type")
+      apps_args <- c("icourse", "module", "app")
       planning_args <- c("icourse", "start_end")
       # Preparing the request for the events tables
       if (request()[1] != "empty") {
+        # 1 : Events
         events_request <- prepare_request(request(), events_args)
+        # 2 : H5P
+        h5p_request <- prepare_request(request(), events_args, type = "h5p")
+        # 3 : Learnr
+        learnr_request <- prepare_request(request(), events_args, type = "learnr")
+        # 4 : Shiny
+        shiny_request <- prepare_request(request(), events_args, type = "shiny")
+        # 5 : Apps
         apps_request <- prepare_request(request(), apps_args)
+        # 6 : Planning
         planning_request <- prepare_request(request(), planning_args)
+        
         print(events_request)
       } else {
-        events_request <- "{}"
-        apps_request <- "{}"
-        planning_request <- "{}"
+        events_request <- '{}'
+        h5p_request <- '{ "type" : "h5p" }'
+        learnr_request <- '{ "type" : "learnr" }'
+        shiny_request <- '{ "type" : "shiny" }'
+        apps_request <- '{}'
+        planning_request <- '{}'
         print(events_request)
       }
       # Requesting to databases
       {message("requete events");events(try(sdd_events$find(events_request, limit = 50000), silent = TRUE))}
-      {message("requete h5p");h5p(try(sdd_h5p$find(events_request, limit = 1000), silent = TRUE))}
-      {message("requete learnr");learnr(try(sdd_learnr$find(events_request, limit = 1000), silent = TRUE))}
-      {message("requete shiny");shiny(try(sdd_shiny$find(events_request, limit = 1000), silent = TRUE))}
+      
+      {message("requete h5p");h5p(try(sdd_events$find(h5p_request, limit = 1000), silent = TRUE))}
+      {message("requete learnr");learnr(try(sdd_events$find(learnr_request, limit = 1000), silent = TRUE))}
+      {message("requete shiny");shiny(try(sdd_events$find(shiny_request, limit = 1000), silent = TRUE))}
+      
       {message("requete apps");apps(try(sdd_apps$find(apps_request), silent = TRUE))}
       {message("requete planning");planning(try(sdd_planning$find(planning_request), silent = TRUE))}
     })

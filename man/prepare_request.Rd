@@ -4,7 +4,7 @@
 \alias{prepare_request}
 \title{Pepare Request}
 \usage{
-prepare_request(request_vector, args)
+prepare_request(request_vector, args, type = NULL)
 }
 \arguments{
 \item{request_vector}{Vector of prepared arguments from selected choices.}
