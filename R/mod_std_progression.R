@@ -58,9 +58,7 @@ mod_std_progression_server <- function(id, all_vars){
     # Display test graph
     output$test_graph <- renderPlot({
       if (req(selected_login()) != "All") {
-        login_grades <- na.omit(h5p()[c("login", "app", "grade")])
-        ggplot2::ggplot(login_grades) +
-          geom_count(mapping = aes(x = grade, y = app))
+        plot(rnorm(30))
       }
     })
 

@@ -44,9 +44,9 @@ mod_right_sidebar_server <- function(id, all_vars){
     sdd_url <- "mongodb://127.0.0.1:27017/sdd"
     # To connect to them
     sdd_events <- try(mongolite::mongo("events", url = sdd_url), silent = TRUE)
-    sdd_h5p <- try(mongolite::mongo("h5p", url = sdd_url), silent = TRUE)
-    sdd_learnr <- try(mongolite::mongo("learnr", url = sdd_url), silent = TRUE)
-    sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url), silent = TRUE)
+    # sdd_h5p <- try(mongolite::mongo("h5p", url = sdd_url), silent = TRUE)
+    # sdd_learnr <- try(mongolite::mongo("learnr", url = sdd_url), silent = TRUE)
+    # sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url), silent = TRUE)
     sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
     sdd_users2 <- try(mongolite::mongo("users2", url = sdd_url), silent = TRUE)
     sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
@@ -284,9 +284,12 @@ mod_right_sidebar_server <- function(id, all_vars){
       if (input$is_dates == TRUE) {
         # Preparation of the dates
         date_from <- as.POSIXct(paste0(input$selected_date1, " ", as.character(strftime(input$selected_time1, "%R"))), tz = "UTC")
+        date_from <- format(date_from, "%Y-%m-%dT%H:%M:%SZ")
         date_to <- as.POSIXct(paste0(input$selected_date2, " ", as.character(strftime(input$selected_time2, "%R"))), tz = "UTC")
+        date_to <- format(date_to, "%Y-%m-%dT%H:%M:%SZ")
         # Preparation of the request
         request_vector <- c(request_vector, "dates" = glue::glue(r"--["date" : { "$gte" : {"$date" : "<<date_from>>"} , "$lte" : {"$date" : "<<date_to>>"} }]--", .open = "<<", .close = ">>"))
+        request_vector <- c(request_vector, "start_end_apps" = glue::glue(r"--["start" : { "$gte" : {"$date" : "<<date_from>>"} } , "end" : { "$lte" : {"$date" : "<<date_to>>"} }]--", .open = "<<", .close = ">>"))
         request_vector <- c(request_vector, "start_end" = glue::glue(r"--["start" : { "$gte" : "<<paste0(input$selected_date1, " ", strftime(input$selected_time1, "%H:%M"))>>" } , "end" : { "$lte" : "<<paste0(input$selected_date2, " ", strftime(input$selected_time2, "%H:%M"))>>" }]--", .open = "<<", .close = ">>"))
       }
       
@@ -308,7 +311,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     observeEvent(request(), {
       # Only args used for the events tables
       events_args <- c("icourse", "module", "app", "user", "dates", "type")
-      apps_args <- c("icourse", "module", "app")
+      apps_args <- c("icourse", "module", "app", "start_end_apps")
       planning_args <- c("icourse", "start_end")
       # --- Preparing the request for the events tables
       # 1 : Events
@@ -325,6 +328,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       planning_request <- prepare_request(request(), planning_args)
       
       print(events_request)
+      print(apps_request)
       
       # --- Preparing the logins from the users
       users2 <- try(unique(sdd_users2$find('{}', fields = '{"user" : true, "login" : true, "_id" : false}')), silent = TRUE)
@@ -355,29 +359,33 @@ mod_right_sidebar_server <- function(id, all_vars){
 
     # Variable : Request for news
     news_request <- reactive({
-      req(input$selected_news_time)
-      try(glue::glue(r"--[{ "date" : { "$gte" : "<<input$selected_news_time>>" } }]--", .open = "<<", .close = ">>"), silent = TRUE)
+      request_vector <- c()
+      news_time <- format(as.POSIXct(req(input$selected_news_time), tz = "UTC"), "%Y-%m-%dT%H:%M:%SZ")
+      request_vector <- c(request_vector, "news_date" = glue::glue(r"--["date" : { "$gte" : {"$date" : "<<news_time>>"} }]--", .open = "<<", .close = ">>"))
     })
     
     # Variable : h5p table with request for news
     h5p_news <- reactive({
-      news <- try(sdd_h5p$count(news_request()), silent = TRUE)
-      attr(news, "apps") <- try(sdd_h5p$distinct("app", query = news_request()), silent = TRUE)
-      attr(news, "courses") <- try(sdd_h5p$distinct("course", query = news_request()), silent = TRUE)
+      request <- prepare_request(news_request(), c("news_date", "type"), type = "h5p")
+      news <- try(sdd_events$count(request), silent = TRUE)
+      attr(news, "apps") <- try(sdd_events$distinct("app", query = request), silent = TRUE)
+      attr(news, "courses") <- try(sdd_events$distinct("course", query = request), silent = TRUE)
       return(news)
     })
     # Variable : learnr table with request for news
     learnr_news <- reactive({
-      news <- try(sdd_learnr$count(news_request()), silent = TRUE)
-      attr(news, "apps") <- try(sdd_learnr$distinct("app", query = news_request()), silent = TRUE)
-      attr(news, "courses") <- try(sdd_learnr$distinct("course", query = news_request()), silent = TRUE)
+      request <- prepare_request(news_request(), c("news_date", "type"), type = "learnr")
+      news <- try(sdd_events$count(request), silent = TRUE)
+      attr(news, "apps") <- try(sdd_events$distinct("app", query = request), silent = TRUE)
+      attr(news, "courses") <- try(sdd_events$distinct("course", query = request), silent = TRUE)
       return(news)
     })
     # Variable : shiny table with request for news
     shiny_news <- reactive({
-      news <- try(sdd_shiny$count(news_request()), silent = TRUE)
-      attr(news, "apps") <- try(sdd_shiny$distinct("app", query = news_request()), silent = TRUE)
-      attr(news, "courses") <- try(sdd_shiny$distinct("course", query = news_request()), silent = TRUE)
+      request <- prepare_request(news_request(), c("news_date", "type"), type = "shiny")
+      news <- try(sdd_events$count(request), silent = TRUE)
+      attr(news, "apps") <- try(sdd_events$distinct("app", query = request), silent = TRUE)
+      attr(news, "courses") <- try(sdd_events$distinct("course", query = request), silent = TRUE)
       return(news)
     })
 

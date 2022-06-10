@@ -68,7 +68,9 @@ mod_home_page_server <- function(id, all_vars){
       if (!inherits(h5p_news(), "try-error")) {
         infoBox(
           title = "H5P",
-          subtitle = paste0("New entries since : ", selected_news_time()),
+          subtitle = if (h5p_news() > 0) {
+            paste0("New entries since : ", selected_news_time())
+          } else {NULL},
           # Show the amount of changes if there are some
           value = if (h5p_news() > 0) {
             h5p_news()
@@ -93,7 +95,9 @@ mod_home_page_server <- function(id, all_vars){
       if (!inherits(learnr_news(), "try-error")) {
         infoBox(
           title = "Learnr",
-          subtitle = paste0("New entries since : ", selected_news_time()),
+          subtitle = if (shiny_news() > 0) {
+            paste0("New entries since : ", selected_news_time())
+          } else {NULL},
           # Show the amount of changes if there are some
           value = if (learnr_news() > 0) {
             learnr_news()
@@ -118,7 +122,9 @@ mod_home_page_server <- function(id, all_vars){
       if (!inherits(shiny_news(), "try-error")) {
         infoBox(
           title = "Shiny",
-          subtitle = paste0("New entries since : ", selected_news_time()),
+          subtitle = if (learnr_news() > 0) {
+            paste0("New entries since : ", selected_news_time())
+          } else {NULL},
           # Show the amount of changes if there are some
           value = if (shiny_news() > 0) {
             shiny_news()
@@ -147,9 +153,7 @@ mod_home_page_server <- function(id, all_vars){
           # Show the apps if there are
           subtitle = if (length(attr(h5p_news(), "apps")) > 0) {
             selectInput(ns("h5p_apps_show"), NULL, choices = attr(h5p_news(), "apps"))
-          } else {
-            NULL
-          },
+          } else {NULL},
           # Show the amoun of apps that changed and in how much courses
           value = if (h5p_news() > 0) {
             paste0(length(attr(h5p_news(), "apps")), " apps changed in ", length(attr(h5p_news(), "courses")), " courses")
@@ -175,9 +179,7 @@ mod_home_page_server <- function(id, all_vars){
           # Show the apps if there are
           subtitle = if (length(attr(learnr_news(), "apps")) > 0) {
             selectInput(ns("learnr_apps_show"), NULL, choices = attr(learnr_news(), "apps"))
-          } else {
-            NULL
-          },
+          } else {NULL},
           # Show the amoun of apps that changed and in how much courses
           value = if (learnr_news() > 0) {
             paste0(length(attr(learnr_news(), "apps")), " apps changed in ", length(attr(learnr_news(), "courses")), " courses")
@@ -203,9 +205,7 @@ mod_home_page_server <- function(id, all_vars){
           # Show the apps if there are
           subtitle = if (length(attr(shiny_news(), "apps")) > 0) {
             selectInput(ns("shiny_apps_show"), NULL, choices = attr(shiny_news(), "apps"))
-          } else {
-            NULL
-          },
+          } else {NULL},
           # Show the amoun of apps that changed and in how much courses
           value = if (shiny_news() > 0) {
             paste0(length(attr(shiny_news(), "apps")), " apps changed in ", length(attr(shiny_news(), "courses")), " courses")
