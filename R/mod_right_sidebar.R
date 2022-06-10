@@ -276,7 +276,7 @@ mod_right_sidebar_server <- function(id, all_vars){
         # Preparation of the request to get user from login
         users2_request <- glue::glue(r"--[{"login" : "<<input$selected_login>>"}]--", .open = "<<", .close = ">>")
         # Get the user from the selected login inside of the users2 table
-        user <- unique(sdd_users2$find(users2_request, fields = '{"user" : true}')$user)
+        user <- try(unique(sdd_users2$find(users2_request, fields = '{"user" : true}')$user), silent = TRUE)
         request_vector <- c(request_vector, "user" = glue::glue(r"--["user" : "<<user>>"]--", .open = "<<", .close = ">>"))
       }
       
@@ -310,37 +310,42 @@ mod_right_sidebar_server <- function(id, all_vars){
       events_args <- c("icourse", "module", "app", "user", "dates", "type")
       apps_args <- c("icourse", "module", "app")
       planning_args <- c("icourse", "start_end")
-      # Preparing the request for the events tables
-      if (request()[1] != "empty") {
-        # 1 : Events
-        events_request <- prepare_request(request(), events_args)
-        # 2 : H5P
-        h5p_request <- prepare_request(request(), events_args, type = "h5p")
-        # 3 : Learnr
-        learnr_request <- prepare_request(request(), events_args, type = "learnr")
-        # 4 : Shiny
-        shiny_request <- prepare_request(request(), events_args, type = "shiny")
-        # 5 : Apps
-        apps_request <- prepare_request(request(), apps_args)
-        # 6 : Planning
-        planning_request <- prepare_request(request(), planning_args)
-        
-        print(events_request)
-      } else {
-        events_request <- '{}'
-        h5p_request <- '{ "type" : "h5p" }'
-        learnr_request <- '{ "type" : "learnr" }'
-        shiny_request <- '{ "type" : "shiny" }'
-        apps_request <- '{}'
-        planning_request <- '{}'
-        print(events_request)
-      }
-      # Requesting to databases
-      {message("requete events");events(try(sdd_events$find(events_request, limit = 50000), silent = TRUE))}
+      # --- Preparing the request for the events tables
+      # 1 : Events
+      events_request <- prepare_request(request(), events_args)
+      # 2 : H5P
+      h5p_request <- prepare_request(request(), events_args, type = "h5p")
+      # 3 : Learnr
+      learnr_request <- prepare_request(request(), events_args, type = "learnr")
+      # 4 : Shiny
+      shiny_request <- prepare_request(request(), events_args, type = "shiny")
+      # 5 : Apps
+      apps_request <- prepare_request(request(), apps_args)
+      # 6 : Planning
+      planning_request <- prepare_request(request(), planning_args)
       
-      {message("requete h5p");h5p(try(sdd_events$find(h5p_request, limit = 1000), silent = TRUE))}
-      {message("requete learnr");learnr(try(sdd_events$find(learnr_request, limit = 1000), silent = TRUE))}
-      {message("requete shiny");shiny(try(sdd_events$find(shiny_request, limit = 1000), silent = TRUE))}
+      print(events_request)
+      
+      # --- Preparing the logins from the users
+      users2 <- try(unique(sdd_users2$find('{}', fields = '{"user" : true, "login" : true, "_id" : false}')), silent = TRUE)
+      users_login <- users2$login
+      names(users_login) <- users2$user
+      
+      # --- Requesting to databases
+      {message("requete events");events(try(sdd_events$find(events_request, limit = 10000), silent = TRUE))}
+      
+      # Preparation of the h5p table with good logins instead of users
+      h5p_table <- {message("requete h5p"); try(sdd_events$find(h5p_request, limit = 1000), silent = TRUE)}
+      h5p_table$user <- as.character(users_login[h5p_table$user])
+      h5p(h5p_table)
+      # Preparation of the learnr table with good logins instead of users
+      learnr_table <- {message("requete learnr"); try(sdd_events$find(learnr_request, limit = 1000), silent = TRUE)}
+      learnr_table$user <- as.character(users_login[learnr_table$user])
+      learnr(learnr_table)
+      # Preparation of the shiny table with good logins instead of users
+      shiny_table <- {message("requete shiny"); try(sdd_events$find(shiny_request, limit = 1000), silent = TRUE)}
+      shiny_table$user <- as.character(users_login[shiny_table$user])
+      shiny(shiny_table)
       
       {message("requete apps");apps(try(sdd_apps$find(apps_request), silent = TRUE))}
       {message("requete planning");planning(try(sdd_planning$find(planning_request), silent = TRUE))}
