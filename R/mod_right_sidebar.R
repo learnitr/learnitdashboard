@@ -405,6 +405,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       learnr_news = NULL,
       shiny_news = NULL,
       selected_news_time = NULL,
+      selected_module = NULL,
       selected_app = NULL,
     )
     
@@ -422,6 +423,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       right_sidebar_vars$learnr_news <- learnr_news()
       right_sidebar_vars$shiny_news <- shiny_news()
       right_sidebar_vars$selected_news_time <- input$selected_news_time
+      right_sidebar_vars$selected_module <- input$selected_module
       right_sidebar_vars$selected_app <- input$selected_app
     })
     

@@ -27,6 +27,7 @@ mod_home_page_ui <- function(id){
     # Template slots for graph
     uiOutput(ns("slot1")),
     uiOutput(ns("slot2")),
+    uiOutput(ns("slot3")),
     
     # UIoutput to generate a timeline of the different apps
     # uiOutput(ns("ui_apps_timeline_1")),
@@ -50,6 +51,8 @@ mod_home_page_server <- function(id, all_vars){
     learnr_news <- reactive({all_vars$right_sidebar_vars$learnr_news})
     shiny_news <- reactive({all_vars$right_sidebar_vars$shiny_news})
     selected_news_time <- reactive({all_vars$right_sidebar_vars$selected_news_time})
+    selected_course <- reactive({all_vars$right_sidebar_vars$selected_course})
+    selected_module <- reactive({all_vars$right_sidebar_vars$selected_module})
     selected_app <- reactive({all_vars$right_sidebar_vars$selected_app})
     
 # Global Vars -------------------------------------------------------------
@@ -57,7 +60,8 @@ mod_home_page_server <- function(id, all_vars){
     # URL to access databases
     sdd_url <- "mongodb://127.0.0.1:27017/sdd"
     # To connect to users
-    sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
+    sdd_users2 <- try(mongolite::mongo("users2", url = sdd_url), silent = TRUE)
+    sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
     
 # Display Boxes -----------------------------------------------------------
 
@@ -244,25 +248,59 @@ mod_home_page_server <- function(id, all_vars){
 
 # Template slots ----------------------------------------------------------
 
+    # Slot for global home information
     output$slot1 <- renderUI({
-      if (!inherits(sdd_users, "try-error")) {
+      if (!inherits(sdd_apps, "try-error")) {
         tagList(
-          box( title = "Slot 1", solidHeader = TRUE,
-               width = 6, icon = shiny::icon("user-check", verify_fa = FALSE), collapsible = TRUE,
-               collapsed = TRUE, status = "purple",
-               "Content"
+          box(
+            title = if (req(selected_course()) != "All") {
+              paste0("Course : ", selected_course())
+            } else {
+              "Course"
+            },
+            solidHeader = TRUE,
+            width = 4, icon = shiny::icon("book-open", verify_fa = FALSE),
+            collapsible = TRUE, collapsed = TRUE, status = "purple",
+            "Content"
           )
         )
       }
     })
     
+    # Slot for global home information
     output$slot2 <- renderUI({
-      if (!inherits(sdd_users, "try-error")) {
+      if (!inherits(sdd_apps, "try-error")) {
         tagList(
-          box( title = "Slot 2", solidHeader = TRUE,
-               width = 6, icon = shiny::icon("user-check", verify_fa = FALSE), collapsible = TRUE,
-               collapsed = TRUE, status = "purple",
-               "Content"
+          box(
+            title = if (req(selected_module()) != "All") {
+              paste0("Module : ", selected_module())
+            } else {
+              "Module"
+            },
+            solidHeader = TRUE,
+            width = 4, icon = shiny::icon("shapes", verify_fa = FALSE),
+            collapsible = TRUE, collapsed = TRUE, status = "purple",
+            "Content"
+          )
+        )
+      }
+    })
+    
+    # Slot for global home information
+    output$slot3 <- renderUI({
+      if (!inherits(sdd_apps, "try-error")) {
+        # app <- sdd_apps$find('{}')
+        tagList(
+          box( 
+            title = if (req(selected_app()) != "All") {
+              paste0("App : ", selected_app())
+            } else {
+              "App"
+            },
+            solidHeader = TRUE,
+            width = 4, icon = shiny::icon("tablet", verify_fa = FALSE),
+            collapsible = TRUE, collapsed = TRUE, status = "purple",
+            "Content"
           )
         )
       }
@@ -272,7 +310,7 @@ mod_home_page_server <- function(id, all_vars){
 
     # Display // UI for the plot of students in courses
     output$courses_students_plot <- renderUI({
-      if (!inherits(sdd_users, "try-error")) {
+      if (!inherits(sdd_users2, "try-error")) {
         tagList(
           box( title = "Amount of Students per Course", solidHeader = TRUE,
             width = 10, icon = shiny::icon("user-check", verify_fa = FALSE), collapsible = TRUE,
@@ -290,7 +328,7 @@ mod_home_page_server <- function(id, all_vars){
     output$courses_students <- renderPlot({
       
       # Getting the data of students and their course + enrolled
-      users <- try(sdd_users$find('{}', fields = '{ "user_login" : true , "icourse" : true , "enrolled" : true}')[c("user_login", "icourse", "enrolled")], silent = TRUE)
+      users <- try(sdd_users2$find('{}', fields = '{ "login" : true , "icourse" : true , "enrolled" : true, "_id" : false}'), silent = TRUE)
       
       # Put off the NA's if show_na is false 
       if (input$show_na == FALSE && !inherits(users, "try-error")) {
@@ -299,6 +337,7 @@ mod_home_page_server <- function(id, all_vars){
       
       # If there are no errors, create the plot of nb of students in courses filled by enrolled or not
       if (!inherits(users, "try-error") && !is.null(users)) {
+        users$enrolled <- ifelse(users$enrolled == TRUE, "yes", "no")
         ggplot(data = users) +
           geom_bar(mapping = aes(icourse, fill = enrolled)) +
           xlab("Courses") +
