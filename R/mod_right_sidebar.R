@@ -17,10 +17,10 @@ mod_right_sidebar_ui <- function(id){
       uiOutput(ns("ui_module_selector")),
       # Selector of app :
       uiOutput(ns("ui_app_selector")),
-      # Selector of enrolled :
-      uiOutput(ns("ui_enrolled_selector")),
       # Selector of login :
       uiOutput(ns("ui_login_selector")),
+      # Selector of enrolled :
+      uiOutput(ns("ui_enrolled_selector")),
       # Selectors of time range :
       tags$h3("Time :"),
       checkboxInput(ns("is_dates"), h4("Select Dates", style = "margin : 0px;")),
@@ -149,8 +149,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       
       if (!inherits(sdd_users, "try-error")) {
       tagList(
-        tags$h3("Login :"),
-        checkboxInput(ns("only_enrolled"), "Only Enrolled", value = FALSE)
+        checkboxInput(ns("only_enrolled"), "Only Enrolled", value = TRUE)
       )
       } else { NULL }
     })
@@ -182,12 +181,16 @@ mod_right_sidebar_server <- function(id, all_vars){
       # If no errors to get the logins : Display the selector
       if (!inherits(logins, "try-error") && length(logins > 0)) {
         tagList(
+          tags$h3("Student :"),
           # Creation of selector with choices "All" and the logins of course or all
           selectInput(ns("selected_login"), NULL, choices = c("All", logins))
         )
       # Create an invisible selector with value NULL to get nothing from the request
-      } else { 
-        selectInput(ns("selected_login"), NULL, choices = "NULL")
+      } else {
+        tagList(
+          tags$h3("Student :"),
+          selectInput(ns("selected_login"), NULL, choices = "NULL")
+        )
       }
       
     })
@@ -336,18 +339,18 @@ mod_right_sidebar_server <- function(id, all_vars){
       names(users_login) <- users2$user
       
       # --- Requesting to databases
-      {message("requete events");events(try(sdd_events$find(events_request, limit = 10000), silent = TRUE))}
+      {message("requete events");events(try(sdd_events$find(events_request, limit = 10000L), silent = TRUE))}
       
       # Preparation of the h5p table with good logins instead of users
-      h5p_table <- {message("requete h5p"); try(sdd_events$find(h5p_request, limit = 1000), silent = TRUE)}
+      h5p_table <- {message("requete h5p"); try(sdd_events$find(h5p_request, limit = 1000L), silent = TRUE)}
       h5p_table$user <- as.character(users_login[h5p_table$user])
       h5p(h5p_table)
       # Preparation of the learnr table with good logins instead of users
-      learnr_table <- {message("requete learnr"); try(sdd_events$find(learnr_request, limit = 1000), silent = TRUE)}
+      learnr_table <- {message("requete learnr"); try(sdd_events$find(learnr_request, limit = 1000L), silent = TRUE)}
       learnr_table$user <- as.character(users_login[learnr_table$user])
       learnr(learnr_table)
       # Preparation of the shiny table with good logins instead of users
-      shiny_table <- {message("requete shiny"); try(sdd_events$find(shiny_request, limit = 1000), silent = TRUE)}
+      shiny_table <- {message("requete shiny"); try(sdd_events$find(shiny_request, limit = 1000L), silent = TRUE)}
       shiny_table$user <- as.character(users_login[shiny_table$user])
       shiny(shiny_table)
       
