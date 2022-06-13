@@ -256,7 +256,7 @@ mod_home_page_server <- function(id, all_vars){
             title = if (req(selected_course()) != "All") {
               paste0("Course : ", selected_course())
             } else {
-              "Course"
+              "Courses"
             },
             solidHeader = TRUE,
             width = 4, icon = shiny::icon("book-open", verify_fa = FALSE),
@@ -275,7 +275,7 @@ mod_home_page_server <- function(id, all_vars){
             title = if (req(selected_module()) != "All") {
               paste0("Module : ", selected_module())
             } else {
-              "Module"
+              "Modules"
             },
             solidHeader = TRUE,
             width = 4, icon = shiny::icon("shapes", verify_fa = FALSE),
@@ -295,7 +295,7 @@ mod_home_page_server <- function(id, all_vars){
             title = if (req(selected_app()) != "All") {
               paste0("App : ", selected_app())
             } else {
-              "App"
+              "Apps"
             },
             solidHeader = TRUE,
             width = 4, icon = shiny::icon("tablet", verify_fa = FALSE),

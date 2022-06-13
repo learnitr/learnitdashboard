@@ -47,7 +47,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     # sdd_h5p <- try(mongolite::mongo("h5p", url = sdd_url), silent = TRUE)
     # sdd_learnr <- try(mongolite::mongo("learnr", url = sdd_url), silent = TRUE)
     # sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url), silent = TRUE)
-    sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
+    # sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
     sdd_users2 <- try(mongolite::mongo("users2", url = sdd_url), silent = TRUE)
     sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
     sdd_planning <- try(mongolite::mongo("planning", url = sdd_url), silent = TRUE)
@@ -147,49 +147,33 @@ mod_right_sidebar_server <- function(id, all_vars){
     # Display // Enrolled selector
     output$ui_enrolled_selector <- renderUI({
       
-      if (!inherits(sdd_users, "try-error")) {
+      if (!inherits(sdd_users2, "try-error")) {
       tagList(
         checkboxInput(ns("only_enrolled"), "Only Enrolled", value = TRUE)
       )
       } else { NULL }
     })
     
-    # Display // Login selector
+    # Display // User selector
     output$ui_login_selector <- renderUI({
       
-      logins <- c()
-      # Getting the logins from selected course
-      if (req(input$selected_course) != "All") {
-        # If only the enrolled
-        if (input$only_enrolled == TRUE) {
-          logins <- try(sort(sdd_users2$distinct("login", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" , "enrolled" : true }]--", .open = "<<", .close = ">>"))), silent = TRUE)
-        # If not only the enrolled
-        } else {
-          logins <- try(sort(sdd_users2$distinct("login", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
-        }
-      # Getting the logins from all courses
-      } else {
-        # If only the enrolled
-        if (input$only_enrolled == TRUE) {
-          logins <- try(sort(sdd_users2$distinct("login", query = r"--[{"enrolled" : true}]--")), silent = TRUE)
-        # If not only the enrolled
-        } else {
-          logins <- try(sort(sdd_users2$distinct("login")), silent = TRUE)
-        }
-      }
+      req(input$selected_course)
       
-      # If no errors to get the logins : Display the selector
-      if (!inherits(logins, "try-error") && length(logins > 0)) {
+      # Getting the users with the function from the selectors
+      users <- try(get_users(input$selected_course, input$only_enrolled, sdd_users2), silent = TRUE)
+      
+      # If no errors to get the users : Display the selector
+      if (!inherits(users, "try-error") && length(users > 0)) {
         tagList(
           tags$h3("Student :"),
-          # Creation of selector with choices "All" and the logins of course or all
-          selectInput(ns("selected_login"), NULL, choices = c("All", logins))
+          # Creation of selector with choices "All" and the users of course or all
+          selectInput(ns("selected_user"), NULL, choices = c("All", users))
         )
       # Create an invisible selector with value NULL to get nothing from the request
       } else {
         tagList(
           tags$h3("Student :"),
-          selectInput(ns("selected_login"), NULL, choices = "NULL")
+          selectInput(ns("selected_user"), NULL, choices = "NULL")
         )
       }
       
@@ -224,7 +208,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     # Display // News Time selector
     output$ui_news_time_selector <- renderUI({
       
-      if (!inherits(sdd_users, "try-error")) {
+      if (!inherits(sdd_events, "try-error")) {
         # Setting the date to 7 days before the actual date
         time <- Sys.time()
         lubridate::day(time) <- lubridate::day(time) - 7
@@ -247,7 +231,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     # Variable : Definition of the request depending on login, app and dates/times
     observeEvent({
       input$selected_course
-      input$selected_login
+      input$selected_user
       input$selected_module
       input$selected_app
       input$is_dates
@@ -275,12 +259,8 @@ mod_right_sidebar_server <- function(id, all_vars){
       }
       
       # Creation of the request part for user if request there is
-      if (is_request(input$selected_login)) {
-        # Preparation of the request to get user from login
-        users2_request <- glue::glue(r"--[{"login" : "<<input$selected_login>>"}]--", .open = "<<", .close = ">>")
-        # Get the user from the selected login inside of the users2 table
-        user <- try(unique(sdd_users2$find(users2_request, fields = '{"user" : true}')$user), silent = TRUE)
-        request_vector <- c(request_vector, "user" = glue::glue(r"--["user" : "<<user>>"]--", .open = "<<", .close = ">>"))
+      if (is_request(input$selected_user)) {
+        request_vector <- c(request_vector, "user" = glue::glue(r"--["user" : "<<input$selected_user>>"]--", .open = "<<", .close = ">>"))
       }
       
       # Creation of the request part for dates if request there is
@@ -335,8 +315,10 @@ mod_right_sidebar_server <- function(id, all_vars){
       
       # --- Preparing the logins from the users
       users2 <- try(unique(sdd_users2$find('{}', fields = '{"user" : true, "login" : true, "_id" : false}')), silent = TRUE)
-      users_login <- users2$login
-      names(users_login) <- users2$user
+      if (!inherits(users2, "try-error")) {
+        users_login <- users2$login
+        names(users_login) <- users2$user
+      }
       
       # --- Requesting to databases
       {message("requete events");events(try(sdd_events$find(events_request, limit = 10000L), silent = TRUE))}
@@ -396,7 +378,7 @@ mod_right_sidebar_server <- function(id, all_vars){
 
     # Variable : all of module's vars
     right_sidebar_vars <- reactiveValues(
-      selected_login = NULL,
+      selected_user = NULL,
       selected_course = NULL,
       events = NULL,
       h5p = NULL,
@@ -414,7 +396,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     
     # Updating the vars
     observe({
-      right_sidebar_vars$selected_login <- input$selected_login
+      right_sidebar_vars$selected_user <- input$selected_user
       right_sidebar_vars$selected_course <- input$selected_course
       right_sidebar_vars$events <- events()
       right_sidebar_vars$h5p <- h5p()

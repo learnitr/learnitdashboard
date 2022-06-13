@@ -27,17 +27,16 @@ mod_std_progression_server <- function(id, all_vars){
 # Getting Modules Vars ----------------------------------------------------
     
     # Vars from right_sidebar
-    selected_login <- reactive({all_vars$right_sidebar_vars$selected_login})
+    selected_user <- reactive({all_vars$right_sidebar_vars$selected_user})
     h5p <- reactive({all_vars$right_sidebar_vars$h5p})
     
 # Display Progression -----------------------------------------------------
 
     # Display the progression of selected student or message if all selected
     output$stdp_progression <- renderUI({
-      req(selected_login())
-      
+      req(selected_user())
       # Message if nothing selected
-      if (selected_login() == "All") {
+      if (selected_user() == "All" || selected_user() == "NULL") {
         tagList(
           # Dashboard box
           box( title = "Graph :", status = "primary", solidHeader = TRUE, width = 8,
@@ -45,10 +44,10 @@ mod_std_progression_server <- function(id, all_vars){
           )
         )
       # Progression if login selected
-      } else if (selected_login() != "All") {
+      } else if (selected_user() != "All" && selected_user() != "NULL") {
         tagList(
           # Dashboard box
-          box( title = paste0("Graph : ",selected_login()), status = "primary", solidHeader = TRUE, width = 8,
+          box( title = paste0("Graph : ", selected_user()), status = "primary", solidHeader = TRUE, width = 8,
             plotOutput(ns("test_graph"))
           )
         )
@@ -57,7 +56,7 @@ mod_std_progression_server <- function(id, all_vars){
     
     # Display test graph
     output$test_graph <- renderPlot({
-      if (req(selected_login()) != "All") {
+      if (req(selected_user()) != "All" && req(selected_user()) != "NULL") {
         plot(rnorm(30))
       }
     })
