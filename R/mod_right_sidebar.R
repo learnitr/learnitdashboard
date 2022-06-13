@@ -38,15 +38,7 @@ mod_right_sidebar_server <- function(id, all_vars){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-# Global Vars / Connecting to DB ------------------------------------------
-
-    # URL to access databases
-    sdd_url <- "mongodb://127.0.0.1:27017/sdd"
-    # To connect to them
-    sdd_events <- try(mongolite::mongo("events", url = sdd_url), silent = TRUE)
-    sdd_users2 <- try(mongolite::mongo("users2", url = sdd_url), silent = TRUE)
-    sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
-    sdd_planning <- try(mongolite::mongo("planning", url = sdd_url), silent = TRUE)
+# Tables Reactive Vars ------------------------------------------
     
     # === Events Table ===
     # Variable : Events
@@ -144,7 +136,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       req(input$selected_course)
       
       # Getting the users with the function from the selectors
-      users <- try(get_users(input$selected_course, input$only_enrolled, sdd_users2), silent = TRUE)
+      users <- try(get_users(input$selected_course, input$only_enrolled, users2_init, acad_year), silent = TRUE)
       
       # If no errors to get the users : Display the selector
       if (!inherits(users, "try-error") && length(users > 0)) {
@@ -226,20 +218,32 @@ mod_right_sidebar_server <- function(id, all_vars){
     }, {
       # Creation of empty vector for the request
       request_vector <- c()
+      apps_table <- apps_init
+      planning_table <- planning_init
       
       # Creation of the request part for course if request there is
       if (is_request(input$selected_course)) {
         request_vector <- c(request_vector, "icourse" = glue::glue(r"--["icourse" : "<<input$selected_course>>"]--", .open = "<<", .close = ">>"))
+        
+        # Apps table icourse condition
+        apps_table <- apps_table[apps_table$icourse == input$selected_course,]
+        planning_table <- planning_table[planning_table$icourse == input$selected_course,]
       }
       
       # Creation of the request part for module if request there is
       if (is_request(input$selected_module) && !is_request(input$selected_app)) {
         request_vector <- c(request_vector, "module" = glue::glue(r"--["module" : "<<input$selected_module>>"]--", .open = "<<", .close = ">>"))
+        
+        # Apps table module condition
+        apps_table <- apps_table[apps_table$module == input$selected_module,]
       }
       
       # Creation of the request part for app if request there is
       if (is_request(input$selected_app)) {
         request_vector <- c(request_vector, "app" = glue::glue(r"--["app" : "<<input$selected_app>>"]--", .open = "<<", .close = ">>"))
+        
+        # Apps table app condition
+        apps_table <- apps_table[apps_table$app == input$selected_app,]
       }
       
       # Creation of the request part for user if request there is
@@ -256,9 +260,16 @@ mod_right_sidebar_server <- function(id, all_vars){
         date_to <- format(date_to, "%Y-%m-%dT%H:%M:%SZ")
         # Preparation of the request
         request_vector <- c(request_vector, "dates" = glue::glue(r"--["date" : { "$gte" : {"$date" : "<<date_from>>"} , "$lte" : {"$date" : "<<date_to>>"} }]--", .open = "<<", .close = ">>"))
-        request_vector <- c(request_vector, "start_end_apps" = glue::glue(r"--["start" : { "$gte" : {"$date" : "<<date_from>>"} } , "end" : { "$lte" : {"$date" : "<<date_to>>"} }]--", .open = "<<", .close = ">>"))
-        request_vector <- c(request_vector, "start_end" = glue::glue(r"--["start" : { "$gte" : "<<paste0(input$selected_date1, " ", strftime(input$selected_time1, "%H:%M"))>>" } , "end" : { "$lte" : "<<paste0(input$selected_date2, " ", strftime(input$selected_time2, "%H:%M"))>>" }]--", .open = "<<", .close = ">>"))
+        request_vector <- c(request_vector, "start_end" = glue::glue(r"--["start" : { "$lte" : {"$date" : "<<date_to>>"} } , "end" : { "$gte" : {"$date" : "<<date_from>>"} }]--", .open = "<<", .close = ">>"))
+        
+        # Apps table date condition
+        apps_table <- apps_table[apps_table$start < date_to & apps_table$end > date_from,]
+        planning_table <- planning_table[planning_table$start < date_to & planning_table$end > date_from,]
       }
+      
+      # Setting the apps_table in the reactiveVal after every selection
+      apps(apps_table)
+      planning(planning_table)
       
       # If the vector is not null, return the vector, if it is, return "empty" to make empty request 
       if (!is.null(request_vector)) {
@@ -272,18 +283,18 @@ mod_right_sidebar_server <- function(id, all_vars){
     observeEvent(request(), {
       # Only args used for the events tables
       events_args <- c("icourse", "module", "app", "user", "dates", "type")
-      apps_args <- c("icourse", "module", "app", "start_end_apps")
-      planning_args <- c("icourse", "start_end")
+      # apps_args <- c("icourse", "module", "app", "start_end")
+      # planning_args <- c("icourse", "start_end")
       # --- Preparing the request for the events tables
       # 1 : Events
       events_request <- prepare_request(request(), events_args)
       # 2 : Apps
-      apps_request <- prepare_request(request(), apps_args)
+      # apps_request <- prepare_request(request(), apps_args)
       # 3 : Planning
-      planning_request <- prepare_request(request(), planning_args)
+      # planning_request <- prepare_request(request(), planning_args)
       
       print(events_request)
-      print(apps_request)
+      # print(apps_request)
       
       # --- Preparing the logins from the users
       users2 <- try(unique(sdd_users2$find('{}', fields = '{"user" : true, "login" : true, "_id" : false}')), silent = TRUE)
@@ -297,8 +308,8 @@ mod_right_sidebar_server <- function(id, all_vars){
       events_table$user <- as.character(users_login[events_table$user])
       events(events_table)
       
-      {message("requete apps");apps(try(sdd_apps$find(apps_request), silent = TRUE))}
-      {message("requete planning");planning(try(sdd_planning$find(planning_request), silent = TRUE))}
+      # {message("requete apps");apps(try(sdd_apps$find(apps_request), silent = TRUE))}
+      # {message("requete planning");planning(try(sdd_planning$find(planning_request), silent = TRUE))}
     })
 
 # News Request ------------------------------------------------------------
