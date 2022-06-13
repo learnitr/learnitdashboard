@@ -10,6 +10,8 @@ prepare_request(request_vector, args, type = NULL)
 \item{request_vector}{Vector of prepared arguments from selected choices.}
 
 \item{args}{Vector of selected arguments to use in the request.}
+
+\item{type}{Type of table to query. Can be h5p, learnr or shiny.}
 }
 \value{
 A string request with the chosen arguments.

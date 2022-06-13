@@ -10,7 +10,7 @@
 #' @export
 #'
 #' @examples
-#' Need a reactive context and a MongoDB database
+#' # Need a reactive context and a MongoDB database
 get_users <- function(selected_course, only_enrolled, sdd_users2) {
   
   # Case 1 : Course is selected and Enrolled is TRUE

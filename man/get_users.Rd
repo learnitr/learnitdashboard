@@ -20,5 +20,5 @@ A vector of users_id name by logins and lastnames
 Get a vector of users_id named by logins and lastnames from a selected course and with enrolled only or everyone
 }
 \examples{
-Need a reactive context and a MongoDB database
+# Need a reactive context and a MongoDB database
 }

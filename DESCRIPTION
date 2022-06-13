@@ -8,6 +8,7 @@ License: GPL (>= 3)
 Imports: 
     config (>= 0.3.1),
     DT,
+    ggplot2,
     glue,
     golem (>= 0.3.2),
     lubridate,
@@ -19,6 +20,7 @@ Imports:
     shinyjs,
     shinythemes,
     shinyTime,
+    stats,
     timevis,
     utils
 Suggests: 

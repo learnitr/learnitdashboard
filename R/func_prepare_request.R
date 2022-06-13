@@ -4,6 +4,8 @@
 #'
 #' @param request_vector Vector of prepared arguments from selected choices.
 #' @param args Vector of selected arguments to use in the request.
+#' @param type Type of table to query. Can be h5p, learnr or shiny.
+#' 
 #'
 #' @return A string request with the chosen arguments.
 #' @export

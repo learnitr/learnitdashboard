@@ -14,6 +14,7 @@ run_app <- function(
   uiPattern = "/",
   ...
 ) {
+  source(system.file("global.R",package = "learnitdashboard"))
   with_golem_options(
     app = shinyApp(
       ui = app_ui,
