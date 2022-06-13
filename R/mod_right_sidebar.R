@@ -44,10 +44,6 @@ mod_right_sidebar_server <- function(id, all_vars){
     sdd_url <- "mongodb://127.0.0.1:27017/sdd"
     # To connect to them
     sdd_events <- try(mongolite::mongo("events", url = sdd_url), silent = TRUE)
-    # sdd_h5p <- try(mongolite::mongo("h5p", url = sdd_url), silent = TRUE)
-    # sdd_learnr <- try(mongolite::mongo("learnr", url = sdd_url), silent = TRUE)
-    # sdd_shiny <- try(mongolite::mongo("shiny", url = sdd_url), silent = TRUE)
-    # sdd_users <- try(mongolite::mongo("users", url = sdd_url), silent = TRUE)
     sdd_users2 <- try(mongolite::mongo("users2", url = sdd_url), silent = TRUE)
     sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
     sdd_planning <- try(mongolite::mongo("planning", url = sdd_url), silent = TRUE)
@@ -55,18 +51,6 @@ mod_right_sidebar_server <- function(id, all_vars){
     # === Events Table ===
     # Variable : Events
     events <- reactiveVal()
-    
-    # === H5P Table ===
-    # Variable : H5P
-    h5p <- reactiveVal()
-    
-    # === Learnr Table ===
-    # Variable : Learnr
-    learnr <- reactiveVal()
-    
-    # === Shiny Table ===
-    # Variable : Shiny
-    shiny <- reactiveVal()
     
     # === Apps Table ===
     apps <- reactiveVal()
@@ -276,12 +260,6 @@ mod_right_sidebar_server <- function(id, all_vars){
         request_vector <- c(request_vector, "start_end" = glue::glue(r"--["start" : { "$gte" : "<<paste0(input$selected_date1, " ", strftime(input$selected_time1, "%H:%M"))>>" } , "end" : { "$lte" : "<<paste0(input$selected_date2, " ", strftime(input$selected_time2, "%H:%M"))>>" }]--", .open = "<<", .close = ">>"))
       }
       
-      # Definition of the request
-      # build_request <- r"--[{<<paste(request_vector, collapse = " , ")>>}]--"
-      
-      # Send the request after evaluating it
-      # request(glue::glue(build_request, .open = "<<", .close = ">>"))
-      
       # If the vector is not null, return the vector, if it is, return "empty" to make empty request 
       if (!is.null(request_vector)) {
         request(request_vector)
@@ -299,15 +277,9 @@ mod_right_sidebar_server <- function(id, all_vars){
       # --- Preparing the request for the events tables
       # 1 : Events
       events_request <- prepare_request(request(), events_args)
-      # 2 : H5P
-      h5p_request <- prepare_request(request(), events_args, type = "h5p")
-      # 3 : Learnr
-      learnr_request <- prepare_request(request(), events_args, type = "learnr")
-      # 4 : Shiny
-      shiny_request <- prepare_request(request(), events_args, type = "shiny")
-      # 5 : Apps
+      # 2 : Apps
       apps_request <- prepare_request(request(), apps_args)
-      # 6 : Planning
+      # 3 : Planning
       planning_request <- prepare_request(request(), planning_args)
       
       print(events_request)
@@ -321,20 +293,9 @@ mod_right_sidebar_server <- function(id, all_vars){
       }
       
       # --- Requesting to databases
-      {message("requete events");events(try(sdd_events$find(events_request, limit = 10000L), silent = TRUE))}
-      
-      # Preparation of the h5p table with good logins instead of users
-      h5p_table <- {message("requete h5p"); try(sdd_events$find(h5p_request, limit = 1000L), silent = TRUE)}
-      h5p_table$user <- as.character(users_login[h5p_table$user])
-      h5p(h5p_table)
-      # Preparation of the learnr table with good logins instead of users
-      learnr_table <- {message("requete learnr"); try(sdd_events$find(learnr_request, limit = 1000L), silent = TRUE)}
-      learnr_table$user <- as.character(users_login[learnr_table$user])
-      learnr(learnr_table)
-      # Preparation of the shiny table with good logins instead of users
-      shiny_table <- {message("requete shiny"); try(sdd_events$find(shiny_request, limit = 1000L), silent = TRUE)}
-      shiny_table$user <- as.character(users_login[shiny_table$user])
-      shiny(shiny_table)
+      events_table <- {message("requete events"); try(sdd_events$find(events_request, limit = 50000L), silent = TRUE)}
+      events_table$user <- as.character(users_login[events_table$user])
+      events(events_table)
       
       {message("requete apps");apps(try(sdd_apps$find(apps_request), silent = TRUE))}
       {message("requete planning");planning(try(sdd_planning$find(planning_request), silent = TRUE))}
@@ -381,9 +342,6 @@ mod_right_sidebar_server <- function(id, all_vars){
       selected_user = NULL,
       selected_course = NULL,
       events = NULL,
-      h5p = NULL,
-      learnr = NULL,
-      shiny = NULL,
       apps = NULL,
       planning = NULL,
       h5p_news = NULL,
@@ -399,9 +357,6 @@ mod_right_sidebar_server <- function(id, all_vars){
       right_sidebar_vars$selected_user <- input$selected_user
       right_sidebar_vars$selected_course <- input$selected_course
       right_sidebar_vars$events <- events()
-      right_sidebar_vars$h5p <- h5p()
-      right_sidebar_vars$learnr <- learnr()
-      right_sidebar_vars$shiny <- shiny()
       right_sidebar_vars$apps <- apps()
       right_sidebar_vars$planning <- planning()
       right_sidebar_vars$h5p_news <- h5p_news()

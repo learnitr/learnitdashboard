@@ -48,9 +48,6 @@ mod_sdd_tables_server <- function(id, all_vars){
     
     # Vars from right_sidebar
     events <- reactive({all_vars$right_sidebar_vars$events})
-    h5p <- reactive({all_vars$right_sidebar_vars$h5p})
-    learnr <- reactive({all_vars$right_sidebar_vars$learnr})
-    shiny <- reactive({all_vars$right_sidebar_vars$shiny})
     apps <- reactive({all_vars$right_sidebar_vars$apps})
     planning <- reactive({all_vars$right_sidebar_vars$planning})
 
@@ -62,10 +59,9 @@ mod_sdd_tables_server <- function(id, all_vars){
     output$sdd_dt_h5p <- renderDT({
       
       # If no errors to get the dataframe from mongoDB
-      if (!inherits(h5p(), "try-error") && length(h5p() > 0)) {
+      if (!inherits(events(), "try-error") && length(events() > 0)) {
         # The columns selection is now rendered by DT !
-        h5p()
-        # events()[events()$type == "h5p",]
+        events()[events()$type == "h5p",]
       } else {
         NULL
       }
@@ -87,10 +83,9 @@ mod_sdd_tables_server <- function(id, all_vars){
     output$sdd_dt_learnr <- renderDT({
       
       # If no errors to get the dataframe from mongoDB
-      if (!inherits(learnr(), "try-error") && length(learnr() > 0)) {
+      if (!inherits(events(), "try-error") && length(events() > 0)) {
         # The columns selection is now rendered by DT !
-        learnr()
-        # events()[events()$type == "learnr",]
+        events()[events()$type == "learnr",]
       } else {
         NULL
       }
@@ -112,10 +107,9 @@ mod_sdd_tables_server <- function(id, all_vars){
     output$sdd_dt_shiny <- renderDT({
       
       # If no errors to get the dataframe from mongoDB
-      if (!inherits(shiny(), "try-error") && length(shiny() > 0)) {
+      if (!inherits(events(), "try-error") && length(events() > 0)) {
         # The columns selection is now rendered by DT !
-        shiny()
-        # events()[events()$type == "shiny",]
+        events()[events()$type == "shiny",]
       } else {
         NULL
       }

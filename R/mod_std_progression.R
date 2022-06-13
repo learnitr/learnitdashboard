@@ -28,7 +28,6 @@ mod_std_progression_server <- function(id, all_vars){
     
     # Vars from right_sidebar
     selected_user <- reactive({all_vars$right_sidebar_vars$selected_user})
-    h5p <- reactive({all_vars$right_sidebar_vars$h5p})
     
 # Display Progression -----------------------------------------------------
 
