@@ -44,79 +44,98 @@ mod_right_sidebar_server <- function(id, all_vars){
     # Variable : Events
     events <- reactiveVal()
     
+    # === Courses Table ===
+    courses <- reactiveVal()
+    
+    # === Modules Table ===
+    modules <- reactiveVal()
+    
     # === Apps Table ===
     apps <- reactiveVal()
     
     # === Planning Table ===
     planning <- reactiveVal()
     
+    # === Users2 Table ===
+    users2 <- reactiveVal()
+    
     # Variable : Courses
-    courses <- try(sort(sdd_apps$distinct("icourse")), silent = TRUE)
+    # courses <- try(sort(sdd_apps$distinct("icourse")), silent = TRUE)
 
     # If courses occured an error or is empty, it becomes NULL
-    if (inherits(courses, "try-error") || length(courses) == 0) {courses <- NULL}
+    # if (inherits(courses, "try-error") || length(courses) == 0) {courses <- NULL}
 
 # Display Selectors ---------------------------------------------------------------
 
     # Display // Course selector
     output$ui_course_selector <- renderUI({
-      if (!is.null(courses)) {
+      if (!inherits(sdd_courses, "try-error")) {
+        courses_df <- unique(courses_init[,c("icourse", "ictitle")])
+        sel_courses <- courses_df$icourse
+        names(sel_courses) <- courses_df$ictitle
         tagList(
           tags$h3("Course :"),
           # Creation of selector with choices "All and the courses
-          selectInput(ns("selected_course"), NULL, choices = c("All", courses))
+          selectInput(ns("selected_course"), NULL, choices = c("All", sel_courses))
         )
-      } else { NULL }
+      }
     })
     
     # Display // Module selector
     output$ui_module_selector <- renderUI({
-      
-      # Selecting the modules : If not All : modules from the table apps for selected course
-      if (req(input$selected_course) != "All") {
-        modules <- try(sort(sdd_apps$distinct("module", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
-      } else {
-      # Else : modules from the apps table for all courses
-        modules <- try(sort(sdd_apps$distinct("module")), silent = TRUE)
+      if (!inherits(sdd_modules, "try-error")) {
+        
+        req(input$selected_course)
+        
+        # Getting the users with the function from the selectors-
+        sel_modules <- try(get_modules(input$selected_course, modules_init, acad_year), silent = TRUE)
+        
+        # modules to NULL if error while getting them
+        # if(inherits(modules, "try-error")) {
+        #   modules <- NULL
+        # }
+        
+        # Elements to display
+        tagList(
+          tags$h3("Module :"),
+          # Creation of the module selector
+          selectInput(ns("selected_module"), NULL, choices = c("All", sel_modules))
+        )
       }
-      
-      # modules to NULL if error while getting them
-      if(inherits(modules, "try-error")) {
-        modules <- NULL
-      }
-      
-      # Elements to display
-      tagList(
-        tags$h3("Module :"),
-        # Creation of the module selector
-        selectInput(ns("selected_module"), NULL, choices = c("All", modules))
-      )
     })
     
     # Display // App selector
     output$ui_app_selector <- renderUI({
-      
-      # Getting apps
-      # If module and course selected
-      if (req(input$selected_module) != "All" && req(input$selected_course) != "All") {
-        sel_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" , "module" : "<<input$selected_module>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
-      # If only module selected
-      } else if (req(input$selected_module) != "All" && req(input$selected_course) == "All") {
-        sel_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "module" : "<<input$selected_module>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
-      # If only course selected
-      } else if (req(input$selected_module) == "All" && req(input$selected_course) != "All") {
-        sel_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
-      # If nothing selected
-      } else {
-        sel_apps <- try(sort(sdd_apps$distinct("app")), silent = TRUE)
-      }
-      
-      # Displaying the selector if apps didn't occur error
-      if (!inherits(sel_apps, "try-error")) {
-        tagList(
-          tags$h3("Application :"),
-          selectInput(ns("selected_app"), NULL, choices = c("All", sel_apps), selected = "All")
-        )
+      if (!inherits(sdd_apps, "try-error")) {
+        req(input$selected_course)
+        req(input$selected_module)
+        
+        # Getting apps
+        # If module and course selected
+        if (input$selected_module != "All" && input$selected_course != "All") {
+          sel_apps <- unique(apps_init[apps_init$icourse == input$selected_course & apps_init$module == input$selected_module, "app"])
+          # sel_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" , "module" : "<<input$selected_module>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        # If only module selected
+        } else if (input$selected_module != "All" && input$selected_course == "All") {
+          sel_apps <- unique(apps_init[apps_init$module == input$selected_module, "app"])
+          # sel_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "module" : "<<input$selected_module>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        # If only course selected
+        } else if (input$selected_module == "All" && input$selected_course != "All") {
+          sel_apps <- unique(apps_init[apps_init$icourse == input$selected_course, "app"])
+          # sel_apps <- try(sort(sdd_apps$distinct("app", query = glue::glue(r"--[{ "icourse" : "<<input$selected_course>>" }]--", .open = "<<", .close = ">>"))), silent = TRUE)
+        # If nothing selected
+        } else {
+          sel_apps <- unique(apps_init$app)
+          # sel_apps <- try(sort(sdd_apps$distinct("app")), silent = TRUE)
+        }
+        
+        # Displaying the selector if apps didn't occur error
+        if (!inherits(sel_apps, "try-error")) {
+          tagList(
+            tags$h3("Application :"),
+            selectInput(ns("selected_app"), NULL, choices = c("All", sel_apps), selected = "All")
+          )
+        }
       }
     })
     
@@ -222,33 +241,40 @@ mod_right_sidebar_server <- function(id, all_vars){
       # Creation of empty vector for the request
       request_vector <- c()
       # Preparing the apps and planning tables
-      if (!inherits(sdd_apps, "try-error") && !inherits(sdd_planning, "try-error")) {
+      if (!inherits(sdd_apps, "try-error") && !inherits(sdd_planning, "try-error") && !inherits(sdd_courses, "try-error") && !inherits(sdd_modules, "try-error") && !inherits(sdd_users2, "try-error")) {
+        courses_table <- courses_init
+        modules_table <- modules_init
         apps_table <- apps_init
         planning_table <- planning_init
+        users2_table <- users2_init
       }
       
-      # 1 Creation of the request part for "course" if request there is
+      # [1] Creation of the request part for "course" if request there is
       if (is_request(input$selected_course)) {
         request_vector <- c(request_vector, "icourse" = glue::glue(r"--["icourse" : "<<input$selected_course>>"]--", .open = "<<", .close = ">>"))
         
-        # Apps & Planning table icourse condition
-        if (!inherits(sdd_apps, "try-error") && !inherits(sdd_planning, "try-error")) {
+        # Courses & Modules & Apps & Planning & users2 table icourse condition
+        if (!inherits(sdd_apps, "try-error") && !inherits(sdd_planning, "try-error") && !inherits(sdd_courses, "try-error") && !inherits(sdd_modules, "try-error") && !inherits(sdd_users2, "try-error")) {
+          courses_table <- courses_table[courses_table$icourse == input$selected_course,]
+          modules_table <- modules_table[modules_table$icourse == input$selected_course,]
           apps_table <- apps_table[apps_table$icourse == input$selected_course,]
           planning_table <- planning_table[planning_table$icourse == input$selected_course,]
+          users2_table <- users2_table[users2_table$icourse == input$selected_course,]
         }
       }
       
-      # 2 Creation of the request part for "module" if request there is
+      # [2] Creation of the request part for "module" if request there is
       if (is_request(input$selected_module) && !is_request(input$selected_app)) {
         request_vector <- c(request_vector, "module" = glue::glue(r"--["module" : "<<input$selected_module>>"]--", .open = "<<", .close = ">>"))
         
-        # Apps table module condition
-        if (!inherits(sdd_apps, "try-error")) {
+        # Modules & Apps table module condition
+        if (!inherits(sdd_apps, "try-error") && !inherits(sdd_modules, "try-error")) {
+          modules_table <- modules_table[modules_table$module == input$selected_module,]
           apps_table <- apps_table[apps_table$module == input$selected_module,]
         }
       }
       
-      # 3 Creation of the request part for "app" if request there is
+      # [3] Creation of the request part for "app" if request there is
       if (is_request(input$selected_app)) {
         request_vector <- c(request_vector, "app" = glue::glue(r"--["app" : "<<input$selected_app>>"]--", .open = "<<", .close = ">>"))
         
@@ -258,33 +284,45 @@ mod_right_sidebar_server <- function(id, all_vars){
         }
       }
       
-      # 4 Creation of the request part for "user" if request there is
+      # [4] Creation of the request part for "user" if request there is
       if (is_request(input$selected_user)) {
         request_vector <- c(request_vector, "user" = glue::glue(r"--["user" : "<<input$selected_user>>"]--", .open = "<<", .close = ">>"))
+        
+        # Users2 table user condition
+        if (!inherits(sdd_users2, "try-error")) {
+          users2_table <- users2_table[users2_table$user == input$selected_user,]
+        }
       }
       
-      # 5 Creation of the request part for "dates" if request there is
+      # [5] Creation of the request part for "dates" if request there is
       if (input$is_dates == TRUE) {
         # Preparation of the dates
-        date_from <- as.POSIXct(paste0(input$selected_date1, " ", as.character(strftime(input$selected_time1, "%R"))), tz = "UTC")
+        date_from <- paste0(input$selected_date1, " ", as.character(strftime(input$selected_time1, "%R")))
+        date_from <- as.POSIXct(date_from, tz = "UTC")
         date_from <- format(date_from, "%Y-%m-%dT%H:%M:%SZ")
-        date_to <- as.POSIXct(paste0(input$selected_date2, " ", as.character(strftime(input$selected_time2, "%R"))), tz = "UTC")
+        date_to <- paste0(input$selected_date2, " ", as.character(strftime(input$selected_time2, "%R")))
+        date_to <- as.POSIXct(date_to, tz = "UTC")
         date_to <- format(date_to, "%Y-%m-%dT%H:%M:%SZ")
         # Preparation of the request
         request_vector <- c(request_vector, "dates" = glue::glue(r"--["date" : { "$gte" : {"$date" : "<<date_from>>"} , "$lte" : {"$date" : "<<date_to>>"} }]--", .open = "<<", .close = ">>"))
         request_vector <- c(request_vector, "start_end" = glue::glue(r"--["start" : { "$lte" : {"$date" : "<<date_to>>"} } , "end" : { "$gte" : {"$date" : "<<date_from>>"} }]--", .open = "<<", .close = ">>"))
         
-        # Apps & Planning table date condition
-        if (!inherits(sdd_apps, "try-error") && !inherits(sdd_planning, "try-error")) {
+        # Courses & Modules & Apps & Planning table date condition
+        if (!inherits(sdd_apps, "try-error") && !inherits(sdd_planning, "try-error") && !inherits(sdd_courses, "try-error") && !inherits(sdd_modules, "try-error")) {
+          courses_table <- courses_table[courses_table$start < date_to & courses_table$end > date_from,]
+          modules_table <- modules_table[modules_table$start < date_to & modules_table$end > date_from,]
           apps_table <- apps_table[apps_table$start < date_to & apps_table$end > date_from,]
           planning_table <- planning_table[planning_table$start < date_to & planning_table$end > date_from,]
         }
       }
       
-      # Setting the apps_table in the reactiveVal after every selection
-      if (!inherits(sdd_apps, "try-error") && !inherits(sdd_planning, "try-error")) {
+      # Setting the tables in the reactiveVal(s) after every selection
+      if (!inherits(sdd_apps, "try-error") && !inherits(sdd_planning, "try-error") && !inherits(sdd_courses, "try-error") && !inherits(sdd_modules, "try-error") && !inherits(sdd_users2, "try-error")) {
         apps(apps_table)
         planning(planning_table)
+        courses(courses_table)
+        modules(modules_table)
+        users2(users2_table)
       }
       
       # If the vector is not null, return the vector, if it is, return "empty" to make empty request 
@@ -316,9 +354,9 @@ mod_right_sidebar_server <- function(id, all_vars){
       
       # --- Preparing the logins from the users
       if (!inherits(sdd_users2, "try-error")) {
-        users2 <- unique(users2_init[, c("user", "ilastname", "login")])
-        users_login <- users2$login
-        names(users_login) <- users2$user
+        all_users2 <- unique(users2_init[, c("user", "ilastname", "login")])
+        users_login <- all_users2$login
+        names(users_login) <- all_users2$user
       }
       # users2 <- try(unique(sdd_users2$find('{}', fields = '{"user" : true, "login" : true, "_id" : false}')), silent = TRUE)
       # if (!inherits(users2, "try-error")) {
@@ -378,8 +416,11 @@ mod_right_sidebar_server <- function(id, all_vars){
       selected_user = NULL,
       selected_course = NULL,
       events = NULL,
+      courses = NULL,
+      modules = NULL,
       apps = NULL,
       planning = NULL,
+      users2 = NULL,
       h5p_news = NULL,
       learnr_news = NULL,
       shiny_news = NULL,
@@ -393,8 +434,11 @@ mod_right_sidebar_server <- function(id, all_vars){
       right_sidebar_vars$selected_user <- input$selected_user
       right_sidebar_vars$selected_course <- input$selected_course
       right_sidebar_vars$events <- events()
+      right_sidebar_vars$courses <- courses()
+      right_sidebar_vars$modules <- modules()
       right_sidebar_vars$apps <- apps()
       right_sidebar_vars$planning <- planning()
+      right_sidebar_vars$users2 <- users2()
       right_sidebar_vars$h5p_news <- h5p_news()
       right_sidebar_vars$learnr_news <- learnr_news()
       right_sidebar_vars$shiny_news <- shiny_news()

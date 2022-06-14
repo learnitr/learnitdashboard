@@ -2,9 +2,9 @@
 #' 
 #' Get a vector of users_id named by logins and lastnames from a selected course and with enrolled only or everyone
 #'
-#' @param selected_course Selected course, can be "All" or specific
-#' @param only_enrolled Only the enrolled users or everyone
-#' @param sdd_users2 The table from which we get the users
+#' @param selected_course Selected course, can be "All" or specific.
+#' @param only_enrolled Only the enrolled users or everyone.
+#' @param sdd_users2 The table from which it gets the users.
 #' @param acad_year The academic year of the users.
 #'
 #' @return A vector of users_id name by logins and lastnames

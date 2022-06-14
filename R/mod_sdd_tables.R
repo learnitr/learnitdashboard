@@ -25,12 +25,24 @@ mod_sdd_tables_ui <- function(id){
         DTOutput(ns("sdd_dt_shiny")),
       ),
       # Display of the result Shiny table
+      tabPanel("Courses",
+               DTOutput(ns("sdd_dt_courses")),
+      ),
+      # Display of the result Shiny table
+      tabPanel("Modules",
+               DTOutput(ns("sdd_dt_modules")),
+      ),
+      # Display of the result Shiny table
       tabPanel("Apps",
                DTOutput(ns("sdd_dt_apps")),
       ),
       # Display of the result Shiny table
       tabPanel("Planning",
                DTOutput(ns("sdd_dt_planning")),
+      ),
+      # Display of the result Shiny table
+      tabPanel("Users2",
+               DTOutput(ns("sdd_dt_users2")),
       )
     )
     
@@ -48,8 +60,11 @@ mod_sdd_tables_server <- function(id, all_vars){
     
     # Vars from right_sidebar
     events <- reactive({all_vars$right_sidebar_vars$events})
+    courses <- reactive({all_vars$right_sidebar_vars$courses})
+    modules <- reactive({all_vars$right_sidebar_vars$modules})
     apps <- reactive({all_vars$right_sidebar_vars$apps})
     planning <- reactive({all_vars$right_sidebar_vars$planning})
+    users2 <- reactive({all_vars$right_sidebar_vars$users2})
 
 # Global Vars -------------------------------------------------------------
     
@@ -127,6 +142,54 @@ mod_sdd_tables_server <- function(id, all_vars){
     )
     )
     
+    # Display // Courses datatable
+    output$sdd_dt_courses <- renderDT({
+      
+      # If no errors to get the dataframe from mongoDB
+      if (!inherits(courses(), "try-error") && length(courses() > 0)) {
+        # The columns selection is now rendered by DT !
+        courses()
+      } else {
+        NULL
+      }
+    },
+    # Extension to display a button that allow col selection
+    extensions = 'Buttons',
+    # Options for the data table
+    options = list(
+      scrollX = TRUE,
+      pageLength = 50,
+      lengthMenu = c(20,50,100),
+      # Options to get the col selector and lengthmenu
+      dom = 'Blfrtip',
+      buttons = I('colvis')
+    )
+    )
+    
+    # Display // Modules datatable
+    output$sdd_dt_modules <- renderDT({
+      
+      # If no errors to get the dataframe from mongoDB
+      if (!inherits(modules(), "try-error") && length(modules() > 0)) {
+        # The columns selection is now rendered by DT !
+        modules()
+      } else {
+        NULL
+      }
+    },
+    # Extension to display a button that allow col selection
+    extensions = 'Buttons',
+    # Options for the data table
+    options = list(
+      scrollX = TRUE,
+      pageLength = 50,
+      lengthMenu = c(20,50,100),
+      # Options to get the col selector and lengthmenu
+      dom = 'Blfrtip',
+      buttons = I('colvis')
+    )
+    )
+    
     # Display // Apps datatable
     output$sdd_dt_apps <- renderDT({
       
@@ -158,6 +221,30 @@ mod_sdd_tables_server <- function(id, all_vars){
       if (!inherits(planning(), "try-error") && length(planning() > 0)) {
         # The columns selection is now rendered by DT !
         planning()
+      } else {
+        NULL
+      }
+    },
+    # Extension to display a button that allow col selection
+    extensions = 'Buttons',
+    # Options for the data table
+    options = list(
+      scrollX = TRUE,
+      pageLength = 50,
+      lengthMenu = c(20,50,100),
+      # Options to get the col selector and lengthmenu
+      dom = 'Blfrtip',
+      buttons = I('colvis')
+    )
+    )
+    
+    # Display // Planning datatable
+    output$sdd_dt_users2 <- renderDT({
+      
+      # If no errors to get the dataframe from mongoDB
+      if (!inherits(users2(), "try-error") && length(users2() > 0)) {
+        # The columns selection is now rendered by DT !
+        users2()
       } else {
         NULL
       }
