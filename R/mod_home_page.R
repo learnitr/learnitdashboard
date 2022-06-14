@@ -56,12 +56,6 @@ mod_home_page_server <- function(id, all_vars){
     selected_app <- reactive({all_vars$right_sidebar_vars$selected_app})
     
 # Global Vars -------------------------------------------------------------
-
-    # URL to access databases
-    sdd_url <- "mongodb://127.0.0.1:27017/sdd"
-    # To connect to users
-    sdd_users2 <- try(mongolite::mongo("users2", url = sdd_url), silent = TRUE)
-    sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
     
 # Display Boxes -----------------------------------------------------------
 
@@ -327,16 +321,20 @@ mod_home_page_server <- function(id, all_vars){
     # Display // Plot of students in courses
     output$courses_students <- renderPlot({
       
+      users <- NULL
       # Getting the data of students and their course + enrolled
-      users <- try(sdd_users2$find('{}', fields = '{ "login" : true , "icourse" : true , "enrolled" : true, "_id" : false}'), silent = TRUE)
+      if (!inherits(sdd_users2, "try-error")) {
+        users <- users2_init[,c("login", "icourse", "enrolled")]
+      }
+      # users <- try(sdd_users2$find('{}', fields = '{ "login" : true , "icourse" : true , "enrolled" : true, "_id" : false}'), silent = TRUE)
       
       # Put off the NA's if show_na is false 
-      if (input$show_na == FALSE && !inherits(users, "try-error")) {
+      if (input$show_na == FALSE && length(users) > 0) {
         users <- na.omit(users)
       }
       
       # If there are no errors, create the plot of nb of students in courses filled by enrolled or not
-      if (!inherits(users, "try-error") && !is.null(users)) {
+      if (!is.null(users)) {
         users$enrolled <- ifelse(users$enrolled == TRUE, "yes", "no")
         ggplot(data = users) +
           geom_bar(mapping = aes(icourse, fill = enrolled)) +

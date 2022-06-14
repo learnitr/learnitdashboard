@@ -6,8 +6,6 @@
 #' @noRd
 app_server <- function(input, output, session) {
   
-  acad_year <- "2021-2022"
-  
   # Global var to communicate between modules
   all_vars <- reactiveValues(
     right_sidebar_vars = NULL,

@@ -17,6 +17,8 @@ get_users <- function(selected_course, only_enrolled, users2_init, acad_year) {
   # Case 1 : Course is selected and Enrolled is TRUE
   if (selected_course != "All") {
     if (only_enrolled == TRUE) {
+      
+      # --- For request to users2 ---
       # Preparing the request
       # users_request <- glue::glue(r"--[
       #                             [{ "$match" : {
@@ -31,6 +33,8 @@ get_users <- function(selected_course, only_enrolled, users2_init, acad_year) {
       #                             }}]
       # ]--", .open = "<<", .close = ">>")
       # usersdf <- sdd_users2$aggregate(users_request)
+      # --- For request to users2 ---
+      
       usersdf <- unique(users2_init[users2_init$icourse == selected_course & users2_init$enrolled == only_enrolled & users2_init$acad_year == acad_year, c("user", "ilastname", "login")])
       # Getting out the NA's and ordering by names and then structure the good names
       usersdf <- na.omit(usersdf)
@@ -41,6 +45,8 @@ get_users <- function(selected_course, only_enrolled, users2_init, acad_year) {
       
     # Case 2 : Course is selected and Enrolled is FALSE
     } else {
+      
+      # --- For request to users2 ---
       # Preparing the request
       # users_request <- glue::glue(r"--[
       #                             [{ "$match" : {
@@ -54,6 +60,8 @@ get_users <- function(selected_course, only_enrolled, users2_init, acad_year) {
       #                             }}]
       # ]--", .open = "<<", .close = ">>")
       # usersdf <- sdd_users2$aggregate(users_request)
+      # --- For request to users2 ---
+      
       usersdf <- unique(users2_init[users2_init$icourse == selected_course & users2_init$acad_year == acad_year, c("user", "ilastname", "login")])
       # Getting out the NA's and ordering by names and then structure the good names
       usersdf <- na.omit(usersdf)
@@ -67,6 +75,8 @@ get_users <- function(selected_course, only_enrolled, users2_init, acad_year) {
   } else {
     # If only the enrolled
     if (only_enrolled == TRUE) {
+      
+      # --- For request to users2 ---
       # Preparing the request
       # users_request <- glue::glue(r"--[
       #                             [{ "$match" : {
@@ -80,6 +90,8 @@ get_users <- function(selected_course, only_enrolled, users2_init, acad_year) {
       #                             }}]
       # ]--", .open = "<<", .close = ">>")
       # usersdf <- sdd_users2$aggregate(users_request)
+      # --- For request to users2 ---
+      
       usersdf <- unique(users2_init[users2_init$enrolled == only_enrolled & users2_init$acad_year == acad_year, c("user", "ilastname", "login")])
       # Getting out the NA's and ordering by names and then structure the good names
       usersdf <- na.omit(usersdf)
@@ -90,6 +102,8 @@ get_users <- function(selected_course, only_enrolled, users2_init, acad_year) {
       
     # Case 4 : Course is not selected and Enrolled is FALSE
     } else {
+      
+      # --- For request to users2 ---
       # Preparing the request
       # users_request <- glue::glue(r"--[
       #                             [{ "$match" : {
@@ -102,6 +116,8 @@ get_users <- function(selected_course, only_enrolled, users2_init, acad_year) {
       #                             }}]
       # ]--", .open = "<<", .close = ">>")
       # usersdf <- sdd_users2$aggregate(users_request)
+      # --- For request to users2 ---
+      
       usersdf <- unique(users2_init[users2_init$acad_year == acad_year, c("user", "ilastname", "login")])
       # Getting out the NA's and ordering by names and then structure the good names
       usersdf <- na.omit(usersdf)
