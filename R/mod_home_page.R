@@ -245,17 +245,54 @@ mod_home_page_server <- function(id, all_vars){
     # Slot for global home information
     output$slot1 <- renderUI({
       if (!inherits(sdd_apps, "try-error")) {
-        tagList(
+        req(selected_course())
+        
+        # Getting the data to display
+        if (selected_course() != "All") {
+          course <- selected_course()
+          attr(course, "title") <- courses_init[courses_init$icourse == selected_course(), "ictitle"][1]
+          attr(course, "start") <- courses_init[courses_init$icourse == selected_course(), "start"][1]
+          attr(course, "end") <- courses_init[courses_init$icourse == selected_course(), "end"][1]
+          attr(course, "url") <- courses_init[courses_init$icourse == selected_course(), "url"][1]
+          attr(course, "alt_url") <- courses_init[courses_init$icourse == selected_course(), "alt_url"][1]
+        }
+        
+        return(
           box(
-            title = if (req(selected_course()) != "All") {
+            title = if (selected_course() != "All") {
               paste0("Course : ", selected_course())
             } else {
               "Courses"
             },
             solidHeader = TRUE,
             width = 4, icon = shiny::icon("book-open", verify_fa = FALSE),
-            collapsible = TRUE, collapsed = TRUE, status = "purple",
-            "Content"
+            collapsible = TRUE, collapsed = FALSE, status = "purple",
+            # Box content :
+            if (selected_course() != "All") {
+              tagList(
+                h4("Course Title"),
+                attr(course, "title"),
+                h4("Course Start"),
+                attr(course, "start"),
+                h4("Course End"),
+                attr(course, "end"),
+                h4("Course Url"),
+                tags$a(attr(course, "url"), href = attr(course, "url")),
+                h4("Course Alt Url"),
+                tags$a(attr(course, "alt_url"), href = attr(course, "alt_url"))
+              )
+            } else {
+              tagList(
+                h4("Number of ICourses"),
+                length(unique(courses_init[,"icourse"])),
+                h4("Different Units"),
+                length(unique(courses_init[,"iunit"])),
+                h4("Different Sections"),
+                length(unique(courses_init[,"section"])),
+                h4("Different Iclass"),
+                length(unique(courses_init[,"iclass"]))
+              )
+            }
           )
         )
       }
@@ -264,17 +301,48 @@ mod_home_page_server <- function(id, all_vars){
     # Slot for global home information
     output$slot2 <- renderUI({
       if (!inherits(sdd_apps, "try-error")) {
+        req(selected_module())
+        
+        # Getting the data to display
+        if (selected_module() != "All") {
+          module <- selected_module()
+          attr(module, "title") <- modules_init[modules_init$module == selected_module(), "title"][1]
+          attr(module, "start") <- modules_init[modules_init$module == selected_module(), "start"][1]
+          attr(module, "end") <- modules_init[modules_init$module == selected_module(), "end"][1]
+          attr(module, "url") <- modules_init[modules_init$module == selected_module(), "url"][1]
+          attr(module, "alt_url") <- modules_init[modules_init$module == selected_module(), "alt_url"][1]
+        }
+        
         tagList(
           box(
-            title = if (req(selected_module()) != "All") {
+            title = if (selected_module() != "All") {
               paste0("Module : ", selected_module())
             } else {
               "Modules"
             },
             solidHeader = TRUE,
             width = 4, icon = shiny::icon("shapes", verify_fa = FALSE),
-            collapsible = TRUE, collapsed = TRUE, status = "purple",
-            "Content"
+            collapsible = TRUE, collapsed = FALSE, status = "purple",
+            # Box content :
+            if (selected_module() != "All") {
+              tagList(
+                h4("Module Title"),
+                attr(module, "title"),
+                h4("Module Start"),
+                attr(module, "start"),
+                h4("Module End"),
+                attr(module, "end"),
+                h4("Module Url"),
+                tags$a(attr(module, "url"), href = attr(module, "url")),
+                h4("Module Alt Url"),
+                tags$a(attr(module, "alt_url"), href = attr(module, "alt_url"))
+              )
+            } else {
+              tagList(
+                h4("Number of Modules"),
+                length(unique(modules_init[,"module"]))
+              )
+            }
           )
         )
       }
@@ -283,18 +351,50 @@ mod_home_page_server <- function(id, all_vars){
     # Slot for global home information
     output$slot3 <- renderUI({
       if (!inherits(sdd_apps, "try-error")) {
-        # app <- sdd_apps$find('{}')
-        tagList(
+        req(selected_app())
+        
+        # Getting the data to display
+        if (selected_app() != "All") {
+          app <- selected_app()
+          attr(app, "type") <- apps_init[apps_init$app == selected_app(), "type"][1]
+          attr(app, "start") <- apps_init[apps_init$app == selected_app(), "start"][1]
+          attr(app, "end") <- apps_init[apps_init$app == selected_app(), "end"][1]
+          attr(app, "url") <- apps_init[apps_init$app == selected_app(), "url"][1]
+          attr(app, "alt_url") <- apps_init[apps_init$app == selected_app(), "alt_url"][1]
+        }
+        
+        return(
           box( 
-            title = if (req(selected_app()) != "All") {
+            title = if (selected_app() != "All") {
               paste0("App : ", selected_app())
             } else {
               "Apps"
             },
             solidHeader = TRUE,
             width = 4, icon = shiny::icon("tablet", verify_fa = FALSE),
-            collapsible = TRUE, collapsed = TRUE, status = "purple",
-            "Content"
+            collapsible = TRUE, collapsed = FALSE, status = "purple",
+            # Box content :
+            if (selected_app() != "All") {
+              tagList(
+                h4("App Type"),
+                attr(app, "type"),
+                h4("App Start"),
+                attr(app, "start"),
+                h4("App End"),
+                attr(app, "end"),
+                h4("App Url"),
+                tags$a(attr(app, "url"), href = attr(app, "url")),
+                h4("App Alt Url"),
+                tags$a(attr(app, "alt_url"), href = attr(app, "alt_url"))
+              )
+            } else {
+              tagList(
+                h4("Number of Apps"),
+                length(unique(apps_init[,"app"])),
+                h4("Different Types"),
+                length(unique(apps_init[,"type"]))
+              )
+            }
           )
         )
       }

@@ -19,6 +19,10 @@ sdd_courses <- try(mongolite::mongo("courses", url = sdd_url), silent = TRUE)
 sdd_modules <- try(mongolite::mongo("modules", url = sdd_url), silent = TRUE)
 sdd_apps <- try(mongolite::mongo("apps", url = sdd_url), silent = TRUE)
 
+# --- Initial loading of Courses ---
+courses_init <- try(sdd_courses$find('{}'), silent = TRUE)
+# --- Initial loading of Modules ---
+modules_init <- try(sdd_modules$find('{}'), silent = TRUE)
 # --- Initial loading of Apps ---
 apps_init <- try(sdd_apps$find('{}'), silent = TRUE)
 # --- Initial loading of Planning ---
