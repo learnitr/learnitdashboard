@@ -283,13 +283,13 @@ mod_home_page_server <- function(id, all_vars){
               )
             } else {
               tagList(
-                h4("Number of ICourses"),
+                h4("ICourses"),
                 length(unique(courses_init[,"icourse"])),
-                h4("Different Units"),
+                h4("Units"),
                 length(unique(courses_init[,"iunit"])),
-                h4("Different Sections"),
+                h4("Sections"),
                 length(unique(courses_init[,"section"])),
-                h4("Different Iclass"),
+                h4("Iclass"),
                 length(unique(courses_init[,"iclass"]))
               )
             }
@@ -339,7 +339,7 @@ mod_home_page_server <- function(id, all_vars){
               )
             } else {
               tagList(
-                h4("Number of Modules"),
+                h4("Modules"),
                 length(unique(modules_init[,"module"]))
               )
             }
@@ -389,9 +389,9 @@ mod_home_page_server <- function(id, all_vars){
               )
             } else {
               tagList(
-                h4("Number of Apps"),
+                h4("Apps"),
                 length(unique(apps_init[,"app"])),
-                h4("Different Types"),
+                h4("Types"),
                 length(unique(apps_init[,"type"]))
               )
             }
@@ -415,8 +415,6 @@ mod_home_page_server <- function(id, all_vars){
         )
       }
     })
-    
-    
     
     # Display // Plot of students in courses
     output$courses_students <- renderPlot({

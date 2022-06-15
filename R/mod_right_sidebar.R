@@ -298,7 +298,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       if (input$is_dates == TRUE) {
         # Preparation of the dates
         date_from <- paste0(input$selected_date1, " ", as.character(strftime(input$selected_time1, "%R")))
-        date_from <- as.POSIXct(date_from, tz = "UTC")
+        date_from <- as.POSIXct(date_from, tz = "UTC") # enlever tz, date en locale qui est ensuite convertie en UTC
         date_from <- format(date_from, "%Y-%m-%dT%H:%M:%SZ")
         date_to <- paste0(input$selected_date2, " ", as.character(strftime(input$selected_time2, "%R")))
         date_to <- as.POSIXct(date_to, tz = "UTC")
