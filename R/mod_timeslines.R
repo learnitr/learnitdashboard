@@ -43,7 +43,7 @@ mod_timeslines_server <- function(id, all_vars){
           # Box in which the timeline will appear
           box( title = "Apps Timeline (grouped by icourse)", solidHeader = TRUE,
             width = 12, icon = shiny::icon("calendar", verify_fa = FALSE),
-            collapsible = TRUE, label = boxLabel(2, "danger"), status = "purple",
+            collapsible = TRUE, status = "purple",
             # Sidebar for timeline options
             sidebar = boxSidebar(
               id = ns("apps_timeline_sb"),
@@ -136,7 +136,7 @@ mod_timeslines_server <- function(id, all_vars){
           # Box in which the timeline will appear
           box( title = "Planning Timeline (grouped by icourse)", solidHeader = TRUE,
                width = 12, icon = shiny::icon("calendar", verify_fa = FALSE),
-               collapsible = TRUE, label = boxLabel(3, "danger"), status = "purple",
+               collapsible = TRUE, status = "purple",
                # Sidebar for timeline options
                sidebar = boxSidebar(
                  id = ns("planning_timeline_sb"),

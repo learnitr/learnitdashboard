@@ -47,9 +47,10 @@ mod_home_page_server <- function(id, all_vars){
 # Getting Modules Vars ----------------------------------------------------
 
     # Vars from right_sidebar
-    h5p_news <- reactive({all_vars$right_sidebar_vars$h5p_news})
-    learnr_news <- reactive({all_vars$right_sidebar_vars$learnr_news})
-    shiny_news <- reactive({all_vars$right_sidebar_vars$shiny_news})
+    events_news <- reactive({all_vars$right_sidebar_vars$events_news})
+    # h5p_news <- reactive({all_vars$right_sidebar_vars$h5p_news})
+    # learnr_news <- reactive({all_vars$right_sidebar_vars$learnr_news})
+    # shiny_news <- reactive({all_vars$right_sidebar_vars$shiny_news})
     selected_news_time <- reactive({all_vars$right_sidebar_vars$selected_news_time})
     selected_course <- reactive({all_vars$right_sidebar_vars$selected_course})
     selected_module <- reactive({all_vars$right_sidebar_vars$selected_module})
@@ -86,15 +87,15 @@ mod_home_page_server <- function(id, all_vars){
     output$infobox_1 <- renderInfoBox({
       
       # The boxes need to have something inside, even empty, so it tests if we can put our data inside
-      if (!inherits(h5p_news(), "try-error")) {
+      if (!inherits(events_news(), "try-error")) {
         infoBox(
           title = "H5P",
-          subtitle = if (h5p_news() > 0) {
+          subtitle = if (attr(events_news(), "h5p_nb_apps") > 0) {
             paste0("New entries since : ", selected_news_time())
           } else {NULL},
           # Show the amount of changes if there are some
-          value = if (h5p_news() > 0) {
-            h5p_news()
+          value = if (attr(events_news(), "h5p_nb_apps") > 0) {
+            attr(events_news(), "h5p_nb_apps")
           } else {
             "No changes"
           },
@@ -113,15 +114,15 @@ mod_home_page_server <- function(id, all_vars){
     # Display // Info Box 2
     output$infobox_2 <- renderInfoBox({
       
-      if (!inherits(learnr_news(), "try-error")) {
+      if (!inherits(events_news(), "try-error")) {
         infoBox(
           title = "Learnr",
-          subtitle = if (shiny_news() > 0) {
+          subtitle = if (attr(events_news(), "learnr_nb_apps") > 0) {
             paste0("New entries since : ", selected_news_time())
           } else {NULL},
           # Show the amount of changes if there are some
-          value = if (learnr_news() > 0) {
-            learnr_news()
+          value = if (attr(events_news(), "learnr_nb_apps") > 0) {
+            attr(events_news(), "learnr_nb_apps")
           } else {
             "No changes"
           },
@@ -140,15 +141,15 @@ mod_home_page_server <- function(id, all_vars){
     # Display // Info Box 3
     output$infobox_3 <- renderInfoBox({
       
-      if (!inherits(shiny_news(), "try-error")) {
+      if (!inherits(events_news(), "try-error")) {
         infoBox(
           title = "Shiny",
-          subtitle = if (learnr_news() > 0) {
+          subtitle = if (attr(events_news(), "shiny_nb_apps") > 0) {
             paste0("New entries since : ", selected_news_time())
           } else {NULL},
           # Show the amount of changes if there are some
-          value = if (shiny_news() > 0) {
-            shiny_news()
+          value = if (attr(events_news(), "shiny_nb_apps") > 0) {
+            attr(events_news(), "shiny_nb_apps")
           } else {
             "No changes"
           },
@@ -168,16 +169,16 @@ mod_home_page_server <- function(id, all_vars){
     output$infobox_4 <- renderInfoBox({
       
       # The boxes need to have something inside, even empty, so it tests if we can put our data inside
-      if (!inherits(h5p_news(), "try-error")) {
+      if (!inherits(events_news(), "try-error")) {
         infoBox(
           title = "H5P",
           # Show the apps if there are
-          subtitle = if (length(attr(h5p_news(), "apps")) > 0) {
-            selectInput(ns("h5p_apps_show"), NULL, choices = attr(h5p_news(), "apps"))
+          subtitle = if (length(attr(events_news(), "h5p_apps")) > 0) {
+            selectInput(ns("h5p_apps_show"), NULL, choices = attr(events_news(), "h5p_apps"))
           } else {NULL},
           # Show the amoun of apps that changed and in how much courses
-          value = if (h5p_news() > 0) {
-            paste0(length(attr(h5p_news(), "apps")), " apps changed in ", length(attr(h5p_news(), "courses")), " courses")
+          value = if (attr(events_news(), "h5p_nb_apps") > 0) {
+            paste0(length(attr(events_news(), "h5p_apps")), " apps changed in ", length(attr(events_news(), "h5p_courses")), " courses")
           } else { "No changes" },
           icon = icon("pencil", verify_fa = FALSE),
           color = "purple"
@@ -194,16 +195,16 @@ mod_home_page_server <- function(id, all_vars){
     # Display // Info Box 5
     output$infobox_5 <- renderInfoBox({
       
-      if (!inherits(learnr_news(), "try-error")) {
+      if (!inherits(events_news(), "try-error")) {
         infoBox(
           title = "Learnr",
           # Show the apps if there are
-          subtitle = if (length(attr(learnr_news(), "apps")) > 0) {
-            selectInput(ns("learnr_apps_show"), NULL, choices = attr(learnr_news(), "apps"))
+          subtitle = if (length(attr(events_news(), "learnr_apps")) > 0) {
+            selectInput(ns("learnr_apps_show"), NULL, choices = attr(events_news(), "learnr_apps"))
           } else {NULL},
           # Show the amoun of apps that changed and in how much courses
-          value = if (learnr_news() > 0) {
-            paste0(length(attr(learnr_news(), "apps")), " apps changed in ", length(attr(learnr_news(), "courses")), " courses")
+          value = if (attr(events_news(), "learnr_nb_apps") > 0) {
+            paste0(length(attr(events_news(), "learnr_apps")), " apps changed in ", length(attr(events_news(), "learnr_courses")), " courses")
           } else { "No changes" },
           icon = icon("chalkboard", verify_fa = FALSE),
           color = "purple"
@@ -220,16 +221,16 @@ mod_home_page_server <- function(id, all_vars){
     # Display // Info Box 6
     output$infobox_6 <- renderInfoBox({
       
-      if (!inherits(shiny_news(), "try-error")) {
+      if (!inherits(events_news(), "try-error")) {
         infoBox(
           title = "Shiny",
           # Show the apps if there are
-          subtitle = if (length(attr(shiny_news(), "apps")) > 0) {
-            selectInput(ns("shiny_apps_show"), NULL, choices = attr(shiny_news(), "apps"))
+          subtitle = if (length(attr(events_news(), "shiny_apps")) > 0) {
+            selectInput(ns("shiny_apps_show"), NULL, choices = attr(events_news(), "shiny_apps"))
           } else {NULL},
           # Show the amoun of apps that changed and in how much courses
-          value = if (shiny_news() > 0) {
-            paste0(length(attr(shiny_news(), "apps")), " apps changed in ", length(attr(shiny_news(), "courses")), " courses")
+          value = if (attr(events_news(), "shiny_nb_apps") > 0) {
+            paste0(length(attr(events_news(), "shiny_apps")), " apps changed in ", length(attr(events_news(), "shiny_courses")), " courses")
           } else { "No changes" },
           icon = icon("tablet", verify_fa = FALSE),
           color = "purple"

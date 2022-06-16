@@ -44,7 +44,8 @@ app_server <- function(input, output, session) {
   # Display the menuitems
   output$menuitems <- renderMenu({
     # New elements from tables_news
-    new_elements <- req(right_sidebar_vars$h5p_news) + req(right_sidebar_vars$learnr_news) + req(right_sidebar_vars$shiny_news)
+    events_news <- req(right_sidebar_vars$events_news)
+    new_apps <- req(right_sidebar_vars$apps_news)
     
     # Tabs of the sidebar
     tagList(
@@ -52,15 +53,19 @@ app_server <- function(input, output, session) {
         # First tab
         menuItem("Home Page", tabName = "home_page", icon = shiny::icon("home", verify_fa = FALSE)),
         # Second tab
-        menuItem("Timelines", tabName = "timelines", icon = shiny::icon("calendar", verify_fa = FALSE)),
+        if (!is.null(new_apps) && new_apps > 0) {
+          menuItem("Timelines", tabName = "timelines", icon = shiny::icon("calendar", verify_fa = FALSE), badgeLabel = new_apps, badgeColor = "red")
+        } else {
+          menuItem("Timelines", tabName = "timelines", icon = shiny::icon("calendar", verify_fa = FALSE))
+        },
         # Third tab
         menuItem("Students Progression", tabName = "std_progression", icon = shiny::icon("graduation-cap", verify_fa = FALSE)),
         # Forth tab
         menuItem("Courses Progression", tabName = "cls_progression", icon = shiny::icon("school", verify_fa = FALSE)),
         # Fifth tab
         # If there are news, put a badge
-        if (!is.null(new_elements) && new_elements > 0) {
-          menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE), badgeLabel = new_elements, badgeColor = "red")
+        if (!is.null(events_news) && events_news > 0) {
+          menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE), badgeLabel = events_news, badgeColor = "red")
         } else {
           menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE))
         }

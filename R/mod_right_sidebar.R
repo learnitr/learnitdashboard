@@ -377,17 +377,10 @@ mod_right_sidebar_server <- function(id, all_vars){
     observeEvent(request(), {
       # Variable : args used for the events tables
       events_args <- c("icourse", "module", "app", "user", "dates", "type")
-      # apps_args <- c("icourse", "module", "app", "start_end")
-      # planning_args <- c("icourse", "start_end")
       
       # --- Preparing the request for the events tables
       # 1 : Events
       events_request <- prepare_request(request(), events_args)
-      
-      # 2 : Apps
-      # apps_request <- prepare_request(request(), apps_args)
-      # 3 : Planning
-      # planning_request <- prepare_request(request(), planning_args)
       
       print(events_request)
       # print(apps_request)
@@ -398,11 +391,6 @@ mod_right_sidebar_server <- function(id, all_vars){
         users_login <- all_users2$login
         names(users_login) <- all_users2$user
       }
-      # users2 <- try(unique(sdd_users2$find('{}', fields = '{"user" : true, "login" : true, "_id" : false}')), silent = TRUE)
-      # if (!inherits(users2, "try-error")) {
-      #   users_login <- users2$login
-      #   names(users_login) <- users2$user
-      # }
       
       # --- Requesting to databases
       events_table <- {message("requete events"); try(sdd_events$find(events_request, limit = 50000L), silent = TRUE)}
@@ -410,9 +398,6 @@ mod_right_sidebar_server <- function(id, all_vars){
         events_table$user <- as.character(users_login[events_table$user])
       }
       events(events_table)
-      
-      # {message("requete apps");apps(try(sdd_apps$find(apps_request), silent = TRUE))}
-      # {message("requete planning");planning(try(sdd_planning$find(planning_request), silent = TRUE))}
     })
 
 # News Request ------------------------------------------------------------
@@ -424,30 +409,82 @@ mod_right_sidebar_server <- function(id, all_vars){
       attr(news_time, "tzone") <- "UTC"
       news_time <- format(news_time, "%Y-%m-%dT%H:%M:%SZ")
       request_vector <- c(request_vector, "news_date" = glue::glue(r"--["date" : { "$gte" : {"$date" : "<<news_time>>"} }]--", .open = "<<", .close = ">>"))
+      # Main request on the entire events
+      request <- prepare_request(request_vector, "news_date")
+      # Request for the different types
+      attr(request, "h5p_request") <- prepare_request(request_vector, c("news_date", "type"), type = "h5p")
+      attr(request, "learnr_request") <- prepare_request(request_vector, c("news_date", "type"), type = "learnr")
+      attr(request, "shiny_request") <- prepare_request(request_vector, c("news_date", "type"), type = "shiny")
+      
+      # if (input$selected_user != "All") {
+      #   student_vector <- c(request_vector, "news_std" = glue::glue(r"--["user" : "<<input$selected_user>>"]--", .open = "<<", .close = ">>"))
+      #   attr(request, "student_request") <- prepare_request(student_vector, c("news_date", "news_std"))
+      # }
+      
+      return(request)
+    })
+    # Variable : events table with request for news
+    events_news <- reactive({
+      news <- try(sdd_events$count(news_request()), silent = TRUE)
+      # if ("student_request" %in% names(attributes(news_request())) ) {
+      #   attr(news, "std_nb_obs") <- try(sdd_events$count(attr(news_request(), "student_request")), silent = TRUE)
+      # }
+      # h5p Requests to events 
+      attr(news, "h5p_nb_apps") <- try(sdd_events$count(attr(news_request(), "h5p_request")), silent = TRUE)
+      attr(news, "h5p_apps") <- try(sdd_events$distinct("app", query = attr(news_request(), "h5p_request")), silent = TRUE)
+      attr(news, "h5p_courses") <- try(sdd_events$distinct("icourse", query = attr(news_request(), "h5p_request")), silent = TRUE)
+      # learnr Requests to events
+      attr(news, "learnr_nb_apps") <- try(sdd_events$count(attr(news_request(), "learnr_request")), silent = TRUE)
+      attr(news, "learnr_apps") <- try(sdd_events$distinct("app", query = attr(news_request(), "learnr_request")), silent = TRUE)
+      attr(news, "learnr_courses") <- try(sdd_events$distinct("icourse", query = attr(news_request(), "learnr_request")), silent = TRUE)
+      # shiny Requests to events
+      attr(news, "shiny_nb_apps") <- try(sdd_events$count(attr(news_request(), "shiny_request")), silent = TRUE)
+      attr(news, "shiny_apps") <- try(sdd_events$distinct("app", query = attr(news_request(), "shiny_request")), silent = TRUE)
+      attr(news, "shiny_courses") <- try(sdd_events$distinct("icourse", query = attr(news_request(), "shiny_request")), silent = TRUE)
+      
+      return(news)
     })
     
+    # observe({
+    #   if ("std_nb_obs" %in% names(attributes(events_news())) ) {
+    #     print(attr(events_news(), "std_nb_obs"))
+    #   }
+    # })
+    
     # Variable : h5p table with request for news
-    h5p_news <- reactive({
-      request <- prepare_request(news_request(), c("news_date", "type"), type = "h5p")
-      news <- try(sdd_events$count(request), silent = TRUE)
-      attr(news, "apps") <- try(sdd_events$distinct("app", query = request), silent = TRUE)
-      attr(news, "courses") <- try(sdd_events$distinct("icourse", query = request), silent = TRUE)
-      return(news)
-    })
+    # h5p_news <- reactive({
+    #   request <- prepare_request(news_request(), c("news_date", "type"), type = "h5p")
+    #   news <- try(sdd_events$count(request), silent = TRUE)
+    #   attr(news, "apps") <- try(sdd_events$distinct("app", query = request), silent = TRUE)
+    #   attr(news, "courses") <- try(sdd_events$distinct("icourse", query = request), silent = TRUE)
+    #   return(news)
+    # })
     # Variable : learnr table with request for news
-    learnr_news <- reactive({
-      request <- prepare_request(news_request(), c("news_date", "type"), type = "learnr")
-      news <- try(sdd_events$count(request), silent = TRUE)
-      attr(news, "apps") <- try(sdd_events$distinct("app", query = request), silent = TRUE)
-      attr(news, "courses") <- try(sdd_events$distinct("icourse", query = request), silent = TRUE)
-      return(news)
-    })
+    # learnr_news <- reactive({
+    #   request <- prepare_request(news_request(), c("news_date", "type"), type = "learnr")
+    #   news <- try(sdd_events$count(request), silent = TRUE)
+    #   attr(news, "apps") <- try(sdd_events$distinct("app", query = request), silent = TRUE)
+    #   attr(news, "courses") <- try(sdd_events$distinct("icourse", query = request), silent = TRUE)
+    #   return(news)
+    # })
     # Variable : shiny table with request for news
-    shiny_news <- reactive({
-      request <- prepare_request(news_request(), c("news_date", "type"), type = "shiny")
-      news <- try(sdd_events$count(request), silent = TRUE)
-      attr(news, "apps") <- try(sdd_events$distinct("app", query = request), silent = TRUE)
-      attr(news, "courses") <- try(sdd_events$distinct("icourse", query = request), silent = TRUE)
+    # shiny_news <- reactive({
+    #   request <- prepare_request(news_request(), c("news_date", "type"), type = "shiny")
+    #   news <- try(sdd_events$count(request), silent = TRUE)
+    #   attr(news, "apps") <- try(sdd_events$distinct("app", query = request), silent = TRUE)
+    #   attr(news, "courses") <- try(sdd_events$distinct("icourse", query = request), silent = TRUE)
+    #   return(news)
+    # })
+    # Variable : apps table with news selector
+    apps_news <- reactive({
+      news_time <- as.POSIXct(req(input$selected_news_time))
+      
+      # Getting the data
+      apps_data <- na.omit(unique(apps_init[,c("app", "end")]))
+      # Amount of apps that have their end after the news date
+      news <- nrow(apps_data[apps_data$end > news_time,])
+      # Apps that have their end after the news date
+      attr(news, "apps") <- apps_data[apps_data$end > news_time,]
       return(news)
     })
 
@@ -463,9 +500,11 @@ mod_right_sidebar_server <- function(id, all_vars){
       apps = NULL,
       planning = NULL,
       users2 = NULL,
-      h5p_news = NULL,
-      learnr_news = NULL,
-      shiny_news = NULL,
+      events_news = NULL,
+      # h5p_news = NULL,
+      # learnr_news = NULL,
+      # shiny_news = NULL,
+      apps_news = NULL,
       selected_news_time = NULL,
       selected_module = NULL,
       selected_app = NULL,
@@ -481,9 +520,11 @@ mod_right_sidebar_server <- function(id, all_vars){
       right_sidebar_vars$apps <- apps()
       right_sidebar_vars$planning <- planning()
       right_sidebar_vars$users2 <- users2()
-      right_sidebar_vars$h5p_news <- h5p_news()
-      right_sidebar_vars$learnr_news <- learnr_news()
-      right_sidebar_vars$shiny_news <- shiny_news()
+      right_sidebar_vars$events_news <- events_news()
+      # right_sidebar_vars$h5p_news <- h5p_news()
+      # right_sidebar_vars$learnr_news <- learnr_news()
+      # right_sidebar_vars$shiny_news <- shiny_news()
+      right_sidebar_vars$apps_news <- apps_news()
       right_sidebar_vars$selected_news_time <- input$selected_news_time
       right_sidebar_vars$selected_module <- input$selected_module
       right_sidebar_vars$selected_app <- input$selected_app
