@@ -52,7 +52,7 @@ app_server <- function(input, output, session) {
         # First tab
         menuItem("Home Page", tabName = "home_page", icon = shiny::icon("home", verify_fa = FALSE)),
         # Second tab
-        menuItem("Timelines", tabName = "timelines", icon = shiny::icon("calendar", verify_fa = FALSE), badgeLabel = "News"),
+        menuItem("Timelines", tabName = "timelines", icon = shiny::icon("calendar", verify_fa = FALSE)),
         # Third tab
         menuItem("Students Progression", tabName = "std_progression", icon = shiny::icon("graduation-cap", verify_fa = FALSE)),
         # Forth tab
@@ -62,7 +62,7 @@ app_server <- function(input, output, session) {
         if (!is.null(new_elements) && new_elements > 0) {
           menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE), badgeLabel = new_elements, badgeColor = "red")
         } else {
-          menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE), badgeLabel = "News")
+          menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE))
         }
       )
     )

@@ -11,9 +11,9 @@ get_users(selected_course, only_enrolled, users2_init, acad_year)
 
 \item{only_enrolled}{Only the enrolled users or everyone.}
 
-\item{acad_year}{The academic year of the users.}
+\item{users2_init}{The table from which it gets the users.}
 
-\item{sdd_users2}{The table from which it gets the users.}
+\item{acad_year}{The academic year of the users.}
 }
 \value{
 A vector of users_id name by logins and lastnames

@@ -18,8 +18,8 @@ get_modules <- function(selected_course, modules_init, acad_year) {
     modulesdf <- unique(modules_init[modules_init$icourse == selected_course & modules_init$acad_year == acad_year, c("module", "title")])
     # Getting out the NA's and ordering by names and then structure the good names
     modulesdf <- na.omit(modulesdf)
-    modulesdf <- modulesdf[order(modulesdf$title),]
-    modules_names <- paste0(modulesdf$title, " (", modulesdf$module, ")")
+    modulesdf <- modulesdf[order(modulesdf$module),]
+    modules_names <- paste0(modulesdf$module, " (", modulesdf$title, ")")
     modules <- structure(modulesdf$module, names = modules_names) # `_id`
     return(modules)
     # Case 2 : Course is not selected
@@ -27,8 +27,8 @@ get_modules <- function(selected_course, modules_init, acad_year) {
     modulesdf <- unique(modules_init[modules_init$acad_year == acad_year, c("module", "title")])
     # Getting out the NA's and ordering by names and then structure the good names
     modulesdf <- na.omit(modulesdf)
-    modulesdf <- modulesdf[order(modulesdf$title),]
-    modules_names <- paste0(modulesdf$title, " (", modulesdf$module, ")")
+    modulesdf <- modulesdf[order(modulesdf$module),]
+    modules_names <- paste0(modulesdf$module, " (", modulesdf$title, ")")
     modules <- structure(modulesdf$module, names = modules_names) # `_id`
     return(modules)
   }

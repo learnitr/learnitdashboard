@@ -57,6 +57,29 @@ mod_home_page_server <- function(id, all_vars){
     
 # Global Vars -------------------------------------------------------------
     
+    # R CMD check preparation
+    if (!exists("sdd_apps")) {
+      sdd_apps <- NULL
+    }
+    if (!exists("sdd_planning")) {
+      sdd_planning <- NULL
+    }
+    if (!exists("sdd_users2")) {
+      sdd_users2 <- NULL
+    }
+    if (!exists("courses_init")) {
+      courses_init <- NULL
+    }
+    if (!exists("modules_init")) {
+      modules_init <- NULL
+    }
+    if (!exists("apps_init")) {
+      apps_init <- NULL
+    }
+    if (!exists("users2_init")) {
+      users2_init <- NULL
+    }
+    
 # Display Boxes -----------------------------------------------------------
 
     # Display // Info Box 1
@@ -433,6 +456,8 @@ mod_home_page_server <- function(id, all_vars){
       
       # If there are no errors, create the plot of nb of students in courses filled by enrolled or not
       if (!is.null(users)) {
+        icourse <- NULL
+        enrolled <- NULL
         users$enrolled <- ifelse(users$enrolled == TRUE, "yes", "no")
         ggplot(data = users) +
           geom_bar(mapping = aes(icourse, fill = enrolled)) +

@@ -43,27 +43,65 @@ mod_right_sidebar_server <- function(id, all_vars){
     # === Events Table ===
     # Variable : Events
     events <- reactiveVal()
+    # R CMD check preparation
+    if (!exists("sdd_events")) {
+      sdd_events <- NULL
+    }
     
     # === Courses Table ===
     courses <- reactiveVal()
+    # R CMD check preparation
+    if (!exists("courses_init")) {
+      courses_init <- NULL
+    }
+    if (!exists("sdd_courses")) {
+      sdd_courses <- NULL
+    }
     
     # === Modules Table ===
     modules <- reactiveVal()
+    # R CMD check preparation
+    if (!exists("modules_init")) {
+      modules_init <- NULL
+    }
+    if (!exists("sdd_modules")) {
+      sdd_modules <- NULL
+    }
     
     # === Apps Table ===
     apps <- reactiveVal()
+    # R CMD check preparation
+    if (!exists("sdd_apps")) {
+      sdd_apps <- NULL
+    }
+    if (!exists("apps_init")) {
+      apps_init <- NULL
+    }
     
     # === Planning Table ===
     planning <- reactiveVal()
+    # R CMD check preparation
+    if (!exists("planning_init")) {
+      planning_init <- NULL
+    }
+    if (!exists("sdd_planning")) {
+      sdd_planning <- NULL
+    }
     
     # === Users2 Table ===
     users2 <- reactiveVal()
+    # R CMD check preparation
+    if (!exists("sdd_users2")) {
+      sdd_users2 <- NULL
+    }
+    if (!exists("users2_init")) {
+      users2_init <- NULL
+    }
     
-    # Variable : Courses
-    # courses <- try(sort(sdd_apps$distinct("icourse")), silent = TRUE)
-
-    # If courses occured an error or is empty, it becomes NULL
-    # if (inherits(courses, "try-error") || length(courses) == 0) {courses <- NULL}
+    # Other Global Vars preparation (For R CMD check)
+    if (!exists("acad_year")) {
+      acad_year <- NULL
+    }
 
 # Display Selectors ---------------------------------------------------------------
 
@@ -298,10 +336,12 @@ mod_right_sidebar_server <- function(id, all_vars){
       if (input$is_dates == TRUE) {
         # Preparation of the dates
         date_from <- paste0(input$selected_date1, " ", as.character(strftime(input$selected_time1, "%R")))
-        date_from <- as.POSIXct(date_from, tz = "UTC") # enlever tz, date en locale qui est ensuite convertie en UTC
+        date_from <- as.POSIXct(date_from)
+        attr(date_from, "tzone") <- "UTC"
         date_from <- format(date_from, "%Y-%m-%dT%H:%M:%SZ")
         date_to <- paste0(input$selected_date2, " ", as.character(strftime(input$selected_time2, "%R")))
-        date_to <- as.POSIXct(date_to, tz = "UTC")
+        date_to <- as.POSIXct(date_to)
+        attr(datr_to, "tzone") <- "UTC"
         date_to <- format(date_to, "%Y-%m-%dT%H:%M:%SZ")
         # Preparation of the request
         request_vector <- c(request_vector, "dates" = glue::glue(r"--["date" : { "$gte" : {"$date" : "<<date_from>>"} , "$lte" : {"$date" : "<<date_to>>"} }]--", .open = "<<", .close = ">>"))
@@ -380,7 +420,9 @@ mod_right_sidebar_server <- function(id, all_vars){
     # Variable : Request for news
     news_request <- reactive({
       request_vector <- c()
-      news_time <- format(as.POSIXct(req(input$selected_news_time), tz = "UTC"), "%Y-%m-%dT%H:%M:%SZ")
+      news_time <- as.POSIXct(req(input$selected_news_time))
+      attr(news_time, "tzone") <- "UTC"
+      news_time <- format(news_time, "%Y-%m-%dT%H:%M:%SZ")
       request_vector <- c(request_vector, "news_date" = glue::glue(r"--["date" : { "$gte" : {"$date" : "<<news_time>>"} }]--", .open = "<<", .close = ">>"))
     })
     
