@@ -22,7 +22,7 @@ mod_right_sidebar_ui <- function(id){
       # Selector of enrolled :
       uiOutput(ns("ui_enrolled_selector")),
       # Selectors of time range :
-      tags$h3("Time :"),
+      tags$h4("Time :"),
       checkboxInput(ns("is_dates"), h4("Select Dates", style = "margin : 0px;")),
       uiOutput(ns("ui_dates_selectors")),
       # Selector of news_time
@@ -112,7 +112,7 @@ mod_right_sidebar_server <- function(id, all_vars){
         sel_courses <- courses_df$icourse
         names(sel_courses) <- courses_df$ictitle
         tagList(
-          tags$h3("Course :"),
+          tags$h4("Course :"),
           # Creation of selector with choices "All and the courses
           selectInput(ns("selected_course"), NULL, choices = c("All", sel_courses))
         )
@@ -135,7 +135,7 @@ mod_right_sidebar_server <- function(id, all_vars){
         
         # Elements to display
         tagList(
-          tags$h3("Module :"),
+          tags$h4("Module :"),
           # Creation of the module selector
           selectInput(ns("selected_module"), NULL, choices = c("All", sel_modules))
         )
@@ -170,7 +170,7 @@ mod_right_sidebar_server <- function(id, all_vars){
         # Displaying the selector if apps didn't occur error
         if (!inherits(sel_apps, "try-error")) {
           tagList(
-            tags$h3("Application :"),
+            tags$h4("Application :"),
             selectInput(ns("selected_app"), NULL, choices = c("All", sel_apps), selected = "All")
           )
         }
@@ -201,14 +201,14 @@ mod_right_sidebar_server <- function(id, all_vars){
       # If no errors to get the users : Display the selector
       if (!inherits(users, "try-error") && length(users > 0)) {
         tagList(
-          tags$h3("Student :"),
+          tags$h4("Student :"),
           # Creation of selector with choices "All" and the users of course or all
           selectInput(ns("selected_user"), NULL, choices = c("All", users))
         )
       # Create an invisible selector with value NULL to get nothing from the request
       } else {
         tagList(
-          tags$h3("Student :"),
+          tags$h4("Student :"),
           selectInput(ns("selected_user"), NULL, choices = "NULL")
         )
       }
@@ -252,7 +252,7 @@ mod_right_sidebar_server <- function(id, all_vars){
         # Displaying the selector
         tagList(
           hr(),
-          h3("See News From :"),
+          tags$h4("See News From :"),
           dateInput(ns("selected_news_time"), NULL, value = time)
           # timeInput()
         )
@@ -341,7 +341,7 @@ mod_right_sidebar_server <- function(id, all_vars){
         date_from <- format(date_from, "%Y-%m-%dT%H:%M:%SZ")
         date_to <- paste0(input$selected_date2, " ", as.character(strftime(input$selected_time2, "%R")))
         date_to <- as.POSIXct(date_to)
-        attr(datr_to, "tzone") <- "UTC"
+        attr(date_to, "tzone") <- "UTC"
         date_to <- format(date_to, "%Y-%m-%dT%H:%M:%SZ")
         # Preparation of the request
         request_vector <- c(request_vector, "dates" = glue::glue(r"--["date" : { "$gte" : {"$date" : "<<date_from>>"} , "$lte" : {"$date" : "<<date_to>>"} }]--", .open = "<<", .close = ">>"))

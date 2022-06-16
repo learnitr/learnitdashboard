@@ -69,7 +69,7 @@ mod_timeslines_server <- function(id, all_vars){
     
     # Variable Data of the timeline
     apps_timeline_data <- reactive({
-      if (!inherits(apps(), "try-error") && length(apps()) > 0 && !inherits(planning(), "try-error") && length(planning()) > 0) {
+      if (!inherits(apps(), "try-error") && nrow(apps()) > 0 && !inherits(planning(), "try-error") && nrow(planning()) > 0) {
         
         # Setting the apps and planning data
         apps_data <- na.omit(apps()[c("app", "start", "end", "icourse", "type", "url", "alt_url")])
@@ -148,7 +148,7 @@ mod_timeslines_server <- function(id, all_vars){
                    tags$br(),
                    tags$br(),
                    selectInput(ns("plan_center_to_month"), NULL, choices = c("Center to Month","September", "October", "November", "December", "January", "February", "March", "April", "May", "June", "July", "August"), width = "90%"),
-                   selectInput(ns("selected_label"), NULL, choices = c("Center to Label", sort(unique(planning()$label))), width = "90%")
+                   selectInput(ns("selected_label"), NULL, choices = c("Center to Module", sort(unique(planning()$label))), width = "90%")
                  )
                ),
                timevisOutput(ns("planning_timeline"))
@@ -162,7 +162,7 @@ mod_timeslines_server <- function(id, all_vars){
     
     # Variable : Data of the timeline
     planning_timeline_data <- reactive({
-      if (!inherits(planning(), "try-error") && length(planning()) > 0) {
+      if (!inherits(planning(), "try-error") && nrow(planning()) > 0) {
 
         planning_df <- na.omit(planning()[c("label", "start", "end", "url", "alt_url", "summary", "icourse")])
 
@@ -220,7 +220,7 @@ mod_timeslines_server <- function(id, all_vars){
     
     # Update Planning - Changing the timevis window
     observeEvent(input$selected_label, {
-      if (input$selected_label != "Center to Label") {
+      if (input$selected_label != "Center to Module") {
         # Get the dates of start and end of selected label
         start <- as.POSIXct(na.omit(planning_timeline_data()[planning_timeline_data()$label == input$selected_label,"start"]))
         end <- as.POSIXct(na.omit(planning_timeline_data()[planning_timeline_data()$label == input$selected_label,"end"]))

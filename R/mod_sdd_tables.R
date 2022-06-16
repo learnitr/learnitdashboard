@@ -12,36 +12,28 @@ mod_sdd_tables_ui <- function(id){
   tagList(
     
     tabBox( title = "Raw Data Exploration", width = 12,
-      # Display of the result H5P table
-      tabPanel("H5P",
-        DTOutput(ns("sdd_dt_h5p")),
+      # Display of the result Events table
+      tabPanel("Events",
+        DTOutput(ns("sdd_dt_events")),
       ),
-      # Display of the result Learnr table
-      tabPanel("Learnr",
-        DTOutput(ns("sdd_dt_learnr")),
-      ),
-      # Display of the result Shiny table
-      tabPanel("Shiny",
-        DTOutput(ns("sdd_dt_shiny")),
-      ),
-      # Display of the result Shiny table
+      # Display of the result Courses table
       tabPanel("Courses",
                DTOutput(ns("sdd_dt_courses")),
       ),
-      # Display of the result Shiny table
+      # Display of the result Modules table
       tabPanel("Modules",
                DTOutput(ns("sdd_dt_modules")),
       ),
-      # Display of the result Shiny table
+      # Display of the result Apps table
       tabPanel("Apps",
                DTOutput(ns("sdd_dt_apps")),
       ),
-      # Display of the result Shiny table
+      # Display of the result Planning table
       tabPanel("Planning",
                DTOutput(ns("sdd_dt_planning")),
       ),
-      # Display of the result Shiny table
-      tabPanel("Users2",
+      # Display of the result Users table
+      tabPanel("Users",
                DTOutput(ns("sdd_dt_users2")),
       )
     )
@@ -70,61 +62,13 @@ mod_sdd_tables_server <- function(id, all_vars){
     
 # DT Displays -------------------------------------------------------------
     
-    # Display // H5P datatable
-    output$sdd_dt_h5p <- renderDT({
+    # Display // Events datatable
+    output$sdd_dt_events <- renderDT({
       
       # If no errors to get the dataframe from mongoDB
-      if (!inherits(events(), "try-error") && length(events() > 0)) {
+      if (!inherits(events(), "try-error") && nrow(events()) > 0) {
         # The columns selection is now rendered by DT !
-        events()[events()$type == "h5p",]
-      } else {
-        NULL
-      }
-    },
-    # Extension to display a button that allow col selection
-    extensions = 'Buttons',
-    # Options for the data table
-    options = list(
-      scrollX = TRUE,
-      pageLength = 100,
-      lengthMenu = c(50,100,200,500),
-      # Options to get the col selector and lengthmenu
-      dom = 'Blfrtip',
-      buttons = I('colvis')
-    )
-    )
-    
-    # Display // Learnr datatable
-    output$sdd_dt_learnr <- renderDT({
-      
-      # If no errors to get the dataframe from mongoDB
-      if (!inherits(events(), "try-error") && length(events() > 0)) {
-        # The columns selection is now rendered by DT !
-        events()[events()$type == "learnr",]
-      } else {
-        NULL
-      }
-    },
-    # Extension to display a button that allow col selection
-    extensions = 'Buttons',
-    # Options for the data table
-    options = list(
-      scrollX = TRUE,
-      pageLength = 100,
-      lengthMenu = c(50,100,200,500),
-      # Options to get the col selector and lengthmenu
-      dom = 'Blfrtip',
-      buttons = I('colvis')
-    )
-    )
-    
-    # Display // Shiny datatable
-    output$sdd_dt_shiny <- renderDT({
-      
-      # If no errors to get the dataframe from mongoDB
-      if (!inherits(events(), "try-error") && length(events() > 0)) {
-        # The columns selection is now rendered by DT !
-        events()[events()$type == "shiny",]
+        events()
       } else {
         NULL
       }
@@ -146,13 +90,17 @@ mod_sdd_tables_server <- function(id, all_vars){
     output$sdd_dt_courses <- renderDT({
       
       # If no errors to get the dataframe from mongoDB
-      if (!inherits(courses(), "try-error") && length(courses() > 0)) {
+      if (!inherits(courses(), "try-error") && nrow(courses()) > 0) {
+        # Preparing the links
+        courses <- prepare_url_alr_url(courses())
         # The columns selection is now rendered by DT !
-        courses()
+        return(courses)
       } else {
-        NULL
+        return(NULL)
       }
     },
+    # To activate the link
+    escape = FALSE,
     # Extension to display a button that allow col selection
     extensions = 'Buttons',
     # Options for the data table
@@ -170,13 +118,17 @@ mod_sdd_tables_server <- function(id, all_vars){
     output$sdd_dt_modules <- renderDT({
       
       # If no errors to get the dataframe from mongoDB
-      if (!inherits(modules(), "try-error") && length(modules() > 0)) {
+      if (!inherits(modules(), "try-error") && nrow(modules()) > 0) {
+        # Preparing the links
+        modules <- prepare_url_alr_url(modules())
         # The columns selection is now rendered by DT !
-        modules()
+        return(modules)
       } else {
-        NULL
+        return(NULL)
       }
     },
+    # To activate the link
+    escape = FALSE,
     # Extension to display a button that allow col selection
     extensions = 'Buttons',
     # Options for the data table
@@ -194,13 +146,17 @@ mod_sdd_tables_server <- function(id, all_vars){
     output$sdd_dt_apps <- renderDT({
       
       # If no errors to get the dataframe from mongoDB
-      if (!inherits(apps(), "try-error") && length(apps() > 0)) {
+      if (!inherits(apps(), "try-error") && nrow(apps()) > 0) {
+        # Preparing the links
+        apps <- prepare_url_alr_url(apps())
         # The columns selection is now rendered by DT !
-        apps()
+        return(apps)
       } else {
-        NULL
+        return(NULL)
       }
     },
+    # To activate the link
+    escape = FALSE,
     # Extension to display a button that allow col selection
     extensions = 'Buttons',
     # Options for the data table
@@ -218,13 +174,17 @@ mod_sdd_tables_server <- function(id, all_vars){
     output$sdd_dt_planning <- renderDT({
       
       # If no errors to get the dataframe from mongoDB
-      if (!inherits(planning(), "try-error") && length(planning() > 0)) {
+      if (!inherits(planning(), "try-error") && nrow(planning()) > 0) {
+        # Preparing the links
+        planning <- prepare_url_alr_url(planning())
         # The columns selection is now rendered by DT !
-        planning()
+        return(planning)
       } else {
-        NULL
+        return(NULL)
       }
     },
+    # To activate the link
+    escape = FALSE,
     # Extension to display a button that allow col selection
     extensions = 'Buttons',
     # Options for the data table
@@ -238,17 +198,21 @@ mod_sdd_tables_server <- function(id, all_vars){
     )
     )
     
-    # Display // Planning datatable
+    # Display // Users2 datatable
     output$sdd_dt_users2 <- renderDT({
       
       # If no errors to get the dataframe from mongoDB
-      if (!inherits(users2(), "try-error") && length(users2() > 0)) {
+      if (!inherits(users2(), "try-error") && nrow(users2()) > 0) {
+        # Preparing the links
+        users2 <- prepare_url_alr_url(users2())
         # The columns selection is now rendered by DT !
-        users2()
+        return(users2)
       } else {
-        NULL
+        return(NULL)
       }
     },
+    # To activate the link
+    escape = FALSE,
     # Extension to display a button that allow col selection
     extensions = 'Buttons',
     # Options for the data table
