@@ -52,7 +52,13 @@ app_ui <- function(request) {
             mod_cls_progression_ui("cls_progression_1")
           ),
           
-          # Fifth tab : Data Table Exploration
+          # Fifth tab : Apps progression
+          tabItem(tabName = "apps_progression",
+            # Page Module
+            mod_apps_progression_ui("apps_progression_1")
+          ),
+          
+          # Sixth tab : Data Table Exploration
           tabItem(tabName = "rawdatatable",
             # Page Module
             mod_sdd_tables_ui("sdd_tables_1")

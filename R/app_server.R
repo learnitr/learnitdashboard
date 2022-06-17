@@ -39,6 +39,8 @@ app_server <- function(input, output, session) {
   # Server module of 4th page
   cls_progression_vars <- mod_cls_progression_server("cls_progression_1", all_vars = all_vars)
   # Server module of 5th page
+  mod_apps_progression_server("apps_progression_1", all_vars = all_vars)
+  # Server module of 6th page
   sdd_tables_vars <- mod_sdd_tables_server("sdd_tables_1", all_vars = all_vars)
   
   # Display the menuitems
@@ -67,6 +69,8 @@ app_server <- function(input, output, session) {
         # Forth tab
         menuItem("Courses Progression", tabName = "cls_progression", icon = shiny::icon("school", verify_fa = FALSE)),
         # Fifth tab
+        menuItem("Apps Progression", tabName = "apps_progression", icon = shiny::icon("gears", verify_fa = FALSE)),
+        # Sixth tab
         # If there are news, put a badge
         if (!is.null(events_news) && events_news > 0) {
           menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE), badgeLabel = events_news, badgeColor = "red")
