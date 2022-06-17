@@ -15,6 +15,7 @@
 #' @importFrom glue glue
 #' @importFrom lubridate year month day floor_date ceiling_date hour minute
 #' @import mongolite
+#' @importFrom plotly plotlyOutput renderPlotly ggplotly plot_ly
 #' @import rlang
 #' @import shiny
 #' @import shinydashboard

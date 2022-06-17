@@ -75,38 +75,40 @@ mod_timeslines_server <- function(id, all_vars){
         apps_data <- na.omit(apps()[c("app", "start", "end", "icourse", "type", "url", "alt_url")])
         planning_data <- na.omit(planning()[c("label", "start", "end", "url", "alt_url", "summary", "icourse")])
         
-        # Preparing apps dataframe
-        apps_data$content <- prepare_content(apps_data)
-        apps_data$style <- prepare_style(apps_data)
-        apps_data$title <- NA
-        apps_data$id <- 1:nrow(apps_data)
-        # Preparing planning dataframe
-        planning_data$content <- prepare_content(planning_data)
-        planning_data$style <- "background-color : #F4A460; font-weight : bold;"
-        planning_data$group <- NA # "Classes"
-        planning_data$app <- NA
-        planning_data$id <- (1+nrow(apps_data)):(nrow(apps_data)+nrow(planning_data))
-        
-        # Taking only interesting columns
-        apps_data <- apps_data[apps_data$start < apps_data$end ,c("id", "content", "icourse", "start", "end", "app", "title", "style")]
-        planning_data <- planning_data[c("id", "content", "group", "start", "end", "app", "summary", "style")]
-        # Setting the good names to fit timevis
-        names(apps_data) <- c("id", "content", "group", "start", "end", "app", "title", "style")
-        names(planning_data) <- c("id", "content", "group", "start", "end", "app", "title", "style")
-        # Adding style and type to data
-        apps_data$type <- NA
-        planning_data$type <- "background"
-        
-        # Creating the result dataframe
-        timeline_df <- rbind(apps_data, planning_data)
-        
-        # Preparing the groups for timevis
-        attr(timeline_df, "groups") <- data.frame(
-          id = unique(na.omit(timeline_df$group)),
-          content = unique(na.omit(timeline_df$group))
-        )
-        
-        return(timeline_df)
+        if (nrow(apps_data) > 0 && nrow(planning_data) > 0) {
+          # Preparing apps dataframe
+          apps_data$content <- prepare_content(apps_data)
+          apps_data$style <- prepare_style(apps_data)
+          apps_data$title <- NA
+          apps_data$id <- 1:nrow(apps_data)
+          # Preparing planning dataframe
+          planning_data$content <- prepare_content(planning_data)
+          planning_data$style <- "background-color : #F4A460; font-weight : bold;"
+          planning_data$group <- NA # "Classes"
+          planning_data$app <- NA
+          planning_data$id <- (1+nrow(apps_data)):(nrow(apps_data)+nrow(planning_data))
+          
+          # Taking only interesting columns
+          apps_data <- apps_data[apps_data$start < apps_data$end ,c("id", "content", "icourse", "start", "end", "app", "title", "style")]
+          planning_data <- planning_data[c("id", "content", "group", "start", "end", "app", "summary", "style")]
+          # Setting the good names to fit timevis
+          names(apps_data) <- c("id", "content", "group", "start", "end", "app", "title", "style")
+          names(planning_data) <- c("id", "content", "group", "start", "end", "app", "title", "style")
+          # Adding style and type to data
+          apps_data$type <- NA
+          planning_data$type <- "background"
+          
+          # Creating the result dataframe
+          timeline_df <- rbind(apps_data, planning_data)
+          
+          # Preparing the groups for timevis
+          attr(timeline_df, "groups") <- data.frame(
+            id = unique(na.omit(timeline_df$group)),
+            content = unique(na.omit(timeline_df$group))
+          )
+          
+          return(timeline_df)
+        } else { NULL }
       } else { NULL }
     })
     
@@ -166,22 +168,24 @@ mod_timeslines_server <- function(id, all_vars){
 
         planning_df <- na.omit(planning()[c("label", "start", "end", "url", "alt_url", "summary", "icourse")])
 
-        # Preparing planning dataframe
-        planning_df$content <- prepare_content(planning_df)
-        planning_df$id <- 1:(nrow(planning_df))
-
-        # Taking the good columns
-        planning_df <- planning_df[c("id", "content", "icourse", "start", "end", "summary", "label")]
-        # Setting the good names for columns for timevis
-        names(planning_df) <- c("id", "content", "group", "start", "end", "title", "label")
-        
-        # Getting the groups
-        attr(planning_df, "groups") <- data.frame(
-          id = unique(planning_df$group),
-          content = unique(planning_df$group)
-        )
-        
-        return(planning_df)
+        if (nrow(planning_df) > 0) {
+          # Preparing planning dataframe
+          planning_df$content <- prepare_content(planning_df)
+          planning_df$id <- 1:(nrow(planning_df))
+  
+          # Taking the good columns
+          planning_df <- planning_df[c("id", "content", "icourse", "start", "end", "summary", "label")]
+          # Setting the good names for columns for timevis
+          names(planning_df) <- c("id", "content", "group", "start", "end", "title", "label")
+          
+          # Getting the groups
+          attr(planning_df, "groups") <- data.frame(
+            id = unique(planning_df$group),
+            content = unique(planning_df$group)
+          )
+          
+          return(planning_df)
+        } else { NULL }
       } else { NULL }
     })
     

@@ -110,7 +110,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       if (!inherits(sdd_courses, "try-error")) {
         courses_df <- unique(courses_init[,c("icourse", "ictitle")])
         sel_courses <- courses_df$icourse
-        names(sel_courses) <- courses_df$ictitle
+        names(sel_courses) <- paste0(courses_df$ictitle, " (", courses_df$icourse, ")")
         tagList(
           tags$h4("Course :"),
           # Creation of selector with choices "All and the courses
@@ -412,7 +412,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       attr(request, "shiny_request") <- prepare_request(request_vector, c("news_date", "type"), type = "shiny")
       
       # Creation of request if a student is selected
-      if (input$selected_user != "All") {
+      if (input$selected_user != "All" && input$selected_user != "NULL") {
         student_vector <- c(request_vector, "news_std" = glue::glue(r"--["user" : "<<input$selected_user>>"]--", .open = "<<", .close = ">>"))
         attr(request, "std_request") <- prepare_request(student_vector, c("news_date", "news_std"))
         print(attr(request, "std_request"))
@@ -472,6 +472,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       selected_news_time = NULL,
       selected_module = NULL,
       selected_app = NULL,
+      is_dates = NULL,
     )
     
     # Updating the vars
@@ -489,6 +490,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       right_sidebar_vars$selected_news_time <- input$selected_news_time
       right_sidebar_vars$selected_module <- input$selected_module
       right_sidebar_vars$selected_app <- input$selected_app
+      right_sidebar_vars$is_dates <- input$is_dates
     })
     
     return(right_sidebar_vars)
