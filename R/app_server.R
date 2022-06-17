@@ -59,7 +59,11 @@ app_server <- function(input, output, session) {
           menuItem("Timelines", tabName = "timelines", icon = shiny::icon("calendar", verify_fa = FALSE))
         },
         # Third tab
-        menuItem("Students Progression", tabName = "std_progression", icon = shiny::icon("graduation-cap", verify_fa = FALSE)),
+        if (!is.null(events_news) && "std_nb_obs" %in% names(attributes(events_news)) && attr(events_news, "std_nb_obs") > 0) {
+          menuItem("Students Progression", tabName = "std_progression", icon = shiny::icon("graduation-cap", verify_fa = FALSE), badgeLabel = attr(events_news, "std_nb_obs"), badgeColor = "red")
+        } else {
+          menuItem("Students Progression", tabName = "std_progression", icon = shiny::icon("graduation-cap", verify_fa = FALSE))
+        },
         # Forth tab
         menuItem("Courses Progression", tabName = "cls_progression", icon = shiny::icon("school", verify_fa = FALSE)),
         # Fifth tab
