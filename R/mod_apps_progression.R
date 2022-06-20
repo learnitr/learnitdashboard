@@ -103,7 +103,7 @@ mod_apps_progression_server <- function(id, all_vars){
       # Data preparation if only course and not date and events is not empty, then get the data
       if ((is_course() || is_module() || is_app() || is_user()) && !is_dates() && nrow(events()) > 0) {
         # Only the elements that are submitted or evaluated or answered
-        data <- events()[events()$verb == "submitted" | events()$verb == "evaluated" | events()$verb == "answered", c("app", "correct")]
+        data <- events()[events()$verb == "submitted" | events()$verb == "answered", c("app", "correct")]
         # If not with NA's, na.omit()
         if (!input$g1_is_na) {
           data <- na.omit(data)
@@ -214,7 +214,7 @@ mod_apps_progression_server <- function(id, all_vars){
     # Update of the variable
     observeEvent(request(), {
       # Creation of a special request for the app progression graph wih the good verbs
-      app_prog_request <- c(request(), "verbs" = r"--["verb" : {"$in" : ["submitted", "answered", "evaluated"]}]--")
+      app_prog_request <- c(request(), "verbs" = r"--["verb" : {"$in" : ["submitted", "answered"]}]--")
       app_prog_request <- prepare_request(app_prog_request, c("icourse", "module", "app", "user", "verbs"))
       
       if (app_prog_request != "{}") {

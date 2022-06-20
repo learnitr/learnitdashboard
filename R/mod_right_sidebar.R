@@ -43,7 +43,7 @@ mod_right_sidebar_server <- function(id, all_vars){
     # === Events Table ===
     # Variable : Events
     events <- reactiveVal()
-    # R CMD check preparation
+    # R CMD check preparation : To avoid R CMD check errors
     if (!exists("sdd_events")) {
       sdd_events <- NULL
     }
@@ -413,7 +413,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       
       # Creation of request if a student is selected
       if (input$selected_user != "All" && input$selected_user != "NULL") {
-        student_vector <- c(request_vector, "news_std" = glue::glue(r"--["user" : "<<input$selected_user>>"]--", .open = "<<", .close = ">>"))
+        student_vector <- c(request_vector, "news_std" = glue::glue(r"--["user" : "<<input$selected_user>>", "verb" : {"$in" : ["submitted", "answered"] }]--", .open = "<<", .close = ">>"))
         attr(request, "std_request") <- prepare_request(student_vector, c("news_date", "news_std"))
         print(attr(request, "std_request"))
       }

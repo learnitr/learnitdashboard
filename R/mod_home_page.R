@@ -28,6 +28,7 @@ mod_home_page_ui <- function(id){
     uiOutput(ns("slot1")),
     uiOutput(ns("slot2")),
     uiOutput(ns("slot3")),
+    uiOutput(ns("slot4")),
     
     # UIoutput to generate a timeline of the different apps
     # uiOutput(ns("ui_apps_timeline_1")),
@@ -48,13 +49,11 @@ mod_home_page_server <- function(id, all_vars){
 
     # Vars from right_sidebar
     events_news <- reactive({all_vars$right_sidebar_vars$events_news})
-    # h5p_news <- reactive({all_vars$right_sidebar_vars$h5p_news})
-    # learnr_news <- reactive({all_vars$right_sidebar_vars$learnr_news})
-    # shiny_news <- reactive({all_vars$right_sidebar_vars$shiny_news})
     selected_news_time <- reactive({all_vars$right_sidebar_vars$selected_news_time})
     selected_course <- reactive({all_vars$right_sidebar_vars$selected_course})
     selected_module <- reactive({all_vars$right_sidebar_vars$selected_module})
     selected_app <- reactive({all_vars$right_sidebar_vars$selected_app})
+    selected_user <- reactive({all_vars$right_sidebar_vars$selected_user})
     
 # Global Vars -------------------------------------------------------------
     
@@ -294,15 +293,15 @@ mod_home_page_server <- function(id, all_vars){
             # Box content :
             if (selected_course() != "All") {
               tagList(
-                h4("Course Title"),
+                h4("Title"),
                 attr(course, "title"),
-                h4("Course Start"),
+                h4("Start"),
                 attr(course, "start"),
-                h4("Course End"),
+                h4("End"),
                 attr(course, "end"),
-                h4("Course Url"),
+                h4("Course"),
                 tags$a(attr(course, "url"), href = attr(course, "url")),
-                h4("Course Alt Url"),
+                h4("Description"),
                 tags$a(attr(course, "alt_url"), href = attr(course, "alt_url"))
               )
             } else {
@@ -350,15 +349,15 @@ mod_home_page_server <- function(id, all_vars){
             # Box content :
             if (selected_module() != "All") {
               tagList(
-                h4("Module Title"),
+                h4("Title"),
                 attr(module, "title"),
-                h4("Module Start"),
+                h4("Start"),
                 attr(module, "start"),
-                h4("Module End"),
+                h4("End"),
                 attr(module, "end"),
-                h4("Module Url"),
+                h4("Chapter"),
                 tags$a(attr(module, "url"), href = attr(module, "url")),
-                h4("Module Alt Url"),
+                h4("Exercises"),
                 tags$a(attr(module, "alt_url"), href = attr(module, "alt_url"))
               )
             } else {
@@ -400,15 +399,15 @@ mod_home_page_server <- function(id, all_vars){
             # Box content :
             if (selected_app() != "All") {
               tagList(
-                h4("App Type"),
+                h4("Type"),
                 attr(app, "type"),
-                h4("App Start"),
+                h4("Start"),
                 attr(app, "start"),
-                h4("App End"),
+                h4("End"),
                 attr(app, "end"),
-                h4("App Url"),
+                h4("App"),
                 tags$a(attr(app, "url"), href = attr(app, "url")),
-                h4("App Alt Url"),
+                h4("More Info"),
                 tags$a(attr(app, "alt_url"), href = attr(app, "alt_url"))
               )
             } else {
@@ -417,6 +416,55 @@ mod_home_page_server <- function(id, all_vars){
                 length(unique(apps_init[,"app"])),
                 h4("Types"),
                 length(unique(apps_init[,"type"]))
+              )
+            }
+          )
+        )
+      }
+    })
+    
+    # Slot for global home information
+    output$slot4 <- renderUI({
+      if (!inherits(sdd_users2, "try-error")) {
+        req(selected_user())
+        
+        # Getting the data to display
+        if (selected_user() != "All" && selected_user() != "NONE") {
+          user <- selected_user()
+          attr(user, "name") <- paste0(users2_init[users2_init$user == selected_user(), "ilastname"][1], " ", users2_init[users2_init$user == selected_user(), "ifirstname"][1])
+          attr(user, "courses") <- paste(users2_init[users2_init$user == selected_user(), "icourse"], collapse = " / ")
+          attr(user, "login") <- users2_init[users2_init$user == selected_user(), "login"][1]
+          attr(user, "github") <- users2_init[users2_init$user == selected_user(), "url"][1]
+        }
+        
+        return(
+          box( 
+            title = if (selected_user() != "All" && selected_user() != "NONE") {
+              paste0("User : ", users2_init[users2_init$user == selected_user(), "login"][1])
+            } else {
+              "Users"
+            },
+            solidHeader = TRUE,
+            width = 4, icon = shiny::icon("tablet", verify_fa = FALSE),
+            collapsible = TRUE, collapsed = FALSE, status = "purple",
+            # Box content :
+            if (selected_user() != "All") {
+              tagList(
+                h4("Name"),
+                attr(user, "name"),
+                h4("Login"),
+                attr(user, "login"),
+                h4("Courses"),
+                attr(user, "courses"),
+                h4("GitHub"),
+                tags$a(attr(user, "github"), href = attr(user, "github"))
+              )
+            } else {
+              tagList(
+                h4("Users"),
+                length(unique(users2_init[,"user"])),
+                h4("Acad Year"),
+                "2021-2022"
               )
             }
           )

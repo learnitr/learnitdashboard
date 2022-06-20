@@ -14,16 +14,16 @@ prepare_url_alr_url <- function(data_table) {
   if (!any(!c("url", "alt_url") %in% names(data_table))) {
     
     # Preparinf the url in html link
-    data_table$url <- paste0('<a href="',data_table$url,'">',data_table$url,'</a>')
+    data_table$url <- paste0('<a href="',data_table$url,'" target="_blank">',data_table$url,'</a>')
     # Preparinf the alt_url in html link
-    data_table$alt_url <- paste0('<a href="',data_table$alt_url,'">',data_table$alt_url,'</a>')
+    data_table$alt_url <- paste0('<a href="',data_table$alt_url,'" target="_blank">',data_table$alt_url,'</a>')
     
     return(data_table)
   # If only url
   } else if ("url" %in% names(data_table)) {
     
     # Preparinf the url in html link
-    data_table$url <- paste0('<a href="',data_table$url,'">',data_table$url,'</a>')
+    data_table$url <- paste0('<a href="',data_table$url,'" target="_blank">',data_table$url,'</a>')
     
     return(data_table)
   # If none
