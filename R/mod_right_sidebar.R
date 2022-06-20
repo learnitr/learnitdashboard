@@ -473,6 +473,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       selected_module = NULL,
       selected_app = NULL,
       is_dates = NULL,
+      request = NULL,
     )
     
     # Updating the vars
@@ -491,6 +492,7 @@ mod_right_sidebar_server <- function(id, all_vars){
       right_sidebar_vars$selected_module <- input$selected_module
       right_sidebar_vars$selected_app <- input$selected_app
       right_sidebar_vars$is_dates <- input$is_dates
+      right_sidebar_vars$request <- request()
     })
     
     return(right_sidebar_vars)
