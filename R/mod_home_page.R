@@ -24,14 +24,18 @@ mod_home_page_ui <- function(id){
       # valueBoxOutput(ns("valuebox_1")),
     ),
     
-    # Template slots for graph
-    uiOutput(ns("slot1")),
-    uiOutput(ns("slot2")),
-    uiOutput(ns("slot3")),
-    uiOutput(ns("slot4")),
-    
-    # UIoutput to generate a timeline of the different apps
-    # uiOutput(ns("ui_apps_timeline_1")),
+    # Slots for general informations
+    fluidRow(
+      column( width = 5, offset = 1,
+        uiOutput(ns("slot1")),
+        uiOutput(ns("slot2"))
+      ),
+      column( width = 5,
+        uiOutput(ns("slot3")),
+        uiOutput(ns("slot4"))
+      ),
+    ),
+        
     
     # UIoutput to generate a box and a plot inside (of students per courses)
     uiOutput(ns("courses_students_plot"))
@@ -288,7 +292,7 @@ mod_home_page_server <- function(id, all_vars){
               "Courses"
             },
             solidHeader = TRUE,
-            width = 4, icon = shiny::icon("book-open", verify_fa = FALSE),
+            width = 12, icon = shiny::icon("book-open", verify_fa = FALSE),
             collapsible = TRUE, collapsed = FALSE, status = "purple",
             # Box content :
             if (selected_course() != "All") {
@@ -344,7 +348,7 @@ mod_home_page_server <- function(id, all_vars){
               "Modules"
             },
             solidHeader = TRUE,
-            width = 4, icon = shiny::icon("shapes", verify_fa = FALSE),
+            width = 12, icon = shiny::icon("shapes", verify_fa = FALSE),
             collapsible = TRUE, collapsed = FALSE, status = "purple",
             # Box content :
             if (selected_module() != "All") {
@@ -363,7 +367,9 @@ mod_home_page_server <- function(id, all_vars){
             } else {
               tagList(
                 h4("Modules"),
-                length(unique(modules_init[,"module"]))
+                length(unique(modules_init[,"module"])),
+                h4("In Courses"),
+                length(unique(na.omit(modules_init$icourse)))
               )
             }
           )
@@ -394,7 +400,7 @@ mod_home_page_server <- function(id, all_vars){
               "Apps"
             },
             solidHeader = TRUE,
-            width = 4, icon = shiny::icon("tablet", verify_fa = FALSE),
+            width = 12, icon = shiny::icon("tablet", verify_fa = FALSE),
             collapsible = TRUE, collapsed = FALSE, status = "purple",
             # Box content :
             if (selected_app() != "All") {
@@ -433,6 +439,7 @@ mod_home_page_server <- function(id, all_vars){
           user <- selected_user()
           attr(user, "name") <- paste0(users2_init[users2_init$user == selected_user(), "ilastname"][1], " ", users2_init[users2_init$user == selected_user(), "ifirstname"][1])
           attr(user, "courses") <- paste(users2_init[users2_init$user == selected_user(), "icourse"], collapse = " / ")
+          attr(user, "institution") <- users2_init[users2_init$user == selected_user(), "institution"][1]
           attr(user, "login") <- users2_init[users2_init$user == selected_user(), "login"][1]
           attr(user, "github") <- users2_init[users2_init$user == selected_user(), "url"][1]
         }
@@ -445,7 +452,7 @@ mod_home_page_server <- function(id, all_vars){
               "Users"
             },
             solidHeader = TRUE,
-            width = 4, icon = shiny::icon("tablet", verify_fa = FALSE),
+            width = 12, icon = shiny::icon("tablet", verify_fa = FALSE),
             collapsible = TRUE, collapsed = FALSE, status = "purple",
             # Box content :
             if (selected_user() != "All") {
@@ -454,6 +461,8 @@ mod_home_page_server <- function(id, all_vars){
                 attr(user, "name"),
                 h4("Login"),
                 attr(user, "login"),
+                h4("Institution"),
+                attr(user, "institution"),
                 h4("Courses"),
                 attr(user, "courses"),
                 h4("GitHub"),
@@ -464,7 +473,11 @@ mod_home_page_server <- function(id, all_vars){
                 h4("Users"),
                 length(unique(users2_init[,"user"])),
                 h4("Acad Year"),
-                "2021-2022"
+                "2021-2022",
+                h4("Institutions"),
+                paste(unique(users2_init$institution), collapse = " / "),
+                h4("Enrolled / Non Enrolled"),
+                paste0(sum(na.omit(users2_init$enrolled)), " / ", sum(!na.omit(users2_init$enrolled)))
               )
             }
           )

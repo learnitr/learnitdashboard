@@ -89,7 +89,6 @@ mod_apps_progression_server <- function(id, all_vars){
         tagList(
           box( title = paste(title, collapse = " / ") , solidHeader = TRUE,
                width = 5, collapsible = TRUE, status = "purple",
-               checkboxInput(ns("g1_is_na"), "With NA's"),
                plotly::plotlyOutput(ns("graph_1"))
           )
         )
@@ -98,103 +97,6 @@ mod_apps_progression_server <- function(id, all_vars){
     
     # Rendering the graph
     output$graph_1 <- plotly::renderPlotly({
-      # Setting the data to NULL
-      data <- NULL
-      # Data preparation if only course and not date and events is not empty, then get the data
-      if ((is_course() || is_module() || is_app() || is_user()) && !is_dates() && nrow(events()) > 0) {
-        # Only the elements that are submitted or evaluated or answered
-        data <- events()[events()$verb == "submitted" | events()$verb == "answered", c("app", "correct")]
-        # If not with NA's, na.omit()
-        if (!input$g1_is_na) {
-          data <- na.omit(data)
-        }
-        # Order from app names
-        data <- data[order(data$app),]
-      }
-      
-      # Creation of the result graph
-      if (!is.null(data) && nrow(data) > 0) {
-        ggplot(data = data, mapping = aes(x = app, fill = correct)) +
-          xlab("Apps") +
-          ylab("Amount of Answers") +
-          coord_flip() +
-          geom_bar()
-      }
-    })
-
-# Graph 2 -----------------------------------------------------------------
-
-    # # Rendering the box and the outputs
-    # output$apps_graph_2 <- renderUI({
-    #   if (!inherits(sdd_events, "try-error")) {
-    #     tagList(
-    #       box( title = if (is_user()) {
-    #         paste0("User : ", unique(users2_init[users2_init$user == selected_user(), "login"]))
-    #       } else {
-    #         "Apps Graph 2"
-    #       }, solidHeader = TRUE,
-    #            width = 5, collapsible = TRUE, status = "purple",
-    #            checkboxInput(ns("g2_is_na"), "With NA's"),
-    #            plotly::plotlyOutput(ns("graph_2"))
-    #       )
-    #     )
-    #   }
-    # })
-    # 
-    # # Rendering the graph
-    # output$graph_2 <- renderPlotly({
-    #   # Setting the data to NULL
-    #   data <- NULL
-    #   # Data preparation if only course and not date and events is not empty, then get the data
-    #   if (is_user() && nrow(events()) > 0) {
-    #     # Only the elements that are submitted or evaluated or answered
-    #     data <- events()[events()$verb == "submitted" | events()$verb == "evaluated" | events()$verb == "answered", c("app", "correct")]
-    #     # If not with NA's, na.omit()
-    #     if (!input$g2_is_na) {
-    #       data <- na.omit(data)
-    #     }
-    #     # Order from app names
-    #     data <- data[order(data$app),]
-    #   }
-    #   
-    #   # Creation of the result graph
-    #   if (!is.null(data) && nrow(data) > 0) {
-    #     ggplot(data = data, mapping = aes(x = app, fill = correct)) +
-    #       xlab("Apps") +
-    #       ylab("Amount of Answers") +
-    #       coord_flip() +
-    #       geom_bar()
-    #   }
-    # })
-
-# Graph 3 -----------------------------------------------------------------
-
-    # Rendering the box and the outputs
-    output$apps_graph_3 <- renderUI({
-      if (!inherits(sdd_events, "try-error")) {
-        # Creating the title
-        title <- c("Apps Graph")
-        if (is_course()) {
-          title <- c(title, paste0("Course : ", selected_course()))
-        } else if (is_module()) {
-          title <- c(title, paste0("Module : ", selected_module()))
-        } else if (is_app()) {
-          title <- c(title, paste0("App : ", selected_app()))
-        }
-        if (is_user()) {
-          title <- c(title, paste0("User : ", unique(users2_init[users2_init$user == selected_user(), "login"])))
-        }
-        tagList(
-          box( title = paste(title, collapse = " / ") , solidHeader = TRUE,
-               width = 5, collapsible = TRUE, status = "purple",
-               plotly::plotlyOutput(ns("graph_3"))
-          )
-        )
-      }
-    })
-    
-    # Rendering the graph
-    output$graph_3 <- plotly::renderPlotly({
       if (nrow(req(app_prog_data())) > 0) {
         
         # Creation of the result graph
@@ -219,10 +121,12 @@ mod_apps_progression_server <- function(id, all_vars){
       
       if (app_prog_request != "{}") {
         # Getting the data, only the app and correct fields
-        data <- na.omit(sdd_events$find(query = app_prog_request, fields = '{"_id" : false, "app" : true, "correct" : true}'))
-        data <- data[order(data$app),]
-        # Putting the data inside of the reactive Variable
-        app_prog_data(data)
+        data <- try(na.omit(sdd_events$find(query = app_prog_request, fields = '{"_id" : false, "app" : true, "correct" : true}')), silent = TRUE)
+        if (!inherits(data, "try-error") && !is.null(data) && nrow(data) > 0) {
+          data <- data[order(data$app),]
+          # Putting the data inside of the reactive Variable
+          app_prog_data(data)
+        }
       }
     })
     
