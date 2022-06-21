@@ -71,6 +71,79 @@ mod_apps_progression_server <- function(id, all_vars){
 
 # Graph 1 -----------------------------------------------------------------
 
+    # Variable : Data for the app progression graph
+    app_prog_dataa <- reactive({
+      
+      # req(selected_course())
+      # req(selected_module())
+      # req(selected_app())
+      
+      # Initialisation of the request vector
+      request_vector <- c()
+      
+      # Request part for the course
+      if (is_request(selected_course())) {
+        request_vector <- c(request_vector, glue::glue(r"--["icourse" : "<<selected_course()>>"]--", .open = "<<", .close = ">>"))
+      }
+      # Request part for the module
+      if (is_request(selected_module())) {
+        request_vector <- c(request_vector, glue::glue(r"--["module" : "<<selected_module()>>"]--", .open = "<<", .close = ">>"))
+      }
+      # Request part for the app
+      if (is_request(selected_app())) {
+        request_vector <- c(request_vector, glue::glue(r"--["app" : "<<selected_app()>>"]--", .open = "<<", .close = ">>"))
+      }
+      # Creation of the entire request part if the vector isn't NULL
+      if (!is.null(request_vector)) {
+        conditions <- paste(request_vector, collapse = ", ")
+      } else { conditions <- NULL}
+      
+      # If it's only a selected course -> grouped by module, if else -> grouped by app
+      app_or_module <- ifelse(is_course(), "$module", "$app")
+      
+      # Creation of the entire request if the request part isn't NULL
+      if (!is.null(conditions)) {
+        request <- r"--[
+          [{ "$match" : {
+            <<conditions>>,
+            "verb" : {"$in" : ["submitted", "answered"]},
+            "correct" : {"$in" : [true, false]}
+          }},
+          { "$group" : {
+            "_id" : "<<app_or_module>>",
+            "correct" : {"$sum" : { "$cond" : [ { "$eq" : ["$correct", true] }, 1, 0 ] } },
+            "incorrect" : {"$sum" : { "$cond" : [ { "$eq" : ["$correct", false] }, 1, 0 ] } }
+          }}]
+        ]--"
+        request <- glue::glue(request, .open = "<<", .close = ">>")
+      } else { request <- NULL }
+      
+      # Getting the data and preparation of this data
+      if (!inherits(sdd_events, "try-error") && !is.null(request)) {
+        # Making the request
+        data <- sdd_events$aggregate(request)
+      } else { data <- NULL }
+      
+      if (!is.null(data) && nrow(data) > 0) {
+        # Setting the good names
+        if (app_or_module == "$module") {
+          names(data) <- c("module", "correct", "incorrect")
+        } else {
+          names(data) <- c("app", "correct", "incorrect")
+        }
+        # Getting the amount of students for the selection
+        nb_std <- length(sdd_users2$distinct("user", query = prepare_request(request(), c("icourse", "module", "app"))))
+        # Counting the answers / nb_students
+        data$correct <- round(data$correct / nb_std, 2)
+        data$incorrect <- round(data$incorrect / nb_std, 2)
+        return(data)
+      }
+    })
+    
+    observe({
+      print(app_prog_dataa())
+    })
+    
     # Rendering the box and the outputs
     output$apps_graph_1 <- renderUI({
       if (!inherits(sdd_events, "try-error")) {
@@ -97,14 +170,32 @@ mod_apps_progression_server <- function(id, all_vars){
     
     # Rendering the graph
     output$graph_1 <- plotly::renderPlotly({
-      if (nrow(req(app_prog_data())) > 0) {
+      # if (nrow(req(app_prog_data())) > 0) {
+      #   
+      #   # Creation of the result graph
+      #   ggplot(data = app_prog_data(), mapping = aes(x = app, fill = correct)) +
+      #     xlab("Apps") +
+      #     ylab("Amount of Answers") +
+      #     coord_flip() +
+      #     geom_bar()
+      # }
+      if (nrow(req(app_prog_dataa())) > 0) {
         
-        # Creation of the result graph
-        ggplot(data = app_prog_data(), mapping = aes(x = app, fill = correct)) +
-          xlab("Apps") +
-          ylab("Amount of Answers") +
-          coord_flip() +
-          geom_bar()
+        if ("module" %in% names(app_prog_dataa())) {
+          # Creation of the result graph
+          ggplot(data = app_prog_dataa(), mapping = aes(x = module, y = correct)) +
+            xlab("Modules") +
+            ylab("Amount of Answers") +
+            coord_flip() +
+            geom_bar(stat = "identity")
+        } else {
+          # Creation of the result graph
+          ggplot(data = app_prog_dataa(), mapping = aes(x = app, y = correct)) +
+            xlab("Apps") +
+            ylab("Amount of Answers") +
+            coord_flip() +
+            geom_bar(stat = "identity")
+        }
       }
     })
 
