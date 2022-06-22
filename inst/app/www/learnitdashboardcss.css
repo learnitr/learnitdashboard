@@ -1,0 +1,10 @@
+
+/* CSS Stylesheet for learnitdashboard */
+
+/* Loading State Render */
+div#loadstate {
+  background-color: transparent;
+  border-style: none;
+  border: 0px;
+  box-shadow: none;
+}

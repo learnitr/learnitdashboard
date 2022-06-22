@@ -43,6 +43,19 @@ app_server <- function(input, output, session) {
   # Server module of 6th page
   sdd_tables_vars <- mod_sdd_tables_server("sdd_tables_1", all_vars = all_vars)
   
+  # Render loadingstate
+  output$load <- renderUI({
+    if (is.null(right_sidebar_vars$events_news)) {
+      tagList(
+        column( width = 4, offset = 4,
+          box(headerBorder = FALSE, id = "loadstate",
+            loadingState()
+          )
+        )
+      )
+    }
+  })
+  
   # Display the menuitems
   output$menuitems <- renderMenu({
     # New elements from tables_news

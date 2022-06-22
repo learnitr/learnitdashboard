@@ -21,7 +21,6 @@
 #' @import shinydashboard
 #' @import shinydashboardPlus
 #' @importFrom shinyjs useShinyjs disabled disable enable
-#' @import shinythemes
 #' @import shinyTime
 #' @import stats
 #' @importFrom timevis timevisOutput renderTimevis timevis centerItem setWindow

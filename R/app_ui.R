@@ -9,7 +9,7 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    dashboardPage( skin = "purple",
+    dashboardPage(
       
       # Head of Dashboard
       header = dashboardHeader(
@@ -26,6 +26,9 @@ app_ui <- function(request) {
       # Body of Dashboard
       body = dashboardBody(
         useShinyjs(),
+        
+        uiOutput("load"),
+        
         tabItems(
           
           # First tab : Home Page with general informations

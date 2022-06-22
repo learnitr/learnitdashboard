@@ -16,13 +16,9 @@ mod_apps_progression_ui <- function(id){
       uiOutput(ns("apps_graph_1")),
       
       # Graph 2
-      uiOutput(ns("apps_graph_3")),
+      uiOutput(ns("apps_graph_2")),
     ),
     
-    # fluidRow(
-    #   # Graph 3
-    #   uiOutput(ns("apps_graph_3"))
-    # )
   )
 }
     
@@ -72,7 +68,7 @@ mod_apps_progression_server <- function(id, all_vars){
 # Graph 1 -----------------------------------------------------------------
 
     # Variable : Data for the app progression graph
-    app_prog_dataa <- reactive({
+    app_prog_data <- reactive({
       
       # req(selected_course())
       # req(selected_module())
@@ -141,14 +137,14 @@ mod_apps_progression_server <- function(id, all_vars){
     })
     
     observe({
-      print(app_prog_dataa())
+      print(app_prog_data())
     })
     
     # Rendering the box and the outputs
     output$apps_graph_1 <- renderUI({
       if (!inherits(sdd_events, "try-error")) {
         # Creating the title
-        title <- c("Apps Graph")
+        title <- c("Apps Progression Graph")
         if (is_course()) {
           title <- c(title, paste0("Course : ", selected_course()))
         } else if (is_module()) {
@@ -179,18 +175,18 @@ mod_apps_progression_server <- function(id, all_vars){
       #     coord_flip() +
       #     geom_bar()
       # }
-      if (nrow(req(app_prog_dataa())) > 0) {
+      if (nrow(req(app_prog_data())) > 0) {
         
-        if ("module" %in% names(app_prog_dataa())) {
+        if ("module" %in% names(app_prog_data())) {
           # Creation of the result graph
-          ggplot(data = app_prog_dataa(), mapping = aes(x = module, y = correct)) +
+          ggplot(data = app_prog_data(), mapping = aes(x = module, y = correct)) +
             xlab("Modules") +
             ylab("Amount of Answers") +
             coord_flip() +
             geom_bar(stat = "identity")
         } else {
           # Creation of the result graph
-          ggplot(data = app_prog_dataa(), mapping = aes(x = app, y = correct)) +
+          ggplot(data = app_prog_data(), mapping = aes(x = app, y = correct)) +
             xlab("Apps") +
             ylab("Amount of Answers") +
             coord_flip() +
@@ -199,27 +195,75 @@ mod_apps_progression_server <- function(id, all_vars){
       }
     })
 
-# Request -----------------------------------------------------------------
+# Graph 2 -----------------------------------------------------------------
 
-    # Variable : App Progression graph data
-    app_prog_data <- reactiveVal()
+    # Rendering the box and the outputs
+    output$apps_graph_2 <- renderUI({
+      if (!inherits(sdd_events, "try-error")) {
+        # Creating the title
+        title <- c("Apps Progression Graph")
+        if (is_course()) {
+          title <- c(title, paste0("Course : ", selected_course()))
+        } else if (is_module()) {
+          title <- c(title, paste0("Module : ", selected_module()))
+        } else if (is_app()) {
+          title <- c(title, paste0("App : ", selected_app()))
+        }
+        if (is_user()) {
+          title <- c(title, paste0("User : ", unique(users2_init[users2_init$user == selected_user(), "login"])))
+        }
+        tagList(
+          box( title = paste(title, collapse = " / ") , solidHeader = TRUE,
+               width = 5, collapsible = TRUE, status = "purple",
+               plotly::plotlyOutput(ns("graph_2"))
+          )
+        )
+      }
+    })
     
-    # Update of the variable
-    observeEvent(request(), {
-      # Creation of a special request for the app progression graph wih the good verbs
-      app_prog_request <- c(request(), "verbs" = r"--["verb" : {"$in" : ["submitted", "answered"]}]--")
-      app_prog_request <- prepare_request(app_prog_request, c("icourse", "module", "app", "user", "verbs"))
-      
-      if (app_prog_request != "{}") {
-        # Getting the data, only the app and correct fields
-        data <- try(na.omit(sdd_events$find(query = app_prog_request, fields = '{"_id" : false, "app" : true, "correct" : true}')), silent = TRUE)
-        if (!inherits(data, "try-error") && !is.null(data) && nrow(data) > 0) {
-          data <- data[order(data$app),]
-          # Putting the data inside of the reactive Variable
-          app_prog_data(data)
+    # Rendering the graph
+    output$graph_2 <- plotly::renderPlotly({
+      if (nrow(req(app_prog_data())) > 0) {
+        
+        if ("module" %in% names(app_prog_data())) {
+          # Creation of the result graph
+          ggplot(data = app_prog_data(), mapping = aes(x = module, y = incorrect)) +
+            xlab("Modules") +
+            ylab("Amount of Answers") +
+            coord_flip() +
+            geom_bar(stat = "identity")
+        } else {
+          # Creation of the result graph
+          ggplot(data = app_prog_data(), mapping = aes(x = app, y = incorrect)) +
+            xlab("Apps") +
+            ylab("Amount of Answers") +
+            coord_flip() +
+            geom_bar(stat = "identity")
         }
       }
     })
+
+# ~~~ Old Request -----------------------------------------------------------------
+
+    # # Variable : App Progression graph data
+    # app_prog_data <- reactiveVal()
+    # 
+    # # Update of the variable
+    # observeEvent(request(), {
+    #   # Creation of a special request for the app progression graph wih the good verbs
+    #   app_prog_request <- c(request(), "verbs" = r"--["verb" : {"$in" : ["submitted", "answered"]}]--")
+    #   app_prog_request <- prepare_request(app_prog_request, c("icourse", "module", "app", "user", "verbs"))
+    #   
+    #   if (app_prog_request != "{}") {
+    #     # Getting the data, only the app and correct fields
+    #     data <- try(na.omit(sdd_events$find(query = app_prog_request, fields = '{"_id" : false, "app" : true, "correct" : true}')), silent = TRUE)
+    #     if (!inherits(data, "try-error") && !is.null(data) && nrow(data) > 0) {
+    #       data <- data[order(data$app),]
+    #       # Putting the data inside of the reactive Variable
+    #       app_prog_data(data)
+    #     }
+    #   }
+    # })
     
   })
 }
