@@ -38,7 +38,7 @@ mod_std_progression_server <- function(id, all_vars){
       if (selected_user() == "All" || selected_user() == "NULL") {
         tagList(
           # Dashboard box
-          box( title = "Graph :", status = "primary", solidHeader = TRUE, width = 8,
+          box( title = "Graph :", status = "info", solidHeader = TRUE, width = 8,
             tags$h4("Nothing to display, please select a login.")
           )
         )
@@ -46,7 +46,7 @@ mod_std_progression_server <- function(id, all_vars){
       } else if (selected_user() != "All" && selected_user() != "NULL") {
         tagList(
           # Dashboard box
-          box( title = paste0("Graph : ", selected_user()), status = "primary", solidHeader = TRUE, width = 8,
+          box( title = paste0("Graph : ", selected_user()), status = "info", solidHeader = TRUE, width = 8,
             plotOutput(ns("test_graph"))
           )
         )

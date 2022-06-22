@@ -103,13 +103,13 @@ mod_home_page_server <- function(id, all_vars){
             "No changes"
           },
           icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
+          color = "aqua"
         )
       } else {
         infoBox(
           title = "",
           icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
+          color = "aqua"
         )
       }
     })
@@ -130,13 +130,13 @@ mod_home_page_server <- function(id, all_vars){
             "No changes"
           },
           icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
+          color = "aqua"
         )
       } else {
         infoBox(
           title = "",
           icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
+          color = "aqua"
         )
       }
     })
@@ -157,13 +157,13 @@ mod_home_page_server <- function(id, all_vars){
             "No changes"
           },
           icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
+          color = "aqua"
         )
       } else {
         infoBox(
           title = "",
           icon = icon("gears", verify_fa = FALSE),
-          color = "purple"
+          color = "aqua"
         )
       }
     })
@@ -184,13 +184,13 @@ mod_home_page_server <- function(id, all_vars){
             paste0(length(attr(events_news(), "h5p_apps")), " apps changed in ", length(attr(events_news(), "h5p_courses")), " courses")
           } else { "No changes" },
           icon = icon("pencil", verify_fa = FALSE),
-          color = "purple"
+          color = "aqua"
         )
       } else {
         infoBox(
           title = "",
           icon = icon("pencil", verify_fa = FALSE),
-          color = "purple"
+          color = "aqua"
         )
       }
     })
@@ -210,13 +210,13 @@ mod_home_page_server <- function(id, all_vars){
             paste0(length(attr(events_news(), "learnr_apps")), " apps changed in ", length(attr(events_news(), "learnr_courses")), " courses")
           } else { "No changes" },
           icon = icon("chalkboard", verify_fa = FALSE),
-          color = "purple"
+          color = "aqua"
         )
       } else {
         infoBox(
           title = "",
           icon = icon("chalkboard", verify_fa = FALSE),
-          color = "purple"
+          color = "aqua"
         )
       }
     })
@@ -236,13 +236,13 @@ mod_home_page_server <- function(id, all_vars){
             paste0(length(attr(events_news(), "shiny_apps")), " apps changed in ", length(attr(events_news(), "shiny_courses")), " courses")
           } else { "No changes" },
           icon = icon("tablet", verify_fa = FALSE),
-          color = "purple"
+          color = "aqua"
         )
       } else {
         infoBox(
           title = "",
           icon = icon("tablet", verify_fa = FALSE),
-          color = "purple"
+          color = "aqua"
         )
       }
     })
@@ -255,14 +255,14 @@ mod_home_page_server <- function(id, all_vars){
     #       value = paste0(nrow(h5p_news()), " entries"),
     #       subtitle = "H5P Apps",
     #       icon = icon("gears", verify_fa = FALSE),
-    #       color = "purple"
+    #       color = "aqua"
     #     )
     #   } else {
     #     valueBox(
     #       value = NULL,
     #       subtitle = "",
     #       icon = icon("gears", verify_fa = FALSE),
-    #       color = "purple"
+    #       color = "aqua"
     #     )
     #   }
     # })
@@ -293,7 +293,7 @@ mod_home_page_server <- function(id, all_vars){
             },
             solidHeader = TRUE,
             width = 12, icon = shiny::icon("book-open", verify_fa = FALSE),
-            collapsible = TRUE, collapsed = FALSE, status = "purple",
+            collapsible = TRUE, collapsed = FALSE, status = "info",
             # Box content :
             if (selected_course() != "All") {
               tagList(
@@ -349,7 +349,7 @@ mod_home_page_server <- function(id, all_vars){
             },
             solidHeader = TRUE,
             width = 12, icon = shiny::icon("shapes", verify_fa = FALSE),
-            collapsible = TRUE, collapsed = FALSE, status = "purple",
+            collapsible = TRUE, collapsed = FALSE, status = "info",
             # Box content :
             if (selected_module() != "All") {
               tagList(
@@ -401,7 +401,7 @@ mod_home_page_server <- function(id, all_vars){
             },
             solidHeader = TRUE,
             width = 12, icon = shiny::icon("tablet", verify_fa = FALSE),
-            collapsible = TRUE, collapsed = FALSE, status = "purple",
+            collapsible = TRUE, collapsed = FALSE, status = "info",
             # Box content :
             if (selected_app() != "All") {
               tagList(
@@ -453,7 +453,7 @@ mod_home_page_server <- function(id, all_vars){
             },
             solidHeader = TRUE,
             width = 12, icon = shiny::icon("tablet", verify_fa = FALSE),
-            collapsible = TRUE, collapsed = FALSE, status = "purple",
+            collapsible = TRUE, collapsed = FALSE, status = "info",
             # Box content :
             if (selected_user() != "All") {
               tagList(
@@ -493,7 +493,7 @@ mod_home_page_server <- function(id, all_vars){
         tagList(
           box( title = "Amount of Students per Course", solidHeader = TRUE,
             width = 10, icon = shiny::icon("user-check", verify_fa = FALSE), collapsible = TRUE,
-            collapsed = TRUE, status = "purple",
+            collapsed = TRUE, status = "info",
             checkboxInput(ns("show_na"), "Show NA's"),
             plotOutput(ns("courses_students"))
           )

@@ -8,3 +8,13 @@ div#loadstate {
   border: 0px;
   box-shadow: none;
 }
+
+/* Changing the theme manually */
+.logo {
+  background-color: #c40c42 !important;
+}
+
+.navbar {
+  background-color: #c40c42 !important;
+}
+

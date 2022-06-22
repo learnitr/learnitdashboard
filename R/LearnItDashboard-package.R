@@ -10,6 +10,7 @@
 #' @name learnitdashboard-package
 #' 
 #' 
+#' @import dashboardthemes
 #' @importFrom DT DTOutput renderDT
 #' @importFrom ggplot2 ggplot geom_count aes geom_bar theme_bw coord_flip xlab ylab qplot
 #' @importFrom glue glue

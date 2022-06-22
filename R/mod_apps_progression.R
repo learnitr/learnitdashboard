@@ -19,6 +19,8 @@ mod_apps_progression_ui <- function(id){
       uiOutput(ns("apps_graph_2")),
     ),
     
+    plotly::plotlyOutput(ns("graph_1"))
+    
   )
 }
     
@@ -157,8 +159,9 @@ mod_apps_progression_server <- function(id, all_vars){
         }
         tagList(
           box( title = paste(title, collapse = " / ") , solidHeader = TRUE,
-               width = 5, collapsible = TRUE, status = "purple",
-               plotly::plotlyOutput(ns("graph_1"))
+               width = 5, collapsible = TRUE, status = "info",
+               # plotly::plotlyOutput(ns("graph_1"))
+               "bla"
           )
         )
       }
@@ -171,7 +174,7 @@ mod_apps_progression_server <- function(id, all_vars){
       #   # Creation of the result graph
       #   ggplot(data = app_prog_data(), mapping = aes(x = app, fill = correct)) +
       #     xlab("Apps") +
-      #     ylab("Amount of Answers") +
+      #     ylab("Count") +
       #     coord_flip() +
       #     geom_bar()
       # }
@@ -179,16 +182,16 @@ mod_apps_progression_server <- function(id, all_vars){
         
         if ("module" %in% names(app_prog_data())) {
           # Creation of the result graph
-          ggplot(data = app_prog_data(), mapping = aes(x = module, y = correct)) +
+          ggplot(data = app_prog_data(), mapping = aes(x = module, y = correct, fill = incorrect)) +
             xlab("Modules") +
-            ylab("Amount of Answers") +
+            ylab("Count") +
             coord_flip() +
             geom_bar(stat = "identity")
         } else {
           # Creation of the result graph
-          ggplot(data = app_prog_data(), mapping = aes(x = app, y = correct)) +
+          ggplot(data = app_prog_data(), mapping = aes(x = app, y = correct, fill = incorrect)) +
             xlab("Apps") +
-            ylab("Amount of Answers") +
+            ylab("Count") +
             coord_flip() +
             geom_bar(stat = "identity")
         }
@@ -214,7 +217,7 @@ mod_apps_progression_server <- function(id, all_vars){
         }
         tagList(
           box( title = paste(title, collapse = " / ") , solidHeader = TRUE,
-               width = 5, collapsible = TRUE, status = "purple",
+               width = 5, collapsible = TRUE, status = "info",
                plotly::plotlyOutput(ns("graph_2"))
           )
         )
@@ -227,16 +230,16 @@ mod_apps_progression_server <- function(id, all_vars){
         
         if ("module" %in% names(app_prog_data())) {
           # Creation of the result graph
-          ggplot(data = app_prog_data(), mapping = aes(x = module, y = incorrect)) +
+          ggplot(data = app_prog_data(), mapping = aes(x = module, y = incorrect, fill = correct)) +
             xlab("Modules") +
-            ylab("Amount of Answers") +
+            ylab("Count") +
             coord_flip() +
             geom_bar(stat = "identity")
         } else {
           # Creation of the result graph
-          ggplot(data = app_prog_data(), mapping = aes(x = app, y = incorrect)) +
+          ggplot(data = app_prog_data(), mapping = aes(x = app, y = incorrect, fill = correct)) +
             xlab("Apps") +
-            ylab("Amount of Answers") +
+            ylab("Count") +
             coord_flip() +
             geom_bar(stat = "identity")
         }
