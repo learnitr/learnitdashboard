@@ -19,8 +19,6 @@ mod_apps_progression_ui <- function(id){
       uiOutput(ns("apps_graph_2")),
     ),
     
-    plotly::plotlyOutput(ns("graph_1"))
-    
   )
 }
     
@@ -66,15 +64,9 @@ mod_apps_progression_server <- function(id, all_vars){
     is_user <- reactive({
       selected_user() != "All" && selected_user() != "NULL"
     })
-
-# Graph 1 -----------------------------------------------------------------
-
+    
     # Variable : Data for the app progression graph
     app_prog_data <- reactive({
-      
-      # req(selected_course())
-      # req(selected_module())
-      # req(selected_app())
       
       # Initialisation of the request vector
       request_vector <- c()
@@ -91,37 +83,42 @@ mod_apps_progression_server <- function(id, all_vars){
       if (is_request(selected_app())) {
         request_vector <- c(request_vector, glue::glue(r"--["app" : "<<selected_app()>>"]--", .open = "<<", .close = ">>"))
       }
+      # Request part for the user
+      if (is_request(selected_user())) {
+        request_vector <- c(request_vector, glue::glue(r"--["user" : "<<selected_user()>>"]--", .open = "<<", .close = ">>"))
+      }
       # Creation of the entire request part if the vector isn't NULL
       if (!is.null(request_vector)) {
         conditions <- paste(request_vector, collapse = ", ")
       } else { conditions <- NULL}
       
       # If it's only a selected course -> grouped by module, if else -> grouped by app
-      app_or_module <- ifelse(is_course(), "$module", "$app")
+      app_or_module <- ifelse(is_course() && !is_user(), "$module", "$app")
       
       # Creation of the entire request if the request part isn't NULL
       if (!is.null(conditions)) {
         request <- r"--[
-          [{ "$match" : {
-            <<conditions>>,
-            "verb" : {"$in" : ["submitted", "answered"]},
-            "correct" : {"$in" : [true, false]}
-          }},
-          { "$group" : {
-            "_id" : "<<app_or_module>>",
-            "correct" : {"$sum" : { "$cond" : [ { "$eq" : ["$correct", true] }, 1, 0 ] } },
-            "incorrect" : {"$sum" : { "$cond" : [ { "$eq" : ["$correct", false] }, 1, 0 ] } }
-          }}]
+        [{ "$match" : {
+        <<conditions>>,
+        "verb" : {"$in" : ["submitted", "answered"]},
+        "correct" : {"$in" : [true, false]}
+        }},
+        { "$group" : {
+        "_id" : "<<app_or_module>>",
+        "correct" : {"$sum" : { "$cond" : [ { "$eq" : ["$correct", true] }, 1, 0 ] } },
+        "incorrect" : {"$sum" : { "$cond" : [ { "$eq" : ["$correct", false] }, 1, 0 ] } }
+        }}]
         ]--"
         request <- glue::glue(request, .open = "<<", .close = ">>")
       } else { request <- NULL }
       
-      # Getting the data and preparation of this data
+      # Getting the data
       if (!inherits(sdd_events, "try-error") && !is.null(request)) {
         # Making the request
         data <- sdd_events$aggregate(request)
       } else { data <- NULL }
       
+      # Preparation of the data
       if (!is.null(data) && nrow(data) > 0) {
         # Setting the good names
         if (app_or_module == "$module") {
@@ -130,7 +127,11 @@ mod_apps_progression_server <- function(id, all_vars){
           names(data) <- c("app", "correct", "incorrect")
         }
         # Getting the amount of students for the selection
-        nb_std <- length(sdd_users2$distinct("user", query = prepare_request(request(), c("icourse", "module", "app"))))
+        if (!is.null(selected_course())) {
+          nb_std <- length(unique(users2_init[users2_init$icourse == selected_course(), "user"]))
+        } else {
+          nb_std <- length(unique(users2_init["user"]))
+        }
         # Counting the answers / nb_students
         data$correct <- round(data$correct / nb_std, 2)
         data$incorrect <- round(data$incorrect / nb_std, 2)
@@ -138,9 +139,12 @@ mod_apps_progression_server <- function(id, all_vars){
       }
     })
     
+    # test
     observe({
       print(app_prog_data())
     })
+
+# Graph 1 -----------------------------------------------------------------
     
     # Rendering the box and the outputs
     output$apps_graph_1 <- renderUI({
@@ -160,8 +164,7 @@ mod_apps_progression_server <- function(id, all_vars){
         tagList(
           box( title = paste(title, collapse = " / ") , solidHeader = TRUE,
                width = 5, collapsible = TRUE, status = "info",
-               # plotly::plotlyOutput(ns("graph_1"))
-               "bla"
+               plotly::plotlyOutput(ns("graph_1"))
           )
         )
       }
@@ -178,8 +181,11 @@ mod_apps_progression_server <- function(id, all_vars){
       #     coord_flip() +
       #     geom_bar()
       # }
+      
+      # If the data is available and not empty
       if (nrow(req(app_prog_data())) > 0) {
         
+        # If it's from a course, and thus show modules progression
         if ("module" %in% names(app_prog_data())) {
           # Creation of the result graph
           ggplot(data = app_prog_data(), mapping = aes(x = module, y = correct, fill = incorrect)) +
@@ -187,6 +193,7 @@ mod_apps_progression_server <- function(id, all_vars){
             ylab("Count") +
             coord_flip() +
             geom_bar(stat = "identity")
+        # Or if it's from something esle, and thus show apps progression
         } else {
           # Creation of the result graph
           ggplot(data = app_prog_data(), mapping = aes(x = app, y = correct, fill = incorrect)) +
@@ -226,8 +233,10 @@ mod_apps_progression_server <- function(id, all_vars){
     
     # Rendering the graph
     output$graph_2 <- plotly::renderPlotly({
+      # If the data is available and not empty
       if (nrow(req(app_prog_data())) > 0) {
         
+        # If it's from a course, and thus show modules progression
         if ("module" %in% names(app_prog_data())) {
           # Creation of the result graph
           ggplot(data = app_prog_data(), mapping = aes(x = module, y = incorrect, fill = correct)) +
@@ -235,6 +244,7 @@ mod_apps_progression_server <- function(id, all_vars){
             ylab("Count") +
             coord_flip() +
             geom_bar(stat = "identity")
+        # Or if it's from something esle, and thus show apps progression
         } else {
           # Creation of the result graph
           ggplot(data = app_prog_data(), mapping = aes(x = app, y = incorrect, fill = correct)) +
