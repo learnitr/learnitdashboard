@@ -10,6 +10,7 @@
 #' @name learnitdashboard-package
 #' 
 #' 
+#' @importFrom bslib bs_theme font_google
 #' @import dashboardthemes
 #' @importFrom DT DTOutput renderDT
 #' @importFrom ggplot2 ggplot geom_count aes geom_bar theme_bw coord_flip xlab ylab qplot
@@ -24,6 +25,8 @@
 #' @importFrom shinyjs useShinyjs disabled disable enable
 #' @import shinyTime
 #' @import stats
+#' @importFrom thematic thematic_shiny
+#' @importFrom tidyr pivot_longer
 #' @importFrom timevis timevisOutput renderTimevis timevis centerItem setWindow
 #' @importFrom utils head
 #' 

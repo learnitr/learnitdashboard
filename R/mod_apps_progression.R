@@ -135,6 +135,7 @@ mod_apps_progression_server <- function(id, all_vars){
         # Counting the answers / nb_students
         data$correct <- round(data$correct / nb_std, 2)
         data$incorrect <- round(data$incorrect / nb_std, 2)
+        data <- tidyr::pivot_longer(data, cols = c(correct, incorrect), names_to = "correct", values_to = "count")
         return(data)
       }
     })
@@ -188,7 +189,7 @@ mod_apps_progression_server <- function(id, all_vars){
         # If it's from a course, and thus show modules progression
         if ("module" %in% names(app_prog_data())) {
           # Creation of the result graph
-          ggplot(data = app_prog_data(), mapping = aes(x = module, y = correct, fill = incorrect)) +
+          ggplot(data = app_prog_data(), mapping = aes(x = module, y = count, fill = correct)) +
             xlab("Modules") +
             ylab("Count") +
             coord_flip() +
@@ -196,7 +197,7 @@ mod_apps_progression_server <- function(id, all_vars){
         # Or if it's from something esle, and thus show apps progression
         } else {
           # Creation of the result graph
-          ggplot(data = app_prog_data(), mapping = aes(x = app, y = correct, fill = incorrect)) +
+          ggplot(data = app_prog_data(), mapping = aes(x = app, y = count, fill = correct)) +
             xlab("Apps") +
             ylab("Count") +
             coord_flip() +
@@ -239,7 +240,7 @@ mod_apps_progression_server <- function(id, all_vars){
         # If it's from a course, and thus show modules progression
         if ("module" %in% names(app_prog_data())) {
           # Creation of the result graph
-          ggplot(data = app_prog_data(), mapping = aes(x = module, y = incorrect, fill = correct)) +
+          ggplot(data = app_prog_data(), mapping = aes(x = module, y = count, fill = correct)) +
             xlab("Modules") +
             ylab("Count") +
             coord_flip() +
@@ -247,7 +248,7 @@ mod_apps_progression_server <- function(id, all_vars){
         # Or if it's from something esle, and thus show apps progression
         } else {
           # Creation of the result graph
-          ggplot(data = app_prog_data(), mapping = aes(x = app, y = incorrect, fill = correct)) +
+          ggplot(data = app_prog_data(), mapping = aes(x = app, y = count, fill = correct)) +
             xlab("Apps") +
             ylab("Count") +
             coord_flip() +

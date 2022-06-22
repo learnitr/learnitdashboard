@@ -29,3 +29,6 @@ apps_init <- try(sdd_apps$find('{}'), silent = TRUE)
 planning_init <- try(sdd_planning$find('{}'), silent = TRUE)
 # --- Initial loading of Users2 ---
 users2_init <- try(sdd_users2$find('{}'), silent = TRUE)
+
+# Execution
+thematic::thematic_shiny(font = NA, qualitative = c("#1daac0","#c40c42"))
