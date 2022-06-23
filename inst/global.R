@@ -31,4 +31,4 @@ planning_init <- try(sdd_planning$find('{}'), silent = TRUE)
 users2_init <- try(sdd_users2$find('{}'), silent = TRUE)
 
 # Execution
-thematic::thematic_shiny(font = NA, qualitative = c("#1daac0","#c40c42"))
+thematic::thematic_shiny(font = NA, qualitative = c("#00c0ef","#c40c42"))

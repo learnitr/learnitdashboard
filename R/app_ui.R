@@ -73,6 +73,7 @@ app_ui <- function(request) {
       controlbar = dashboardControlbar(
         collapsed = FALSE,
         skin = "dark",
+        overlay = FALSE,
         mod_right_sidebar_ui("right_sidebar_1")
       )
       

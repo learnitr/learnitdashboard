@@ -149,7 +149,7 @@ mod_apps_progression_server <- function(id, all_vars){
     
     # Rendering the box and the outputs
     output$apps_graph_1 <- renderUI({
-      if (!inherits(sdd_events, "try-error")) {
+      if (!inherits(sdd_events, "try-error") && nrow(req(app_prog_data())) > 0) {
         # Creating the title
         title <- c("Apps Progression Graph")
         if (is_course()) {
@@ -164,7 +164,7 @@ mod_apps_progression_server <- function(id, all_vars){
         }
         tagList(
           box( title = paste(title, collapse = " / ") , solidHeader = TRUE,
-               width = 5, collapsible = TRUE, status = "info",
+               width = 10, collapsible = TRUE, status = "info",
                plotly::plotlyOutput(ns("graph_1"))
           )
         )
@@ -173,15 +173,6 @@ mod_apps_progression_server <- function(id, all_vars){
     
     # Rendering the graph
     output$graph_1 <- plotly::renderPlotly({
-      # if (nrow(req(app_prog_data())) > 0) {
-      #   
-      #   # Creation of the result graph
-      #   ggplot(data = app_prog_data(), mapping = aes(x = app, fill = correct)) +
-      #     xlab("Apps") +
-      #     ylab("Count") +
-      #     coord_flip() +
-      #     geom_bar()
-      # }
       
       # If the data is available and not empty
       if (nrow(req(app_prog_data())) > 0) {
@@ -203,59 +194,61 @@ mod_apps_progression_server <- function(id, all_vars){
             coord_flip() +
             geom_bar(stat = "identity")
         }
+      } else {
+        NULL
       }
     })
 
 # Graph 2 -----------------------------------------------------------------
 
-    # Rendering the box and the outputs
-    output$apps_graph_2 <- renderUI({
-      if (!inherits(sdd_events, "try-error")) {
-        # Creating the title
-        title <- c("Apps Progression Graph")
-        if (is_course()) {
-          title <- c(title, paste0("Course : ", selected_course()))
-        } else if (is_module()) {
-          title <- c(title, paste0("Module : ", selected_module()))
-        } else if (is_app()) {
-          title <- c(title, paste0("App : ", selected_app()))
-        }
-        if (is_user()) {
-          title <- c(title, paste0("User : ", unique(users2_init[users2_init$user == selected_user(), "login"])))
-        }
-        tagList(
-          box( title = paste(title, collapse = " / ") , solidHeader = TRUE,
-               width = 5, collapsible = TRUE, status = "info",
-               plotly::plotlyOutput(ns("graph_2"))
-          )
-        )
-      }
-    })
+    # # Rendering the box and the outputs
+    # output$apps_graph_2 <- renderUI({
+    #   if (!inherits(sdd_events, "try-error")) {
+    #     # Creating the title
+    #     title <- c("Apps Progression Graph")
+    #     if (is_course()) {
+    #       title <- c(title, paste0("Course : ", selected_course()))
+    #     } else if (is_module()) {
+    #       title <- c(title, paste0("Module : ", selected_module()))
+    #     } else if (is_app()) {
+    #       title <- c(title, paste0("App : ", selected_app()))
+    #     }
+    #     if (is_user()) {
+    #       title <- c(title, paste0("User : ", unique(users2_init[users2_init$user == selected_user(), "login"])))
+    #     }
+    #     tagList(
+    #       box( title = paste(title, collapse = " / ") , solidHeader = TRUE,
+    #            width = 6, collapsible = TRUE, status = "info",
+    #            plotly::plotlyOutput(ns("graph_2"))
+    #       )
+    #     )
+    #   }
+    # })
     
-    # Rendering the graph
-    output$graph_2 <- plotly::renderPlotly({
-      # If the data is available and not empty
-      if (nrow(req(app_prog_data())) > 0) {
-        
-        # If it's from a course, and thus show modules progression
-        if ("module" %in% names(app_prog_data())) {
-          # Creation of the result graph
-          ggplot(data = app_prog_data(), mapping = aes(x = module, y = count, fill = correct)) +
-            xlab("Modules") +
-            ylab("Count") +
-            coord_flip() +
-            geom_bar(stat = "identity")
-        # Or if it's from something esle, and thus show apps progression
-        } else {
-          # Creation of the result graph
-          ggplot(data = app_prog_data(), mapping = aes(x = app, y = count, fill = correct)) +
-            xlab("Apps") +
-            ylab("Count") +
-            coord_flip() +
-            geom_bar(stat = "identity")
-        }
-      }
-    })
+    # # Rendering the graph
+    # output$graph_2 <- plotly::renderPlotly({
+    #   # If the data is available and not empty
+    #   if (nrow(req(app_prog_data())) > 0) {
+    #     
+    #     # If it's from a course, and thus show modules progression
+    #     if ("module" %in% names(app_prog_data())) {
+    #       # Creation of the result graph
+    #       ggplot(data = app_prog_data(), mapping = aes(x = module, y = count, fill = correct)) +
+    #         xlab("Modules") +
+    #         ylab("Count") +
+    #         coord_flip() +
+    #         geom_bar(stat = "identity")
+    #     # Or if it's from something esle, and thus show apps progression
+    #     } else {
+    #       # Creation of the result graph
+    #       ggplot(data = app_prog_data(), mapping = aes(x = app, y = count, fill = correct)) +
+    #         xlab("Apps") +
+    #         ylab("Count") +
+    #         coord_flip() +
+    #         geom_bar(stat = "identity")
+    #     }
+    #   }
+    # })
 
 # ~~~ Old Request -----------------------------------------------------------------
 
