@@ -297,26 +297,26 @@ mod_home_page_server <- function(id, all_vars){
             # Box content :
             if (selected_course() != "All") {
               tagList(
-                h4("Title"),
+                h4("- Title"),
                 attr(course, "title"),
-                h4("Start"),
+                h4("- Start"),
                 attr(course, "start"),
-                h4("End"),
+                h4("- End"),
                 attr(course, "end"),
-                h4("Course"),
+                h4("- Course"),
                 tags$a(attr(course, "url"), href = attr(course, "url")),
-                h4("Description"),
+                h4("- Description"),
                 tags$a(attr(course, "alt_url"), href = attr(course, "alt_url"))
               )
             } else {
               tagList(
-                h4("ICourses"),
+                h4("- ICourses"),
                 length(unique(courses_init[,"icourse"])),
-                h4("Units"),
+                h4("- Units"),
                 length(unique(courses_init[,"iunit"])),
-                h4("Sections"),
+                h4("- Sections"),
                 length(unique(courses_init[,"section"])),
-                h4("Iclass"),
+                h4("- Iclass"),
                 length(unique(courses_init[,"iclass"]))
               )
             }
@@ -353,22 +353,22 @@ mod_home_page_server <- function(id, all_vars){
             # Box content :
             if (selected_module() != "All") {
               tagList(
-                h4("Title"),
+                h4("- Title"),
                 attr(module, "title"),
-                h4("Start"),
+                h4("- Start"),
                 attr(module, "start"),
-                h4("End"),
+                h4("- End"),
                 attr(module, "end"),
-                h4("Chapter"),
+                h4("- Chapter"),
                 tags$a(attr(module, "url"), href = attr(module, "url")),
-                h4("Exercises"),
+                h4("- Exercises"),
                 tags$a(attr(module, "alt_url"), href = attr(module, "alt_url"))
               )
             } else {
               tagList(
-                h4("Modules"),
+                h4("- Modules"),
                 length(unique(modules_init[,"module"])),
-                h4("In Courses"),
+                h4("- In Courses"),
                 length(unique(na.omit(modules_init$icourse)))
               )
             }
@@ -405,22 +405,22 @@ mod_home_page_server <- function(id, all_vars){
             # Box content :
             if (selected_app() != "All") {
               tagList(
-                h4("Type"),
+                h4("- Type"),
                 attr(app, "type"),
-                h4("Start"),
+                h4("- Start"),
                 attr(app, "start"),
-                h4("End"),
+                h4("- End"),
                 attr(app, "end"),
-                h4("App"),
+                h4("- App"),
                 tags$a(attr(app, "url"), href = attr(app, "url")),
-                h4("More Info"),
+                h4("- More Info"),
                 tags$a(attr(app, "alt_url"), href = attr(app, "alt_url"))
               )
             } else {
               tagList(
-                h4("Apps"),
+                h4("- Apps"),
                 length(unique(apps_init[,"app"])),
-                h4("Types"),
+                h4("- Types"),
                 length(unique(apps_init[,"type"]))
               )
             }
@@ -457,26 +457,26 @@ mod_home_page_server <- function(id, all_vars){
             # Box content :
             if (selected_user() != "All") {
               tagList(
-                h4("Name"),
+                h4("- Name"),
                 attr(user, "name"),
-                h4("Login"),
+                h4("- Login"),
                 attr(user, "login"),
-                h4("Institution"),
+                h4("- Institution"),
                 attr(user, "institution"),
-                h4("Courses"),
+                h4("- Courses"),
                 attr(user, "courses"),
-                h4("GitHub"),
+                h4("- GitHub"),
                 tags$a(attr(user, "github"), href = attr(user, "github"))
               )
             } else {
               tagList(
-                h4("Users"),
+                h4("- Users"),
                 length(unique(users2_init[,"user"])),
-                h4("Acad Year"),
+                h4("- Acad Year"),
                 "2021-2022",
-                h4("Institutions"),
+                h4("- Institutions"),
                 paste(unique(users2_init$institution), collapse = " / "),
-                h4("Enrolled / Non Enrolled"),
+                h4("- Enrolled / Non Enrolled"),
                 paste0(sum(na.omit(users2_init$enrolled)), " / ", sum(!na.omit(users2_init$enrolled)))
               )
             }

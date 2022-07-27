@@ -1,6 +1,6 @@
 Package: learnitdashboard
 Title: Shiny Dashboard For learnitdown
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     person("Martin", "Lecocq", , "martin.lecocq@std.heh.be", role = c("aut", "cre"))
 Description: This is a dashboard app to explore learnitdown data.
