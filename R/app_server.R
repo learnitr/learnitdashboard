@@ -82,7 +82,7 @@ app_server <- function(input, output, session) {
         # Forth tab
         menuItem("Courses Progression", tabName = "cls_progression", icon = shiny::icon("school", verify_fa = FALSE)),
         # Fifth tab
-        menuItem("Apps Progression", tabName = "apps_progression", icon = shiny::icon("briefcase", verify_fa = FALSE)),
+        menuItem("Progressions", tabName = "progression", icon = shiny::icon("bars-progress", verify_fa = FALSE)),
         # Sixth tab
         # If there are news, put a badge
         if (!is.null(events_news) && events_news > 0) {

@@ -269,6 +269,11 @@ mod_home_page_server <- function(id, all_vars){
 
 # Template slots ----------------------------------------------------------
 
+    # R CMD check preparation
+    if (!exists("acad_year")) {
+      acad_year <- NULL
+    }
+    
     # Slot for global home information
     output$slot1 <- renderUI({
       if (!inherits(sdd_apps, "try-error")) {
@@ -310,13 +315,13 @@ mod_home_page_server <- function(id, all_vars){
               )
             } else {
               tagList(
-                h4("- ICourses"),
+                h4("- Courses"),
                 length(unique(courses_init[,"icourse"])),
                 h4("- Units"),
                 length(unique(courses_init[,"iunit"])),
                 h4("- Sections"),
                 length(unique(courses_init[,"section"])),
-                h4("- Iclass"),
+                h4("- Classes"),
                 length(unique(courses_init[,"iclass"]))
               )
             }
@@ -447,12 +452,12 @@ mod_home_page_server <- function(id, all_vars){
         return(
           box( 
             title = if (selected_user() != "All" && selected_user() != "NONE") {
-              paste0("User : ", users2_init[users2_init$user == selected_user(), "login"][1])
+              paste0("Student : ", users2_init[users2_init$user == selected_user(), "login"][1])
             } else {
-              "Users"
+              "Students"
             },
             solidHeader = TRUE,
-            width = 12, icon = shiny::icon("tablet", verify_fa = FALSE),
+            width = 12, icon = shiny::icon("user-graduate", verify_fa = FALSE),
             collapsible = TRUE, collapsed = FALSE, status = "info",
             # Box content :
             if (selected_user() != "All") {
@@ -470,10 +475,10 @@ mod_home_page_server <- function(id, all_vars){
               )
             } else {
               tagList(
-                h4("- Users"),
+                h4("- Students"),
                 length(unique(users2_init[,"user"])),
                 h4("- Acad Year"),
-                "2021-2022",
+                acad_year,
                 h4("- Institutions"),
                 paste(unique(users2_init$institution), collapse = " / "),
                 h4("- Enrolled / Non Enrolled"),
@@ -491,11 +496,13 @@ mod_home_page_server <- function(id, all_vars){
     output$courses_students_plot <- renderUI({
       if (!inherits(sdd_users2, "try-error")) {
         tagList(
-          box( title = "Amount of Students per Course", solidHeader = TRUE,
-            width = 10, icon = shiny::icon("user-check", verify_fa = FALSE), collapsible = TRUE,
-            collapsed = TRUE, status = "info",
-            checkboxInput(ns("show_na"), "Show NA's"),
-            plotOutput(ns("courses_students"))
+          column(width = 12, offset = 1,
+            box( title = "Amount of Students per Course", solidHeader = TRUE,
+              width = 10, icon = shiny::icon("user-check", verify_fa = FALSE), collapsible = TRUE,
+              collapsed = TRUE, status = "info",
+              checkboxInput(ns("show_na"), "Show NA's"),
+              plotOutput(ns("courses_students"))
+            )
           )
         )
       }

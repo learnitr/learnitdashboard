@@ -55,8 +55,8 @@ app_ui <- function(request) {
             mod_cls_progression_ui("cls_progression_1")
           ),
           
-          # Fifth tab : Apps progression
-          tabItem(tabName = "apps_progression",
+          # Fifth tab : Progressions
+          tabItem(tabName = "progression",
             # Page Module
             mod_apps_progression_ui("apps_progression_1")
           ),
@@ -100,7 +100,8 @@ golem_add_external_resources <- function() {
     bundle_resources(
       path = app_sys("app/www"),
       app_title = "learnitdashboard"
-    )
+    ),
+    tags$style("@import url(https://use.fontawesome.com/releases/v6.1.2/css/all.css);"),
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
   )
