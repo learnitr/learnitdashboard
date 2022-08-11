@@ -1,4 +1,4 @@
-#' apps_progression UI Function
+#' progressions UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -7,10 +7,10 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_apps_progression_ui <- function(id){
+mod_progressions_ui <- function(id){
   ns <- NS(id)
   tagList(
-    
+ 
     fluidRow(
       column(width = 6,
         # Graph 1
@@ -27,15 +27,15 @@ mod_apps_progression_ui <- function(id){
   )
 }
     
-#' apps_progression Server Functions
+#' progressions Server Functions
 #'
 #' @noRd 
-mod_apps_progression_server <- function(id, all_vars){
+mod_progressions_server <- function(id, all_vars){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
 # Getting Modules Vars ----------------------------------------------------
-
+    
     # Vars from right_sidebar
     selected_course <- reactive({all_vars$right_sidebar_vars$selected_course})
     selected_module <- reactive({all_vars$right_sidebar_vars$selected_module})
@@ -46,9 +46,9 @@ mod_apps_progression_server <- function(id, all_vars){
     events <- reactive({all_vars$right_sidebar_vars$events})
     
     request <- reactive({all_vars$right_sidebar_vars$request})
-
+    
 # Global Vars -------------------------------------------------------------
-
+    
     # Variable : Is only the course selected
     is_course <- reactive({
       selected_course() != "All" && selected_module() == "All" && selected_app() == "All"
@@ -144,7 +144,7 @@ mod_apps_progression_server <- function(id, all_vars){
         return(data)
       }
     })
-
+    
 # Graph 1 -----------------------------------------------------------------
     
     # Rendering the box and the outputs
@@ -192,7 +192,7 @@ mod_apps_progression_server <- function(id, all_vars){
             ylab("Count") +
             coord_flip() +
             geom_bar(stat = "identity")
-        # Or if it's from something esle, and thus show apps progression
+          # Or if it's from something esle, and thus show apps progression
         } else {
           # Creation of the result graph
           ggplot(data = app_prog_data(), mapping = aes(x = app, y = count, fill = correct)) +
@@ -205,9 +205,9 @@ mod_apps_progression_server <- function(id, all_vars){
         NULL
       }
     })
-
+    
 # Graph 2 -----------------------------------------------------------------
-
+    
     # Display of the output for Graph 2
     output$prog_graph_2 <- renderUI({
       req(selected_course())
@@ -237,9 +237,9 @@ mod_apps_progression_server <- function(id, all_vars){
         plot(rnorm(30))
       }
     })
-
+    
 # Graph 3 -----------------------------------------------------------------
-
+    
     # Display the progression of selected student or message if all selected
     output$prog_graph_3 <- renderUI({
       req(selected_user())
@@ -273,7 +273,7 @@ mod_apps_progression_server <- function(id, all_vars){
 }
     
 ## To be copied in the UI
-# mod_apps_progression_ui("apps_progression_1")
+# mod_progressions_ui("progressions_1")
     
 ## To be copied in the server
-# mod_apps_progression_server("apps_progression_1")
+# mod_progressions_server("progressions_1")

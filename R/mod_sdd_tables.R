@@ -57,9 +57,7 @@ mod_sdd_tables_server <- function(id, all_vars){
     apps <- reactive({all_vars$right_sidebar_vars$apps})
     planning <- reactive({all_vars$right_sidebar_vars$planning})
     users2 <- reactive({all_vars$right_sidebar_vars$users2})
-
-# Global Vars -------------------------------------------------------------
-    
+  
 # DT Displays -------------------------------------------------------------
     
     # Display // Events datatable

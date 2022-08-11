@@ -14,7 +14,13 @@ app_ui <- function(request) {
       # Head of Dashboard
       header = dashboardHeader(
         controlbarIcon = shiny::icon("gears", verify_fa = FALSE),
-        title = h3("LearnItDashboard")
+        title = tagList(
+          span(class = "logo-lg", "LearnItDashboard"), 
+          img(
+            src = "https://avatars.githubusercontent.com/u/11614296?s=280&v=4",
+            style = "width: 35px"
+          )
+        )
       ),
       
       # Sidebar of Dashboard
@@ -43,25 +49,13 @@ app_ui <- function(request) {
             mod_timeslines_ui("timeslines_1")
           ),
           
-          # Third tab : Student progression
-          tabItem(tabName = "std_progression",
+          # Third tab : Progressions
+          tabItem(tabName = "progressions",
             # Page Module
-            mod_std_progression_ui("std_progression_1")
+            mod_progressions_ui("progressions_1")
           ),
           
-          # Forth tab : Course progression
-          tabItem(tabName = "cls_progression",
-            # Page Module
-            mod_cls_progression_ui("cls_progression_1")
-          ),
-          
-          # Fifth tab : Progressions
-          tabItem(tabName = "progression",
-            # Page Module
-            mod_apps_progression_ui("apps_progression_1")
-          ),
-          
-          # Sixth tab : Data Table Exploration
+          # Forth tab : Data Table Exploration
           tabItem(tabName = "rawdatatable",
             # Page Module
             mod_sdd_tables_ui("sdd_tables_1")
