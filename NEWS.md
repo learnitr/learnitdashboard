@@ -1,3 +1,15 @@
+# learnitdashboard 0.1.1
+
+* All the links are now working in "Raw Data Exploration" tab.
+
+* Added new possibilites of icons and changed established ones. 
+
+* Added icon to left sidebar.
+
+* Assembly of progression graphs in one page.
+
+* Correction of bugs and wrong displays.
+
 # learnitdashboard 0.1.0
 
 * Added a `NEWS.md` file to track changes to the package.

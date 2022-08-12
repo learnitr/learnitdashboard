@@ -243,7 +243,7 @@ mod_right_sidebar_server <- function(id, all_vars){
         # Displaying the selector
         tagList(
           hr(),
-          tags$h4("See News From :"),
+          tags$h4("See News From"),
           dateInput(ns("selected_news_time"), NULL, value = time)
           # timeInput()
         )
