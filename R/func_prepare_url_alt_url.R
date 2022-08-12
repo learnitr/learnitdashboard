@@ -2,7 +2,7 @@
 #' 
 #' Prepare the url and alt_url of a given dataframe, making them an html link.
 #'
-#' @param data_table The dateframe from wich the url and alt_url have to be prepared.
+#' @param data_table The dataframe from which the url and alt_url have to be prepared.
 #'
 #' @return The given dataframe with the url and alt_url prepared in html link format.
 #' @export

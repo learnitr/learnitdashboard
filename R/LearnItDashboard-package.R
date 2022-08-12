@@ -13,7 +13,7 @@
 #' @importFrom bslib bs_theme font_google
 #' @import dashboardthemes
 #' @importFrom DT DTOutput renderDT
-#' @importFrom ggplot2 ggplot geom_count aes geom_bar theme_bw coord_flip xlab ylab qplot
+#' @importFrom ggplot2 ggplot geom_count aes geom_bar theme_bw coord_flip xlab ylab qplot aes_string
 #' @importFrom glue glue
 #' @importFrom lubridate year month day floor_date ceiling_date hour minute
 #' @import mongolite
