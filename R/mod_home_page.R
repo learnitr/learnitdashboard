@@ -447,6 +447,7 @@ mod_home_page_server <- function(id, all_vars){
           attr(user, "institution") <- users2_init[users2_init$user == selected_user(), "institution"][1]
           attr(user, "login") <- users2_init[users2_init$user == selected_user(), "login"][1]
           attr(user, "github") <- users2_init[users2_init$user == selected_user(), "url"][1]
+          attr(user, "image") <- users2_init[users2_init$user == selected_user(), "avatar"][1]
         }
         
         return(
@@ -462,6 +463,7 @@ mod_home_page_server <- function(id, all_vars){
             # Box content :
             if (selected_user() != "All") {
               tagList(
+                tags$img(src = attr(user, "image")),
                 h4("- Name"),
                 attr(user, "name"),
                 h4("- Login"),
