@@ -17,12 +17,16 @@ mod_progressions_ui <- function(id){
         uiOutput(ns("prog_graph_1")),
       ),
       column(width = 6,
-        # Graph 2 : Course Progression
-        uiOutput(ns("prog_graph_2")),
         # Graph 3 : Student progression
         uiOutput(ns("prog_graph_3"))
       ),
     ),
+    fluidRow(
+      column(width = 12,
+        # Graph 2 : Course Progression
+        uiOutput(ns("prog_graph_2")),
+      )
+    )
     
   )
 }
@@ -226,30 +230,38 @@ mod_progressions_server <- function(id, all_vars){
     # Display of the output for Graph 2
     output$prog_graph_2 <- renderUI({
       req(selected_course())
+      req(selected_user())
       
       # Message if nothing selected
-      if (selected_course() == "All") {
+      if (selected_course() == "All" || selected_user() == "All") {
         tagList(
           # Dashboard Box
-          box( title = "Template Graph (based on course) : ", status = "info", solidHeader = TRUE, width = 12, collapsible = TRUE,
+          box( title = "Students' Progression : ", status = "info", solidHeader = TRUE, width = 12, collapsible = TRUE,
                tags$h4("Nothing to display, please select a course.")
           )
         )
         # Progression if login selected
-      } else if (selected_course() != "All") {
+      } else if (selected_course() != "All" || selected_user() == "All") {
         tagList(
           # Dashboard Box
-          box( title = paste0("Template Graph (based on course) : ", selected_course()), status = "info", solidHeader = TRUE, width = 12, collapsible = TRUE,
-               plotOutput(ns("template_graph_1"))
+          box( title = paste0("Students' Progression, Course : ", selected_course(), ", Student : ", users2_init[users2_init$user == selected_user(),]$login[1]), status = "info", solidHeader = TRUE, width = 12, collapsible = TRUE,
+               plotly::plotlyOutput(ns("template_graph_1"))
           )
         )
       }
     })
     
     # Display Template Graph 1
-    output$template_graph_1 <- renderPlot({
-      if (req(selected_course()) != "All") {
-        plot(rnorm(30))
+    output$template_graph_1 <- plotly::renderPlotly({
+      mod <- NULL
+      # Test for the module
+      if (req(selected_module()) != "All") {
+        mod <- selected_module()
+      }
+      
+      if (req(selected_course()) != "All" || req(selected_user()) != "All") {
+        progression_plot(users2_init[users2_init$user == req(selected_user()),]$login[1], req(selected_course()),
+                         module = mod, sdd_url = sdd_url)
       }
     })
     
@@ -284,6 +296,8 @@ mod_progressions_server <- function(id, all_vars){
       }
     })
     
+
+
   })
 }
     

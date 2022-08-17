@@ -1,3 +1,9 @@
+# learnitdashboard 0.1.3
+
+* Added the students progression graph in the "Progressions" tab.
+
+* Correction of bugs.
+
 # learnitdashboard 0.1.2
 
 * Suppression of old modules.
