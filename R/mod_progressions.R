@@ -151,14 +151,15 @@ mod_progressions_server <- function(id, all_vars){
           names(data) <- c("app", "correct", "incorrect")
         }
         # Getting the amount of students for the selection
-        if (!is.null(selected_course())) {
+        if (selected_course() != "All") {
           nb_std <- length(unique(users2_init[users2_init$icourse == selected_course(), "user"]))
-        } else {
-          nb_std <- length(unique(users2_init["user"]))
-        }
+        } 
+        
         # Counting the answers / nb_students
-        data$correct <- round(data$correct / nb_std, 2)
-        data$incorrect <- round(data$incorrect / nb_std, 2)
+        if (selected_course() != "All" && selected_user() == "All") {
+          data$correct <- round(data$correct / nb_std, 2)
+          data$incorrect <- round(data$incorrect / nb_std, 2)
+        }
         data <- tidyr::pivot_longer(data, cols = c("correct", "incorrect"), names_to = "correct", values_to = "count")
         return(data)
       }
@@ -231,20 +232,21 @@ mod_progressions_server <- function(id, all_vars){
     output$prog_graph_2 <- renderUI({
       req(selected_course())
       req(selected_user())
+      req(selected_module())
       
       # Message if nothing selected
-      if (selected_course() == "All" || selected_user() == "All") {
+      if (selected_course() == "All" || selected_user() == "All" || selected_module() != "All") {
         tagList(
           # Dashboard Box
-          box( title = "Students' Progression : ", status = "info", solidHeader = TRUE, width = 12, collapsible = TRUE,
-               tags$h4("Nothing to display, please select a course.")
+          box( title = "Students Progression Graph ", status = "info", solidHeader = TRUE, width = 12, collapsible = TRUE,
+               tags$h4("Nothing to display... Please select a course and a student.")
           )
         )
         # Progression if login selected
-      } else if (selected_course() != "All" || selected_user() == "All") {
+      } else {
         tagList(
           # Dashboard Box
-          box( title = paste0("Students' Progression, Course : ", selected_course(), ", Student : ", users2_init[users2_init$user == selected_user(),]$login[1]), status = "info", solidHeader = TRUE, width = 12, collapsible = TRUE,
+          box( title = paste0("Students Progression Graph, Course : ", selected_course(), ", Student : ", users2_init[users2_init$user == selected_user(),]$login[1]), status = "info", solidHeader = TRUE, width = 12, collapsible = TRUE,
                plotly::plotlyOutput(ns("template_graph_1"))
           )
         )
@@ -253,15 +255,20 @@ mod_progressions_server <- function(id, all_vars){
     
     # Display Template Graph 1
     output$template_graph_1 <- plotly::renderPlotly({
-      mod <- NULL
-      # Test for the module
-      if (req(selected_module()) != "All") {
-        mod <- selected_module()
-      }
+      
+      # Turned off because the format of module wasn't correct and no data was found
+      # mod <- NULL
+      # # Test for the module
+      # if (req(selected_module()) != "All") {
+      #   mod <- selected_module()
+      # }
       
       if (req(selected_course()) != "All" || req(selected_user()) != "All") {
-        progression_plot(users2_init[users2_init$user == req(selected_user()),]$login[1], req(selected_course()),
-                         module = mod, sdd_url = sdd_url)
+        plot <- try(progression_plot(users2_init[users2_init$user == req(selected_user()),]$login[1]
+                                     , req(selected_course()), sdd_url = sdd_url), silent = TRUE)
+        if (!inherits(plot, "try-error")) {
+          plot
+        }
       }
     })
     
@@ -274,15 +281,15 @@ mod_progressions_server <- function(id, all_vars){
       if (selected_user() == "All" || selected_user() == "NULL") {
         tagList(
           # Dashboard box
-          box( title = "Template Graph (based on student) : ", status = "info", solidHeader = TRUE, width = 12, collapsible = TRUE,
-               tags$h4("Nothing to display, please select a student.")
+          box( title = "Template Graph (based on student) ", status = "info", solidHeader = TRUE, width = 12, collapsible = TRUE,
+               tags$h4("Nothing to display... Please select a student.")
           )
         )
         # Progression if login selected
       } else if (selected_user() != "All" && selected_user() != "NULL") {
         tagList(
           # Dashboard box
-          box( title = paste0("Template Graph (based on student) : ", unique(users2_init[users2_init$user == selected_user(), "login"])), status = "info", solidHeader = TRUE, width = 12, collapsible = TRUE,
+          box( title = paste0("Template Graph (based on student) ", unique(users2_init[users2_init$user == selected_user(), "login"])), status = "info", solidHeader = TRUE, width = 12, collapsible = TRUE,
                plotOutput(ns("template_graph_2"))
           )
         )
