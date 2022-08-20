@@ -1,3 +1,7 @@
+# learnitdashboard 1.0.0
+
+* First final version of learnitdashboard.
+
 # learnitdashboard 0.1.3
 
 * Added the students progression graph in the "Progressions" tab.
