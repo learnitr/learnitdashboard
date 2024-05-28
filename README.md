@@ -12,7 +12,7 @@
 <!-- badges: end -->
 
 
-Dashboard for exploring {learnitdown} data.
+A dashboard for exploring {learnitdown} data.
 
 This package is associated with and enhances the {learnitdown} package.
 
