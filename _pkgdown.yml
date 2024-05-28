@@ -17,7 +17,7 @@ home:
   strip_header: true
 
 authors:
-  Martin Lecocq
+  Martin Lecocq:
     href: https://www.linkedin.com/in/martin-lecocq-92a976230
   Philippe Grosjean:
     href: https://phgrosjean.sciviews.org
