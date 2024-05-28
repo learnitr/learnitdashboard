@@ -13,7 +13,8 @@ prepare_content(data_frame)
 A vector of html links.
 }
 \description{
-Prepare a given dataframe's content with html tags, such as links or images, to be rendered in a timeline.
+Prepare a given dataframe's content with html tags, such as links or images,
+to be rendered in a timeline.
 }
 \examples{
 # Need special data frame

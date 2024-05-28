@@ -16,7 +16,8 @@ progression_plot(login, course, module = NULL, sdd_url)
 \item{sdd_url}{The URL to the SDD MongoDB database.}
 }
 \value{
-This function is used for its side-effect of plotting a chart comparing the student and the class progression.
+This function is used for its side-effect of plotting a chart
+comparing the student and the class progression.
 }
 \description{
 Plot the Progression of the Students in the Data Science Exercises

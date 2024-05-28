@@ -1,5 +1,5 @@
 testServer(
-  mod_timeslines_server,
+  mod_timelines_server,
   # Add here your module params
   args = list()
   , {
@@ -27,11 +27,11 @@ testServer(
 })
  
 test_that("module ui works", {
-  ui <- mod_timeslines_ui(id = "test")
+  ui <- mod_timelines_ui(id = "test")
   golem::expect_shinytaglist(ui)
   # Check that formals have not been removed
-  fmls <- formals(mod_timeslines_ui)
-  for (i in c("id")){
+  fmls <- formals(mod_timelines_ui)
+  for (i in c("id")) {
     expect_true(i %in% names(fmls))
   }
 })

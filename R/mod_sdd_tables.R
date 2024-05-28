@@ -7,65 +7,52 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_sdd_tables_ui <- function(id){
+mod_sdd_tables_ui <- function(id) {
   ns <- NS(id)
   tagList(
     
     tabBox( title = "Raw Data Exploration", width = 12,
       # Display of the result Events table
-      tabPanel("Events",
-        DTOutput(ns("sdd_dt_events")),
-      ),
+      tabPanel("Events", DTOutput(ns("sdd_dt_events"))),
       # Display of the result Courses table
-      tabPanel("Courses",
-               DTOutput(ns("sdd_dt_courses")),
-      ),
+      tabPanel("Courses", DTOutput(ns("sdd_dt_courses"))),
       # Display of the result Modules table
-      tabPanel("Modules",
-               DTOutput(ns("sdd_dt_modules")),
-      ),
+      tabPanel("Modules", DTOutput(ns("sdd_dt_modules"))),
       # Display of the result Apps table
-      tabPanel("Apps",
-               DTOutput(ns("sdd_dt_apps")),
-      ),
+      tabPanel("Apps", DTOutput(ns("sdd_dt_apps"))),
       # Display of the result Planning table
-      tabPanel("Planning",
-               DTOutput(ns("sdd_dt_planning")),
-      ),
+      tabPanel("Planning", DTOutput(ns("sdd_dt_planning"))),
       # Display of the result Users table
-      tabPanel("Users",
-               DTOutput(ns("sdd_dt_users2")),
-      )
+      tabPanel("Users", DTOutput(ns("sdd_dt_users2")))
     )
-    
   )
 }
     
 #' sdd_tables Server Functions
 #'
 #' @noRd 
-mod_sdd_tables_server <- function(id, all_vars){
-  moduleServer( id, function(input, output, session){
+mod_sdd_tables_server <- function(id, all_vars) {
+  moduleServer( id, function(input, output, session) {
     ns <- session$ns
 
 # Getting Modules Vars ----------------------------------------------------
     
     # Vars from right_sidebar
-    events <- reactive({all_vars$right_sidebar_vars$events})
-    courses <- reactive({all_vars$right_sidebar_vars$courses})
-    modules <- reactive({all_vars$right_sidebar_vars$modules})
-    apps <- reactive({all_vars$right_sidebar_vars$apps})
+    events   <- reactive({all_vars$right_sidebar_vars$events})
+    courses  <- reactive({all_vars$right_sidebar_vars$courses})
+    modules  <- reactive({all_vars$right_sidebar_vars$modules})
+    apps     <- reactive({all_vars$right_sidebar_vars$apps})
     planning <- reactive({all_vars$right_sidebar_vars$planning})
-    users2 <- reactive({all_vars$right_sidebar_vars$users2})
+    users2   <- reactive({all_vars$right_sidebar_vars$users2})
   
 # DT Displays -------------------------------------------------------------
     
-    # Display // Events datatable
+    # Display // Events data table
     output$sdd_dt_events <- renderDT({
       
-      # If no errors to get the dataframe from mongoDB
+      # If no errors to get the data frame from mongoDB
       if (!inherits(events(), "try-error") && nrow(events()) > 0) {
-        # The columns selection is now rendered by DT !
+        # The columns selection is now rendered by DT!
         events()
       } else {
         NULL
@@ -75,13 +62,12 @@ mod_sdd_tables_server <- function(id, all_vars){
     extensions = 'Buttons',
     # Options for the data table
     options = list(
-      scrollX = TRUE,
+      scrollX    = TRUE,
       pageLength = 100,
       lengthMenu = c(50,100,200,500),
       # Options to get the col selector and lengthmenu
-      dom = 'Blfrtip',
-      buttons = I('colvis')
-    )
+      dom        = 'Blfrtip',
+      buttons    = I('colvis'))
     )
     
     # Display // Courses datatable
@@ -103,13 +89,12 @@ mod_sdd_tables_server <- function(id, all_vars){
     extensions = 'Buttons',
     # Options for the data table
     options = list(
-      scrollX = TRUE,
+      scrollX    = TRUE,
       pageLength = 50,
       lengthMenu = c(20,50,100),
       # Options to get the col selector and lengthmenu
-      dom = 'Blfrtip',
-      buttons = I('colvis')
-    )
+      dom        = 'Blfrtip',
+      buttons    = I('colvis'))
     )
     
     # Display // Modules datatable
@@ -131,13 +116,12 @@ mod_sdd_tables_server <- function(id, all_vars){
     extensions = 'Buttons',
     # Options for the data table
     options = list(
-      scrollX = TRUE,
+      scrollX    = TRUE,
       pageLength = 50,
       lengthMenu = c(20,50,100),
       # Options to get the col selector and lengthmenu
-      dom = 'Blfrtip',
-      buttons = I('colvis')
-    )
+      dom        = 'Blfrtip',
+      buttons   = I('colvis'))
     )
     
     # Display // Apps datatable
@@ -159,13 +143,12 @@ mod_sdd_tables_server <- function(id, all_vars){
     extensions = 'Buttons',
     # Options for the data table
     options = list(
-      scrollX = TRUE,
+      scrollX    = TRUE,
       pageLength = 50,
       lengthMenu = c(20,50,100),
       # Options to get the col selector and lengthmenu
-      dom = 'Blfrtip',
-      buttons = I('colvis')
-    )
+      dom        = 'Blfrtip',
+      buttons    = I('colvis'))
     )
     
     # Display // Planning datatable
@@ -187,13 +170,12 @@ mod_sdd_tables_server <- function(id, all_vars){
     extensions = 'Buttons',
     # Options for the data table
     options = list(
-      scrollX = TRUE,
+      scrollX    = TRUE,
       pageLength = 50,
       lengthMenu = c(20,50,100),
       # Options to get the col selector and lengthmenu
-      dom = 'Blfrtip',
-      buttons = I('colvis')
-    )
+      dom        = 'Blfrtip',
+      buttons    = I('colvis'))
     )
     
     # Display // Users2 datatable
@@ -215,18 +197,17 @@ mod_sdd_tables_server <- function(id, all_vars){
     extensions = 'Buttons',
     # Options for the data table
     options = list(
-      scrollX = TRUE,
+      scrollX    = TRUE,
       pageLength = 50,
       lengthMenu = c(20,50,100),
       # Options to get the col selector and lengthmenu
-      dom = 'Blfrtip',
-      buttons = I('colvis')
-    )
+      dom        = 'Blfrtip',
+      buttons    = I('colvis'))
     )
 
 # Communication -----------------------------------------------------------
 
-    # Variable : all of module's vars
+    # Variable: all of module's vars
     sdd_tables_vars <- reactiveValues()
     
     # Updating the vars
@@ -234,7 +215,6 @@ mod_sdd_tables_server <- function(id, all_vars){
     
     # Sending the vars
     return(sdd_tables_vars)
-    
   })
 }
     

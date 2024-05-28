@@ -31,7 +31,7 @@ test_that("module ui works", {
   golem::expect_shinytaglist(ui)
   # Check that formals have not been removed
   fmls <- formals(mod_progressions_ui)
-  for (i in c("id")){
+  for (i in c("id")) {
     expect_true(i %in% names(fmls))
   }
 })

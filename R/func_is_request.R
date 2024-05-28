@@ -8,5 +8,5 @@
 #' @examples
 #' # Need a reactive context
 is_request <- function(input) {
-  return(!is.null(input) && input != "All") # && input != "NULL"
+  !is.null(input) && input != "All" # && input != "NULL"
 }

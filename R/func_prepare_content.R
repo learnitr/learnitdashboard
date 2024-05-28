@@ -1,6 +1,7 @@
 #' Prepare Content
 #' 
-#' Prepare a given dataframe's content with html tags, such as links or images, to be rendered in a timeline.
+#' Prepare a given dataframe's content with html tags, such as links or images,
+#' to be rendered in a timeline.
 #'
 #' @param data_frame data.frame on which prepare the content.
 #'
@@ -22,8 +23,10 @@ prepare_content <- function(data_frame) {
     )
     names(image) <- NULL
     # <img src="<<image>>" width="20" height="20">
-    return(glue::glue(r"--[<img src="<<image>>"> <a href="<<data_frame$url>>"><<data_frame$app>></a> (<a href="<<data_frame$alt_url>>">+</a>)]--", .open = "<<", .close = ">>"))
+    return(glue::glue(r"--[<img src="<<image>>"> <a href="<<data_frame$url>>"><<data_frame$app>></a> (<a href="<<data_frame$alt_url>>">+</a>)]--",
+      .open = "<<", .close = ">>"))
   } else if (!any(!c("alt_url", "url", "label") %in% names(data_frame))) {
-    return(glue::glue(r"--[<a href="<<data_frame$url>>"><<data_frame$label>> </a> (<a href="<<data_frame$alt_url>>">+</a>)]--", .open = "<<", .close = ">>"))
+    return(glue::glue(r"--[<a href="<<data_frame$url>>"><<data_frame$label>> </a> (<a href="<<data_frame$alt_url>>">+</a>)]--",
+      .open = "<<", .close = ">>"))
   }
 }

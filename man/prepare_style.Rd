@@ -13,7 +13,8 @@ prepare_style(data_frame)
 A vector of css styles
 }
 \description{
-Prepare a given dataframe's css style, such as background-color, to be rendered in a timeline.
+Prepare a given data frame's css style, such as background-color, to be
+rendered in a timeline.
 }
 \examples{
 # Need special data frame

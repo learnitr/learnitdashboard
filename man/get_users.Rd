@@ -19,7 +19,8 @@ get_users(selected_course, only_enrolled, users2_init, acad_year)
 A vector of users_id name by logins and lastnames
 }
 \description{
-Get a vector of users_id named by logins and lastnames from a selected course and with enrolled only or everyone
+Get a vector of users_id named by logins and lastnames from a selected course
+and with enrolled only or everyone
 }
 \examples{
 # Need a reactive context and a MongoDB database

@@ -1,0 +1,24 @@
+citHeader("To cite learnitr packages in publications use:")
+
+citEntry(
+  entry        = "Manual",
+  title        = "LearnIt::R",
+  author       = personList(as.person("Philippe Grosjean"),
+                            as.person("Guyliann Engels")),
+  organization = "UMONS",
+  address      = "MONS, Belgium",
+  year         = version$year,
+  url          = "https://learnitr.r-universe.dev/",
+
+  textVersion =
+    paste("Grosjean, Ph. & Engels, G. (", version$year, "). ",
+      "LearnIt::R. ",
+      "UMONS, Mons, Belgium. ",
+      "URL https://learnitr.r-universe.dev/.",
+      sep = "")
+)
+
+citFooter("We have invested a lot of time and effort in creating LearnIt::R,",
+  "please cite it when using it together with R.",
+  "See also", sQuote("citation()"),
+  "for citing R.")

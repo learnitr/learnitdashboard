@@ -2,7 +2,7 @@
 % Please edit documentation in R/func_prepare_request.R
 \name{prepare_request}
 \alias{prepare_request}
-\title{Pepare Request}
+\title{Prepare Request}
 \usage{
 prepare_request(request_vector, args, type = NULL)
 }
@@ -17,7 +17,8 @@ prepare_request(request_vector, args, type = NULL)
 A string request with the chosen arguments.
 }
 \description{
-Prepare the request to get data from MongoDB from chosen arguments and a vector containing different ones.
+Prepare the request to get data from MongoDB from chosen arguments and a
+vector containing different ones.
 }
 \examples{
 rv <- c("color" = "red", "type" = "flower")

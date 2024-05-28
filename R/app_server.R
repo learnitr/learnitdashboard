@@ -21,11 +21,12 @@ app_server <- function(input, output, session) {
   })
   
   # Server module of the right sidebar for selectors
-  right_sidebar_vars <- mod_right_sidebar_server("right_sidebar_1", all_vars = all_vars)
+  right_sidebar_vars <- mod_right_sidebar_server("right_sidebar_1",
+    all_vars = all_vars)
   # Server module of 1st page
   mod_home_page_server("home_page_1", all_vars = all_vars)
   # Server module of 2nd page
-  mod_timeslines_server("timeslines_1", all_vars = all_vars)
+  mod_timelines_server("timelines_1", all_vars = all_vars)
   # Server module of 3rd page
   mod_progressions_server("progressions_1", all_vars = all_vars)
   # Server module of 4th page
@@ -36,9 +37,7 @@ app_server <- function(input, output, session) {
     if (is.null(right_sidebar_vars$events_news)) {
       tagList(
         column( width = 4, offset = 4,
-          box(headerBorder = FALSE, id = "loadstate",
-            loadingState()
-          )
+          box(headerBorder = FALSE, id = "loadstate", loadingState())
         )
       )
     }
@@ -54,22 +53,30 @@ app_server <- function(input, output, session) {
     tagList(
       sidebarMenu(
         # First tab
-        menuItem("Home Page", tabName = "home_page", icon = shiny::icon("home", verify_fa = FALSE)),
+        menuItem("Home Page", tabName = "home_page",
+          icon = shiny::icon("home", verify_fa = FALSE)),
         # Second tab
         # If there are news, put a badge
         if (!is.null(new_apps) && new_apps > 0) {
-          menuItem("Timelines", tabName = "timelines", icon = shiny::icon("calendar", verify_fa = FALSE), badgeLabel = new_apps, badgeColor = "green")
+          menuItem("Timelines", tabName = "timelines",
+            icon = shiny::icon("calendar", verify_fa = FALSE),
+            badgeLabel = new_apps, badgeColor = "green")
         } else {
-          menuItem("Timelines", tabName = "timelines", icon = shiny::icon("calendar", verify_fa = FALSE))
+          menuItem("Timelines", tabName = "timelines",
+            icon = shiny::icon("calendar", verify_fa = FALSE))
         },
         # Third tab
-        menuItem("Progressions", tabName = "progressions", icon = shiny::icon("bars-progress", verify_fa = FALSE)),
-        # Forth tab
+        menuItem("Progressions", tabName = "progressions",
+          icon = shiny::icon("bars-progress", verify_fa = FALSE)),
+        # Fourth tab
         # If there are news, put a badge
         if (!is.null(events_news) && events_news > 0) {
-          menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE), badgeLabel = events_news, badgeColor = "red")
+          menuItem("Raw Data Exploration", tabName = "rawdatatable",
+            icon = shiny::icon("table", verify_fa = FALSE),
+            badgeLabel = events_news, badgeColor = "red")
         } else {
-          menuItem("Raw Data Exploration", tabName = "rawdatatable", icon = shiny::icon("table", verify_fa = FALSE))
+          menuItem("Raw Data Exploration", tabName = "rawdatatable",
+            icon = shiny::icon("table", verify_fa = FALSE))
         }
       )
     )

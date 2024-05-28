@@ -1,0 +1,23 @@
+url: https://learnitr.github.io/learnitdashboard
+
+destination: docs
+
+development:
+  mode: auto
+
+template:
+  params:
+    bootswatch: spacelab
+    mathjax: true
+
+toc:
+  depth: 3
+
+home:
+  strip_header: true
+
+authors:
+  Martin Lecocq
+    href: https://www.linkedin.com/in/martin-lecocq-92a976230
+  Philippe Grosjean:
+    href: https://phgrosjean.sciviews.org

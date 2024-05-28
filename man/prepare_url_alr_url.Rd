@@ -7,14 +7,14 @@
 prepare_url_alr_url(data_table)
 }
 \arguments{
-\item{data_table}{The dataframe from which the url and alt_url have to be prepared.}
+\item{data_table}{The data frame from which the url and alt_url are prepared.}
 }
 \value{
-The given dataframe with the url and alt_url prepared in html link format.
+The given data frame with the url and alt_url prepared as html link.
 }
 \description{
 Prepare the url and alt_url of a given dataframe, making them an html link.
 }
 \examples{
-# Need a special dataframe
+# Need a special data frame
 }

@@ -1,3 +1,5 @@
+# TODO: use dashboardthemes::shinyDashboardThemes()?
+
 #' The application User-Interface
 #'
 #' @param request Internal parameter for `{shiny}`.
@@ -46,7 +48,7 @@ app_ui <- function(request) {
           # Second tab : Timelines
           tabItem(tabName = "timelines",
             # Page Module
-            mod_timeslines_ui("timeslines_1")
+            mod_timelines_ui("timeslines_1")
           ),
           
           # Third tab : Progressions
@@ -70,7 +72,6 @@ app_ui <- function(request) {
         overlay = FALSE,
         mod_right_sidebar_ui("right_sidebar_1")
       )
-      
     )
   )
 }
@@ -84,10 +85,7 @@ app_ui <- function(request) {
 #' @importFrom golem add_resource_path activate_js favicon bundle_resources
 #' @noRd
 golem_add_external_resources <- function() {
-  add_resource_path(
-    "www",
-    app_sys("app/www")
-  )
+  add_resource_path("www", app_sys("app/www"))
 
   tags$head(
     favicon(),
@@ -95,7 +93,9 @@ golem_add_external_resources <- function() {
       path = app_sys("app/www"),
       app_title = "learnitdashboard"
     ),
-    tags$style("@import url(https://use.fontawesome.com/releases/v6.1.2/css/all.css);"),
+    tags$style(
+      "@import url(https://use.fontawesome.com/releases/v6.1.2/css/all.css);"),
+    
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
   )

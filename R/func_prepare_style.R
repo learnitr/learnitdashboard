@@ -1,6 +1,7 @@
 #' Prepare Style
 #' 
-#' Prepare a given dataframe's css style, such as background-color, to be rendered in a timeline.
+#' Prepare a given data frame's css style, such as background-color, to be
+#' rendered in a timeline.
 #'
 #' @param data_frame data.frame on which prepare the content.
 #'
@@ -20,6 +21,6 @@ prepare_style <- function(data_frame) {
       "learnr" = "background-color : #98FB98; font-weight : bold;",
       "shiny" = "background-color : #92A8D1; font-weight : bold;"
     )
-    return(styles)
+    styles
   }
 }

@@ -1,6 +1,7 @@
-#' Pepare Request
+#' Prepare Request
 #' 
-#' Prepare the request to get data from MongoDB from chosen arguments and a vector containing different ones.
+#' Prepare the request to get data from MongoDB from chosen arguments and a
+#' vector containing different ones.
 #'
 #' @param request_vector Vector of prepared arguments from selected choices.
 #' @param args Vector of selected arguments to use in the request.
@@ -14,19 +15,22 @@
 #' rv <- c("color" = "red", "type" = "flower")
 #' prepare_request(rv, "color")
 prepare_request <- function(request_vector, args, type = NULL) {
-  # If type is given, prepare que type request part and add it to request_vector
+  # If type is given, prepare the type request part and add it to request_vector
   if (!is.null(type)) {
-    request_vector <- c(request_vector, "type" = glue::glue(r"--["type" : "<<type>>"]--", .open = "<<", .close = ">>"))
+    request_vector <- c(request_vector, "type" =
+        glue::glue(r"--["type" : "<<type>>"]--", .open = "<<", .close = ">>"))
   }
   
   # If request_vector isn't empty, creates the request
   if (request_vector[1] != "empty") {
-    request <- paste(request_vector[args[args %in% names(request_vector)]], collapse = " , ")
+    request <- paste(request_vector[args[args %in% names(request_vector)]],
+      collapse = " , ")
     return(glue::glue(r"--[{<<request>>}]--", .open = "<<", .close = ">>"))
-  # If request_vector is empty, creates the empty request with or without the type
+  # If request_vector is empty, create an empty request with or without the type
   } else {
     if ("type" %in% names(request_vector)) {
-      return(glue::glue(r"--[{<<request_vector["type"]>>}]--", .open = "<<", .close = ">>"))
+      return(glue::glue(r"--[{<<request_vector["type"]>>}]--",
+        .open = "<<", .close = ">>"))
     } else {
       return("{}")
     }
