@@ -19,6 +19,7 @@
 /*.Rcheck/
 
 # RStudio files
+.Rproj.user
 .Rproj.user/
 
 # produced vignettes
@@ -40,6 +41,7 @@ vignettes/*.pdf
 .Renviron
 
 # pkgdown site
+docs
 docs/
 
 # translation temp files
@@ -47,12 +49,16 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
-.Rproj.user
+/inst/shiny/**/rsconnect/*
+/inst/shiny/**/**/rsconnect/*
 
 # Mac files
 .DS_Store
 
 # More files
 inst/doc
-docs
 Meta
+
+# C compilation files
+*.o
+*.so
