@@ -34,6 +34,9 @@ remotes::install_github("learnitr/learnitdashboard")
 
 TODO…
 
+For further instructions, please, refer to these help pages at
+<https://learnitr.github.io/learnitdashboard/>.
+
 ## Code of Conduct
 
 Please note that the {svMisc} package is released with a [Contributor
