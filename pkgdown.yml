@@ -3,7 +3,7 @@ pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   learnitdashboard: learnitdashboard.html
-last_built: 2025-08-30T08:03Z
+last_built: 2025-08-30T08:20Z
 urls:
   reference: https://learnitr.github.io/learnitdashboard/reference
   article: https://learnitr.github.io/learnitdashboard/articles
