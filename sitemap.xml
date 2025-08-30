@@ -1,66 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/404.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/CODE_OF_CONDUCT.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/TODO.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/articles/learnitdashboard.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/index.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/news/index.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/reference/LearnItDashboard-package.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/reference/get_modules.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/reference/get_users.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/reference/is_request.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/reference/prepare_content.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/reference/prepare_request.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/reference/prepare_style.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/reference/prepare_url_alr_url.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/reference/progression_plot.html</loc>
-  </url>
-  <url>
-    <loc>https://learnitr.github.io/learnitdashboard/reference/run_app.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://learnitr.github.io/learnitdashboard/404.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/CODE_OF_CONDUCT.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/LICENSE-text.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/LICENSE.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/TODO.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/articles/index.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/articles/learnitdashboard.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/authors.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/index.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/news/index.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/reference/LearnItDashboard-package.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/reference/get_modules.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/reference/get_users.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/reference/index.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/reference/is_request.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/reference/prepare_content.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/reference/prepare_request.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/reference/prepare_style.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/reference/prepare_url_alr_url.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/reference/progression_plot.html</loc></url>
+<url><loc>https://learnitr.github.io/learnitdashboard/reference/run_app.html</loc></url>
 </urlset>
+
